@@ -16,14 +16,12 @@ function mouseOverColor(hex) {
 }
 function clickColor(hex) {
     mouseOverColor(hex);
-    $("#hex").val(hex);
     last = hex;
     return false;
 }
 function updateColor() {
     mouseOverColor($("#hex").val());
-    $("#preview").css('visibility', 'visible');
-    $("#preview").css('background-color', $("#hex").val());
+    last = $("#hex").val();
     return false;
 }
 function mouseOutMap() {
