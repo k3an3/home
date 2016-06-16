@@ -1,4 +1,5 @@
 from peewee import *
+from passlib.hash import sha256_crypt
 
 #db = MySQLDatabase(host="localhost", database="party", user="party", passwd="party")
 db = SqliteDatabase('app.db')
@@ -34,3 +35,9 @@ class User(BaseModel):
 
     def is_anonymous(self):
         return False
+
+    def check_password(self, password):
+        return sha256_crypt.verify(password, self.password)
+
+    def set_password(self, password):
+        self.password = sha256_crypt.encrypt(password)
