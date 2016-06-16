@@ -41,11 +41,11 @@ body {
                     </div>
                     <div id="navbar" class="navbar-collapse collapse">
                         <ul class="nav navbar-nav">
-                            <li class="active"><a href="#home">Home</a></li>
+                            <li><a href="#home">Home</a></li>
                             <li><a href="#bulb">Bulb</a></li>
                         </ul>
                         <ul class="nav navbar-nav navbar-right">
-                            <li><a href="../navbar-static-top/">Login</a></li>
+                            <li><a href="#login">Login</a></li>
                         </ul>
                     </div><!--/.nav-collapse -->
                 </div><!--/.container-fluid -->
@@ -108,6 +108,23 @@ $("#slider").on("change", function(){
     ws.emit('change color', {color: last, bright: bright});
 });
                     </script>
+                </div>
+                <div id="login" class="tab-pane fade in">
+
+                    <form class="form-signin" method="POST" action="/login">
+                        <h2 class="form-signin-heading">Please sign in</h2>
+                        <label for="inputEmail" class="sr-only">Email address</label>
+                        <input type="text" id="inputEmail" class="form-control" placeholder="Username" name="username" required autofocus>
+                        <label for="inputPassword" class="sr-only">Password</label>
+                        <input type="password" id="inputPassword" class="form-control" placeholder="Password" name="password" required>
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" value="remember-me"> Remember me
+                            </label>
+                        </div>
+                        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+                    </form>
+
                 </div>
             </div>
             <script>
