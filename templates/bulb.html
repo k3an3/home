@@ -25,38 +25,38 @@ body {
     padding-bottom: 2rem;
 }
 .form-signin {
-  max-width: 330px;
-  padding: 15px;
-  margin: 0 auto;
+    max-width: 330px;
+    padding: 15px;
+    margin: 0 auto;
 }
 .form-signin .form-signin-heading,
 .form-signin .checkbox {
-  margin-bottom: 10px;
+    margin-bottom: 10px;
 }
 .form-signin .checkbox {
-  font-weight: normal;
+    font-weight: normal;
 }
 .form-signin .form-control {
-  position: relative;
-  height: auto;
-  -webkit-box-sizing: border-box;
-     -moz-box-sizing: border-box;
-          box-sizing: border-box;
-  padding: 10px;
-  font-size: 16px;
+    position: relative;
+    height: auto;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    padding: 10px;
+    font-size: 16px;
 }
 .form-signin .form-control:focus {
-  z-index: 2;
+    z-index: 2;
 }
 .form-signin input[type="email"] {
-  margin-bottom: -1px;
-  border-bottom-right-radius: 0;
-  border-bottom-left-radius: 0;
+    margin-bottom: -1px;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
 }
 .form-signin input[type="password"] {
-  margin-bottom: 10px;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
+    margin-bottom: 10px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
 }
     </style>
     <body>
@@ -77,7 +77,18 @@ body {
                         <ul class="nav navbar-nav">
                             <li><a href="#home">Home</a></li>
                             {% if current_user.is_authenticated %}
-                            <li><a href="#bulb">Bulb</a></li>
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Lights<span class="caret"></span></a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="#bulb">Bulb</a></li>
+                                    <li><a href="#">Another action</a></li>
+                                    <li><a href="#">Something else here</a></li>
+                                    <li role="separator" class="divider"></li>
+                                    <li class="dropdown-header">Other Group</li>
+                                    <li><a href="#">Separated link</a></li>
+                                    <li><a href="#">One more separated link</a></li>
+                                </ul>
+                            </li>
                             {% endif %}
                         </ul>
                         <ul class="nav navbar-nav navbar-right">
@@ -93,11 +104,11 @@ body {
             {% with messages = get_flashed_messages() %}
             {% if messages %}
             <div id="messages" style="text-align: center;">
-            <span class="alert alert-warning">
-                {% for message in messages %}
-                {{ message }}
-                {% endfor %}
-            </span>
+                <span class="alert alert-warning">
+                    {% for message in messages %}
+                    {{ message }}
+                    {% endfor %}
+                </span>
             </div>
             {% endif %}
             {% endwith %}
@@ -200,7 +211,7 @@ $('#logout').click(function() {
     document.location = "/logout";
 });
 setTimeout(function() {
- $('#messages').fadeOut();
+    $('#messages').fadeOut();
 }, 3000 );
 
             </script>
