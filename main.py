@@ -1,7 +1,7 @@
-from flask import Flask, render_template, request, redirect, make_response, flash, abort
+from flask import Flask, render_template, request, redirect, make_response, flash, abort, session
 from flask_socketio import SocketIO, emit, disconnect
 from flask_login import LoginManager, login_required, login_user, current_user, logout_user
-import os, functools
+import os, functools, hashlib
 
 from modules.bulb import change_color
 
@@ -12,6 +12,8 @@ app.secret_key = '\xff\xe3\x84\xd0\xeb\x05\x1b\x89\x17\xce\xca\xaf\xdb\x8c\x13\x
 socketio = SocketIO(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
+
+some_random_string = lambda: hashlib.sha1(os.urandom(128)).hexdigest()
 
 def ws_login_required(f):
     @functools.wraps(f)
@@ -84,6 +86,7 @@ def generate_csrf_token():
 @app.after_request
 def add_header(response):
     response.headers['Content-Security-Policy'] = "connect-src 'self'"
+    return response
 
 app.jinja_env.globals['csrf_token'] = generate_csrf_token
 
