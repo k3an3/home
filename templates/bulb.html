@@ -108,6 +108,7 @@ function updateColor() {
 }
 function mouseOutMap() {
     ws.emit('change color', {color: last, bright: bright});
+    ws.emit('outmap', '');
     $("#hex").val(last);
     $("#preview").css('visibility', 'hidden');
     return false;
@@ -124,9 +125,15 @@ $("#slider").on("change", function(){
     bright = $('#slider').val() * 10;
     ws.emit('change color', {color: last, bright: bright});
 });
+
 ws.on('disconnect', function() {
     $('#status').HTML('<span class="alert alert-danger">WebSocket Disconnected</span>');
-})
+});
+
+ws.on('preview reset', function() {
+    $("#hex").val(last);
+    $("#preview").css('visibility', 'hidden');
+});
                     </script>
                 </div>
                 {% endif %}
