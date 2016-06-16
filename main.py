@@ -13,8 +13,10 @@ def index(*args, **kwargs):
 
 @socketio.on('change color', namespace='/test')
 def request_change_color(message):
-    emit('my response', {'data': message['data']})
-    change_color(color_hex=message['data'].split("#")[1])
+    emit('push color', message['color'], broadcast=True)
+    print(message['bright'])
+    change_color(color_hex=message['color'].split("#")[1],
+                 brightness=message.get('bright', 100))
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)
