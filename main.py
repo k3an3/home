@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, make_response, flash
+from flask import Flask, render_template, request, redirect, make_response, flash, abort
 from flask_socketio import SocketIO, emit, disconnect
 from flask_login import LoginManager, login_required, login_user, current_user, logout_user
 import os, functools
@@ -68,6 +68,24 @@ def _db_connect():
 def _db_close(exc):
     if not db.is_closed():
         db.close()
+
+@app.before_request
+def csrf_protect():
+    if request.method == "POST":
+        token = session.pop('_csrf_token', None)
+        if not token or token != request.form.get('_csrf_token'):
+            abort(403)
+
+def generate_csrf_token():
+    if '_csrf_token' not in session:
+        session['_csrf_token'] = some_random_string()
+    return session['_csrf_token']
+
+@app.after_request
+def add_header(response):
+    response.headers['Content-Security-Policy'] = "connect-src 'self'"
+
+app.jinja_env.globals['csrf_token'] = generate_csrf_token
 
 if __name__ == '__main__':
     db_init()
