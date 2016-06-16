@@ -36,7 +36,7 @@ def request_change_color(message):
 @socketio.on('outmap', namespace="/bulb")
 @ws_login_required
 def reset_color_preview(message):
-    emit('preview reset', '', broadcast=True)
+    emit('preview reset', message['color'], broadcast=True)
 
 @login_manager.user_loader
 def user_loader(user_id):
