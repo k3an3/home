@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 leds.py
 ~~~~~~~
@@ -12,6 +13,8 @@ Default outputs (determined arbitrarily):
 22 - blue
 18 - white
 """
+import sys
+
 from gpiozero import RGBLED, LED
 
 class LEDstrip:
