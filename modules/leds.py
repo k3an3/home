@@ -25,7 +25,11 @@ class LEDstrip:
         """
         Initializer with default pins for each color.
         """
-        self.rgb = RGBLED(red=red, green=green, blue=blue)
+        # This next line requires a version of gpiozero newer than
+        # May 8 2016, which was when the pwm kwarg was added.
+        # Without this parameter, it will complain about the pins
+        # not supporting pwm.
+        self.rgb = RGBLED(red=red, green=green, blue=blue, pwm=False)
         self.white = LED(white)
 
     def change_color(self, red=0, green=0, blue=0, white=0):
