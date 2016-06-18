@@ -129,11 +129,34 @@ body {
                     <button class="btn btn-secondary" onclick="clickColor('#000000');">Off</button>
                     <br><br>
                     <div id="preview" style="visibility: hidden; background-color: rgb(0, 0, 0);">&nbsp;</div>
-                    <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
-                    <script>
-var ws = io.connect('http://' + document.domain + ':' + location.port + '/bulb');
+                </div>
+                {% endif %}
+                <div id="login" class="tab-pane fade in">
+
+                    <form class="form-signin" method="POST" action="/login">
+                        <h2 class="form-signin-heading">Please sign in</h2>
+                        <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
+                        <label for="inputEmail" class="sr-only">Email address</label>
+                        <input type="text" id="inputEmail" class="form-control" placeholder="Username" name="username" required autofocus>
+                        <label for="inputPassword" class="sr-only">Password</label>
+                        <input type="password" id="inputPassword" class="form-control" placeholder="Password" name="password" required>
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" value="remember-me"> Remember me
+                            </label>
+                        </div>
+                        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+                    </form>
+
+                </div>
+            </div>
+            <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+            <script>
+{% if current_user.is_authenticated %}
+var ws = io.connect('http://' + document.domain + ':' + location.port + '/ws');
 var last = "#FFFFFF"
 var bright = 100;
+
 function mouseOverColor(hex) {
     ws.emit('change color', {color: hex, bright: bright});
     $("#preview").css('background-color', hex);
@@ -174,36 +197,17 @@ $("#slider").on("change", function(){
 });
 
 ws.on('disconnect', function() {
-    $('#status').HTML('<span class="alert alert-danger">WebSocket Disconnected</span>');
+    $('#messages').html('<span class="alert alert-danger">WebSocket Disconnected</span>');
+});
+ws.on('disconnect', function() {
+    $('#messages').html('<span class="alert alert-success">WebSocket Connected</span>');
 });
 
 ws.on('preview reset', function(msg) {
     $("#hex").val(msg);
     $("#preview").css('visibility', 'hidden');
 });
-                    </script>
-                </div>
-                {% endif %}
-                <div id="login" class="tab-pane fade in">
-
-                    <form class="form-signin" method="POST" action="/login">
-                        <h2 class="form-signin-heading">Please sign in</h2>
-                        <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
-                        <label for="inputEmail" class="sr-only">Email address</label>
-                        <input type="text" id="inputEmail" class="form-control" placeholder="Username" name="username" required autofocus>
-                        <label for="inputPassword" class="sr-only">Password</label>
-                        <input type="password" id="inputPassword" class="form-control" placeholder="Password" name="password" required>
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" value="remember-me"> Remember me
-                            </label>
-                        </div>
-                        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
-                    </form>
-
-                </div>
-            </div>
-            <script>
+{% endif %}
 $('.nav a').click(function (e) {
     e.preventDefault();
     $(this).tab('show');

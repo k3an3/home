@@ -32,14 +32,14 @@ def ws_login_required(f):
 def index(*args, **kwargs):
     return render_template('bulb.html')
 
-@socketio.on('change color', namespace='/bulb')
+@socketio.on('change color', namespace='/ws')
 @ws_login_required
 def request_change_color(message):
     emit('push color', message['color'], broadcast=True)
     b.change_color(*RGBfromhex(message['color']),
                  brightness=message.get('bright', 100))
 
-@socketio.on('outmap', namespace="/bulb")
+@socketio.on('outmap', namespace="/ws")
 @ws_login_required
 def reset_color_preview(message):
     emit('preview reset', message['color'], broadcast=True)
@@ -89,11 +89,30 @@ def generate_csrf_token():
 
 @app.after_request
 def add_header(response):
-    response.headers['Content-Security-Policy'] = "connect-src 'self'"
+    #response.headers['Content-Security-Policy'] = "connect-src 'self'"
     return response
 
 app.jinja_env.globals['csrf_token'] = generate_csrf_token
 
 if __name__ == '__main__':
     db_init()
+    try:
+        import eventlet
+        eventlet.monkey_patch()
+        print('Using eventlet')
+        create_thread_func = lambda f: f
+        start_thread_func = lambda f: eventlet.spawn(f)
+    except ImportError:
+        try:
+            import gevent
+            import gevent.monkey
+            gevent.monkey.patch_all()
+            print('Using gevent')
+            create_thread_func = lambda f: gevent.Greenlet(f)
+            start_thread_func = lambda t: t.start()
+        except ImportError:
+            import threading
+            print('Using threading')
+            create_thread_func = lambda f: threading.Thread(target=f)
+            start_thread_func = lambda t: t.start()
     socketio.run(app, debug=True)

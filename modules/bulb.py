@@ -27,7 +27,6 @@ class Bulb:
         red *= int(brightness / 100)
         green *= int(brightness / 100)
         blue *= int(brightness / 100)
-        print(red, green, blue)
         color_hex = prepare_hex(red) + prepare_hex(green) + prepare_hex(blue)
 
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
