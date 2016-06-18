@@ -9,6 +9,8 @@ from models import *
 
 app = Flask(__name__)
 app.secret_key = '\xff\xe3\x84\xd0\xeb\x05\x1b\x89\x17\xce\xca\xaf\xdb\x8c\x13\xc0\xca\xe4'
+app.config['TEMPLATE_AUTO_RELOAD'] = True
+app.debug = True
 socketio = SocketIO(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
