@@ -3,8 +3,8 @@ from flask_socketio import SocketIO, emit, disconnect
 from flask_login import LoginManager, login_required, login_user, current_user, logout_user
 import os, functools, hashlib
 
-from modules.bulb import change_color
-
+from modules.bulb import Bulb
+from modules.utils import RGBfromhex
 from models import *
 
 app = Flask(__name__)
@@ -32,7 +32,8 @@ def index(*args, **kwargs):
 @ws_login_required
 def request_change_color(message):
     emit('push color', message['color'], broadcast=True)
-    change_color(color_hex=message['color'].split("#")[1],
+    b = Bulb() # Temporary
+    b.change_color(*RGBfromhex(message['color']),
                  brightness=message.get('bright', 100))
 
 @socketio.on('outmap', namespace="/bulb")
