@@ -13,6 +13,10 @@ socketio = SocketIO(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
+# Temporary, until we allow multiple instances of a thing
+b = Bulb()
+# End Temporary
+
 some_random_string = lambda: hashlib.sha1(os.urandom(128)).hexdigest()
 
 def ws_login_required(f):
@@ -32,7 +36,6 @@ def index(*args, **kwargs):
 @ws_login_required
 def request_change_color(message):
     emit('push color', message['color'], broadcast=True)
-    b = Bulb() # Temporary
     b.change_color(*RGBfromhex(message['color']),
                  brightness=message.get('bright', 100))
 
