@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+    <body>
+        <div id="status">Status: None</div>
+        <input type="text" id="message">
+        <input type="button" id="record" value="Record">
+        <input type="button" id="export" value="Export">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+        <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+        <script src="/static/recorder.js"></script>
+        <script>
+var ws = io.connect('http://' + document.domain + ':' + location.port + '/jarvis');
+var rec;
+
+function callback(stream) {
+    var context = new AudioContext() || webkitAudioContext();
+    var mediaStreamSource = context.createMediaStreamSource(stream);
+    rec = new Recorder(mediaStreamSource);
+}
+
+$('#record').click(function() {
+    rec.record();
+    ws.emit("send audio", {"action": "start"});
+    $("#message").text("Click export to stop recording and analyze the input");
+
+    // export a wav every second, so we can emit it using websockets
+    intervalKey = setInterval(function() {
+        rec.exportWAV(function(blob) {
+            rec.clear();
+            ws.emit("send audio", {"data": blob});
+        });
+    }, 1000);
+});
+
+$('#export').click(function() {
+    // first send the stop command
+    rec.stop();
+    ws.emit("send audio", {"action": "stop"});
+    clearInterval(intervalKey);
+    $("#message").text("");
+});
+
+ws.on('disconnect', function() {
+    $('#status').html('Status: <span style="color:red">Disconnected</span>');
+});
+
+ws.on('connect', function() {
+    $('#status').html('Status: <span style="color:green">Connected</span>');
+});
+
+function hasGetUserMedia() {
+    return !!(navigator.getUserMedia || navigator.webkitGetUserMedia ||
+            navigator.mozGetUserMedia || navigator.msGetUserMedia);
+}
+
+navigator.getUserMedia = ( navigator.getUserMedia ||
+        navigator.webkitGetUserMedia ||
+        navigator.mozGetUserMedia ||
+        navigator.msGetUserMedia);
+
+if (!hasGetUserMedia()) {
+    alert('getUserMedia() is not supported in your browser');
+}
+
+navigator.getUserMedia({audio:true}, callback, function() {
+     
+});
+        </script>
+    </body>

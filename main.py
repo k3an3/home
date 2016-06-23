@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, make_response, flash, abort, session
 from flask_socketio import SocketIO, emit, disconnect
 from flask_login import LoginManager, login_required, login_user, current_user, logout_user
-import os, functools, hashlib
+import os, functools, hashlib, string, random, wave
 
 from modules.bulb import Bulb
 from modules.utils import RGBfromhex
@@ -32,7 +32,43 @@ def ws_login_required(f):
 
 @app.route('/', methods=['GET', 'POST'])
 def index(*args, **kwargs):
-    return render_template('bulb.html')
+    return render_template('index.html')
+
+@app.route('/jarvis_test')
+def jarvis(*args, **kwargs):
+    return render_template('jarvis.html')
+
+@app.route('/jarvis')
+def altjarvis(*args, **kwargs):
+    return render_template('altjarvis.html')
+
+@socketio.on('send transcript', namespace='/jarvis')
+def test_jarvis(transcript):
+    if "off" in transcript:
+        b.change_color(0, 0, 0)
+    elif "on" in transcript or \
+            "white" in transcript:
+        b.change_color(255, 255, 255)
+    elif "red" in transcript:
+        b.change_color(255, 0, 0)
+    elif "green" in transcript:
+        b.change_color(0, 255, 0)
+    elif "blue" in transcript:
+        b.change_color(0, 0, 255)
+    emit('return transcript', transcript)
+
+@socketio.on('send audio', namespace='/jarvis')
+def test_jarvis2(message):
+    filename = 'workdir/out.wav'#''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(6))
+    print(message.get('action'))
+    with wave.open(filename, 'wb') as f:
+        f.setnchannels(1)
+        f.setsampwidth(2)
+        f.setframerate(48000)
+        if message.get('data'):
+            f.writeframesraw(message['data'])
+        else:
+            print("fuck")
 
 @socketio.on('change color', namespace='/ws')
 @ws_login_required
@@ -92,6 +128,7 @@ def generate_csrf_token():
 @app.after_request
 def add_header(response):
     #response.headers['Content-Security-Policy'] = "connect-src 'self'"
+    response.headers['Access-Control-Allow-Origin'] = '*'
     return response
 
 app.jinja_env.globals['csrf_token'] = generate_csrf_token
