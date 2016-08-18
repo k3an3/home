@@ -1,7 +1,9 @@
 from peewee import *
 from passlib.hash import sha256_crypt
+import ast
 
 from main import app
+from modules.bulb import Bulb
 
 # Based on configuration, use a different database.
 if app.debug:
@@ -19,10 +21,22 @@ def db_init():
             u.set_password('root')
             u.admin = True
             u.save()
-            Device.create(name='Bulby', category='bulb', data='')
+            Device.create(name='Bulby', category='bulb')
     except OperationalError:
         pass
     db.close()
+
+
+class DeviceMapper:
+    """
+    In-memory representation of a device with a relationship to its
+    driver module.
+    """
+    def __init__(self, id, name, category, device):
+        self.id = id
+        self.name = name
+        self.category = category
+        self.device = device
 
 
 class BaseModel(Model):
@@ -58,4 +72,10 @@ class User(BaseModel):
 class Device(BaseModel):
     name = CharField(unique=True)
     category = CharField()
-    data = CharField
+    data = CharField(default='{}')
+
+    def get_object(self):
+        if self.category == 'bulb':
+            device = Bulb(host=ast.literal_eval(self.data).get('host'))
+        return DeviceMapper(self.id, self.name, self.category, device)
+

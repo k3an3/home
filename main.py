@@ -13,6 +13,7 @@ app.debug = True
 socketio = SocketIO(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
+devices = []
 
 # Temporary, until we allow multiple instances of a thing
 b = Bulb()
@@ -30,6 +31,7 @@ def ws_login_required(f):
             return f(*args, **kwargs)
     return wrapped
 
+
 def login_required(f):
     @functools.wraps(f)
     def wrapped(*args, **kwargs):
@@ -41,7 +43,7 @@ def login_required(f):
 
 @app.route('/', methods=['GET', 'POST'])
 def index(*args, **kwargs):
-    bulbs = Device.filter(category='bulb')
+    bulbs = [bulb for bulb in devices if bulb.category == 'bulb']
     return render_template('index.html', **locals())
 
 
@@ -172,6 +174,8 @@ app.jinja_env.globals['csrf_token'] = generate_csrf_token
 
 if __name__ == '__main__':
     db_init()
+    for device in Device.select():
+        devices.append(device.get_object())
     try:
         import eventlet
         eventlet.monkey_patch()

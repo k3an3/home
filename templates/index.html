@@ -168,10 +168,14 @@ body {
                     </form>
 
                 </div>
+                {% if current_user.admin %}
+                <div id="admin" class="tab-pane fade in">
+                </div>
+                {% endif %}
             </div>
             <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
             <script>
-var ws = io.connect('http://' + document.domain + ':' + location.port + '/ws');
+var ws = io.connect('//' + document.domain + ':' + location.port + '/ws');
 var last = "#FFFFFF"
 var bright = 100;
 var target = "0";
