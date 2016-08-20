@@ -80,14 +80,28 @@ body {
                             <li class="dropdown">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Lights<span class="caret"></span></a>
                                 <ul class="dropdown-menu">
+                                    {% if bulbs %}
+                                    <li class="dropdown-header">Bulbs</li>
                                     {% for bulb in bulbs %}
                                     <li><a href="#{{ bulb.id }}">{{ bulb.name }}</a></li>
                                     {% endfor %}
+                                    {% endif %}
+                                    {% if leds %}
+                                    {% if bulbs %}
+                                    <li role="separator" class="divider"></li>
+                                    {% endif %}
+                                    <li class="dropdown-header">LEDs</li>
                                     <li><a href="#leds">LED Strip</a></li>
                                     <li role="separator" class="divider"></li>
+                                    {% endif %}
+                                    {% if other %}
+                                    {% if previous_thing or first_thing_etc %}
+                                    <li role="separator" class="divider"></li>
+                                    {% endif %}
                                     <li class="dropdown-header">Other Group</li>
                                     <li><a href="#">Separated link</a></li>
                                     <li><a href="#">One more separated link</a></li>
+                                    {% endif %}
                                 </ul>
                                 {% if current_user.admin %}
                                 <li><a href="#admin">Admin</a></li>
@@ -170,11 +184,27 @@ body {
                 </div>
                 {% if current_user.admin %}
                 <div id="admin" class="tab-pane fade in">
+                    <div class="col-md-6">
+                        <div class="panel panel-primary">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Devices</h3> 
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="panel">
+                            <form id="device_form">
+                                <input class="form-control" id="id">
+                                <input class="form-control" id="name">
+                                <input class="form-control" id="category">
+                                <input class="form-control" id="data">
+                            </form>
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
-                {% endif %}
-            </div>
-            <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
-            <script>
+                <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+                <script>
 var ws = io.connect('//' + document.domain + ':' + location.port + '/ws');
 var last = "#FFFFFF"
 var bright = 100;
@@ -250,6 +280,6 @@ $('#logout').click(function() {
 setTimeout(function() {
     $('#messages').fadeOut();
 }, 3000 );
-            </script>
+                </script>
     </body>
 </html>

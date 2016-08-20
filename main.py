@@ -78,7 +78,11 @@ def admin_ws(data):
         Device.create(name=data['name'], category=data['category'], data=data['data'])
     if data['action'] == 'delete':
         d = Device.get(id=data['id'])
+        device.remove([device for device in devices if device.id == d.id][0])
         d.delete_instance()
+    if data['action'] == 'get':
+        device = [device for device in devices if device.id == data['id']][0]
+        emit('device info', device.__dict__)
 
 ### TEST ###
 @socketio.on('send transcript', namespace='/jarvis')
