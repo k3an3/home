@@ -143,11 +143,11 @@ body {
                     {% include 'colormap.html' %}
                     <br><br>
                     <!--<input type="range" id="slider">-->
-                    <input type="text" id="hex" oninput="updateColor();">
+                    <input type="text" id="hex{{ bulb.id }}" oninput="updateColor();">
                     <br><br>
                     <button class="btn btn-secondary" onclick="clickColor('#000000');">Off</button>
                     <br><br>
-                    <div id="preview" style="visibility: hidden; background-color: rgb(0, 0, 0);">&nbsp;</div>
+                    <div id="preview{{ bulb.id }}" style="visibility: hidden; background-color: rgb(0, 0, 0);">&nbsp;</div>
                 </div>
                 {% endfor %}
                 {% for led in leds %}
@@ -233,6 +233,7 @@ function updateColor() {
     last = $("#hex").val();
     return false;
 }
+
 function mouseOutMap() {
     ws.emit('change color', {color: last, bright: bright, device: target});
     ws.emit('outmap', {color: last, bright: bright, device: target});

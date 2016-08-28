@@ -1,7 +1,13 @@
 from flask import Flask, render_template, request, redirect, make_response, flash, abort, session
 from flask_socketio import SocketIO, emit, disconnect
 from flask_login import LoginManager, login_required, login_user, current_user, logout_user
-import os, functools, hashlib, string, random, wave
+from threading import Thread
+import os
+import functools
+import hashlib
+import string
+import random
+import wave
 
 from modules.bulb import Bulb
 from modules.utils import RGBfromhex
@@ -106,8 +112,13 @@ def test_jarvis(transcript):
 @ws_login_required
 def request_change_color(message):
     emit('push color', {"device": message['device'], "color": message['color']}, broadcast=True)
-    b.change_color(*RGBfromhex(message['color']),
-                 brightness=message.get('bright', 100))
+    for bulb in devices[1].devices:
+        Thread(target=bulb.change_color, args=(
+            tuple(RGBfromhex(message['color'])) +
+            (message.get('bright', 100),)
+        ))
+        bulb.change_color(*RGBfromhex(message['color']),
+                        brightness=message.get('bright', 100))
 
 
 @socketio.on('outmap', namespace="/ws")
@@ -180,6 +191,10 @@ if __name__ == '__main__':
     db_init()
     for device in Device.select():
         devices.append(device.get_object())
+    devices.append(DeviceMapper(2, "Living Room", "bulb", devices=[
+        Bulb('172.16.42.199'),
+        Bulb('172.16.42.200'),
+    ]))
     try:
         import eventlet
         eventlet.monkey_patch()

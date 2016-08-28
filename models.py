@@ -29,14 +29,14 @@ def db_init():
 
 class DeviceMapper:
     """
-    In-memory representation of a device with a relationship to its
-    driver module.
+    In-memory representation of one or more devices with a relationship
+    to the driver module.
     """
-    def __init__(self, id, name, category, device):
+    def __init__(self, id, name, category, devices):
         self.id = id
         self.name = name
         self.category = category
-        self.device = device
+        self.devices = devices
 
 
 class BaseModel(Model):

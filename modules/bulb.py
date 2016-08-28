@@ -12,6 +12,7 @@ DEFAULT_BULB_HOST = '10.10.123.3'
 
 prepare_hex = lambda x: format(x, 'x').zfill(2)
 
+
 class Bulb:
     """
     A class representing a single MagicHome LED Bulb.
@@ -30,11 +31,14 @@ class Bulb:
         color_hex = prepare_hex(red) + prepare_hex(green) + prepare_hex(blue)
 
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect((self.host, 5577))
-        data = bytearray.fromhex('31' + color_hex
-                                + '00f00f')
-        data.append(sum(data) % 256)
-        s.send(data)
+        try:
+            s.connect((self.host, 5577))
+            data = bytearray.fromhex('31' + color_hex
+                                    + '00f00f')
+            data.append(sum(data) % 256)
+            s.send(data)
+        except Exception:
+            pass
 
 
 if __name__ == '__main__':
