@@ -81,13 +81,20 @@ def admin(action):
 @socketio.on('admin', namespace='/ws')
 @ws_login_required
 def admin_ws(data):
-    print("HIT")
     if not current_user.admin:
         disconnect()
     if data['action'] == 'add':
-        d = Device.create(name=data['name'], category=data['category'], data=data['data'] or '{}')
-        devices.append(d.get_object())
-        print("Succexfully added")
+        d, created = Device.create_or_get(id=data['id'], name=data['name'], category=data['category'], data=data['data'] or '{}')
+        if created:
+            devices.append(d.get_object())
+        else:
+            d.category = data['category']
+            d.data = data['data']
+            d.save()
+            old = devices.filter(lambda x: x.name == d.name)[0]
+            devices.insert(devices.index(old), d.get_object)
+            devices.delete(old)
+        emit('message', 'Devices updated, please refresh.', broadcast=True)
     if data['action'] == 'delete':
         d = Device.get(id=data['id'])
         device.remove([device for device in devices if device.id == d.id][0])

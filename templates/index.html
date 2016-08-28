@@ -129,6 +129,11 @@ body {
                     {% endfor %}
                 </span>
             </div>
+            {% else %}
+            <div style="text-align: center;" hidden>
+                <span id="messages" class="alert alert-warning">
+                </span>
+            </div>
             {% endif %}
             {% endwith %}
 
@@ -204,6 +209,7 @@ body {
                     <div class="col-md-6">
                         <div class="panel">
                             <form id="device_form">
+                                <input type="hidden" id="id">
                                 Name:
                                 <input class="form-control" id="name">
                                 Category:
@@ -229,7 +235,7 @@ function updateTarget(newTarget) {
 }
 
 function editDevice() {
-    ws.emit('admin', {action: 'add', name: $('#name').val(), category: $('#category').val(), data: $('#data').val()});
+    ws.emit('admin', {action: 'add', id: $('#id').val(), name: $('#name').val(), category: $('#category').val(), data: $('#data').val()});
 }
 
 function mouseOverColor(hex) {
@@ -296,6 +302,13 @@ $('.nav a').click(function (e) {
 
 $('#logout').click(function() {
     document.location = "/logout";
+});
+
+ws.on('message', function(data) {
+    $('#messages').html(data);
+    $("#messages").css('visibility', 'visible');
+    $('#messages').fadeIn();
+    alert("Please refresh to update devices.")
 });
 
 setTimeout(function() {
