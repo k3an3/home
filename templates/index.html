@@ -189,15 +189,29 @@ body {
                             <div class="panel-heading">
                                 <h3 class="panel-title">Devices</h3> 
                             </div>
+                            {% for device in devices %}
+                            <div class="panel-body">
+                                <strong>id=</strong>{{ device.id }}
+                                <strong>name=</strong>{{ device.name }}
+                                <strong>category=</strong>{{ device.category }}
+                                <strong>devices=</strong>{% for device_ in device.devices %}
+                                {{ device_.data }}{% endfor %}
+                                {#count={{ device.devices|length }} #}
+                            </div>
+                            {% endfor %}
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="panel">
                             <form id="device_form">
-                                <input class="form-control" id="id">
+                                Name:
                                 <input class="form-control" id="name">
+                                Category:
                                 <input class="form-control" id="category">
+                                Data (Python3 dictionary):
                                 <input class="form-control" id="data">
+                                <br>
+                                <input class="btn btn-primary" value="Submit" onclick="editDevice()">
                             </form>
                         </div>
                     </div>
@@ -212,6 +226,10 @@ var target = "0";
 
 function updateTarget(newTarget) {
     target = newTarget;
+}
+
+function editDevice() {
+    ws.emit('admin', {action: 'add', name: $('#name').val(), category: $('#category').val(), data: $('#data').val()});
 }
 
 function mouseOverColor(hex) {

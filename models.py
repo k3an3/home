@@ -75,7 +75,7 @@ class Device(BaseModel):
     data = CharField(default='{}')
 
     def get_object(self):
+        device = None
         if self.category == 'bulb':
             device = Bulb(host=ast.literal_eval(self.data).get('host'))
-        return DeviceMapper(self.id, self.name, self.category, device)
-
+        return DeviceMapper(self.id, self.name, self.category, [device])

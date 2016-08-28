@@ -32,6 +32,7 @@ def ws_login_required(f):
     @functools.wraps(f)
     def wrapped(*args, **kwargs):
         if not current_user.is_authenticated:
+            print("D/C WS attempt")
             disconnect()
         else:
             return f(*args, **kwargs)
@@ -50,7 +51,9 @@ def login_required(f):
 @app.route('/', methods=['GET', 'POST'])
 def index(*args, **kwargs):
     bulbs = [bulb for bulb in devices if bulb.category == 'bulb']
-    return render_template('index.html', **locals())
+    return render_template('index.html', bulbs=bulbs,
+                                         devices=devices,
+                                         )
 
 
 ### TEST ###
@@ -75,20 +78,20 @@ def command():
 def admin(action):
     pass
 
-@socketio.on('admin')
+@socketio.on('admin', namespace='/ws')
 @ws_login_required
 def admin_ws(data):
+    print("HIT")
     if not current_user.admin:
         disconnect()
     if data['action'] == 'add':
-        Device.create(name=data['name'], category=data['category'], data=data['data'])
+        d = Device.create(name=data['name'], category=data['category'], data=data['data'] or '{}')
+        devices.append(d.get_object())
+        print("Succexfully added")
     if data['action'] == 'delete':
         d = Device.get(id=data['id'])
         device.remove([device for device in devices if device.id == d.id][0])
         d.delete_instance()
-    if data['action'] == 'get':
-        device = [device for device in devices if device.id == data['id']][0]
-        emit('device info', device.__dict__)
 
 ### TEST ###
 @socketio.on('send transcript', namespace='/jarvis')
