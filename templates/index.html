@@ -138,7 +138,7 @@ body {
                 </div>
                 {% if current_user.is_authenticated %}
                 {% for bulb in bulbs %}
-                <div id="{{ bulb.id }}" onmouseover="updateTarget({{ bulb.id }})" class="tab-pane fade in" style="text-align: center;">
+                <div id="{{ bulb.id }}" class="tab-pane fade in" style="text-align: center;">
                     <h1>{{ bulb.name }}</h1>
                     {% include 'colormap.html' %}
                     <br><br>
@@ -243,10 +243,11 @@ function mouseOutMap() {
 }
 
 ws.on('push color', function(data) {
+    console.log(data.device==target);
     if (data.device == target) {
-        $("#preview").css('background-color', data.color);
-        $("#preview").css('visibility', 'visible');
-        $("#hex").val(data.color);
+        $("#preview" + target).css('background-color', data.color);
+        $("#preview" + target).css('visibility', 'visible');
+        $("#hex" + target).val(data.color);
     }
 });
 
@@ -271,6 +272,7 @@ ws.on('preview reset', function(msg) {
 
 $('.nav a').click(function (e) {
     e.preventDefault();
+    updateTarget($(this).context.hash.split('#')[1]);
     $(this).tab('show');
 });
 

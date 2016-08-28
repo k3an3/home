@@ -112,7 +112,7 @@ def test_jarvis(transcript):
 @ws_login_required
 def request_change_color(message):
     emit('push color', {"device": message['device'], "color": message['color']}, broadcast=True)
-    for bulb in devices[1].devices:
+    for bulb in devices[int(message['device']) - 1].devices:
         Thread(target=bulb.change_color, args=(
             tuple(RGBfromhex(message['color'])) +
             (message.get('bright', 100),)
@@ -194,6 +194,9 @@ if __name__ == '__main__':
     devices.append(DeviceMapper(2, "Living Room", "bulb", devices=[
         Bulb('172.16.42.199'),
         Bulb('172.16.42.200'),
+    ]))
+    devices.append(DeviceMapper(3, "Bedroom", "bulb", devices=[
+        Bulb('192.168.1.123'),
     ]))
     try:
         import eventlet
