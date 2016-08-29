@@ -14,11 +14,12 @@
         </title>
 
         <!-- Bootstrap core CSS -->
-        <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/7.1.0/css/bootstrap-slider.min.css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
-        <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+        <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/7.1.0/bootstrap-slider.min.js"></script>
+        <link rel="manifest" href="/static/manifest.json">
     </head>
     <style>
 body {
@@ -224,6 +225,7 @@ body {
                     {% endif %}
                 </div>
                 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+                <script src="static/check.js"></script>
                 <script>
 var ws = io.connect('//' + document.domain + ':' + location.port + '/ws');
 var last = "#FFFFFF"

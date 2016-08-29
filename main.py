@@ -1,20 +1,22 @@
 from flask import Flask, render_template, request, redirect, make_response, flash, abort, session
 from flask_socketio import SocketIO, emit, disconnect
 from flask_login import LoginManager, login_required, login_user, current_user, logout_user
+from pywebpush import WebPusher
+
 from threading import Thread
 import os
 import functools
 import hashlib
-import string
-import random
-import wave
+import json
 
 from modules.bulb import Bulb
+#from modules.gcm import GCM
 from modules.utils import RGBfromhex
 from models import *
 
 app = Flask(__name__)
 app.secret_key = '\xff\xe3\x84\xd0\xeb\x05\x1b\x89\x17\xce\xca\xaf\xdb\x8c\x13\xc0\xca\xe4'
+API_KEY = 'AIzaSyCa349yW3-oWMbYRHl21V1IgGRyM6O7PW4'
 app.debug = True
 socketio = SocketIO(app)
 login_manager = LoginManager()
@@ -78,6 +80,7 @@ def command():
 def admin(action):
     pass
 
+
 @socketio.on('admin', namespace='/ws')
 @ws_login_required
 def admin_ws(data):
@@ -116,6 +119,19 @@ def test_jarvis(transcript):
         b.change_color(0, 0, 255)
     emit('return transcript', transcript)
 ###
+
+@socketio.on('subscribe', namespace='/ws')
+@ws_login_required
+def subscribe(subscriber):
+    s, created = Subscriber.get_or_create(
+        endpoint=subscriber.get('endpoint'),
+        auth=subscriber.get('keys')['auth'],
+        p256dh=subscriber.get('keys')['p256dh'],
+        user=current_user.id)
+    if created or True:
+        WebPusher(subscriber).send(
+            json.dumps({'body': "Subscribed to push notifications!"}),
+            gcm_key=API_KEY)
 
 
 @socketio.on('change color', namespace='/ws')

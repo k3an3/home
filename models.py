@@ -14,7 +14,7 @@ else:
 def db_init():
     db.connect()
     try:
-        db.create_tables([User, Device])
+        db.create_tables([User, Device, Subscriber])
         print('Creating tables...')
         if app.debug:
             u = User.create(username='keane', password="")
@@ -79,3 +79,10 @@ class Device(BaseModel):
         if self.category == 'bulb':
             device = Bulb(host=ast.literal_eval(self.data).get('host'))
         return DeviceMapper(self.id, self.name, self.category, [device])
+
+
+class Subscriber(BaseModel):
+    endpoint = CharField(unique=True)
+    auth = CharField()
+    p256dh = CharField()
+    user = ForeignKeyField(User, related_name='subscriber')
