@@ -105,6 +105,7 @@ body {
                                     {% endif %}
                                 </ul>
                                 {% if current_user.admin %}
+                                <li><a href="#security">Security</a></li>
                                 <li><a href="#admin">Admin</a></li>
                                 {% endif %}
                             </li>
@@ -189,6 +190,12 @@ body {
 
                 </div>
                 {% if current_user.admin %}
+                <div id="security" class="tab-pane fade in danger">
+                    <div class="jumbotron" style="background-color:{% if sec.state == 'armed' %}green{% elif sec.state == 'alert' %}red{% else %}{% endif %}; color: {% if sec.state == 'armed' %}white{% elif sec.state == 'alert' %}white{% else %}{% endif %};">
+                        <h1 id="status">Status: {{ sec.state }}</h1>
+                        <button onclick="changeState()" class="btn btn-{% if sec.state == 'disabled' %}success">Enable{% elif sec.state == 'armed' %}danger">Disarm{% elif sec.state == 'alert' %}danger">Clear{% endif %}</button>
+                    </div>
+                </div>
                 <div id="admin" class="tab-pane fade in">
                     <div class="col-md-6">
                         <div class="panel panel-primary">
@@ -268,6 +275,10 @@ function mouseOutMap() {
     return false;
 }
 
+function changeState() {
+    ws.emit('change state');
+}
+
 ws.on('push color', function(data) {
     console.log(data.device==target);
     if (data.device == target) {
@@ -311,6 +322,17 @@ ws.on('message', function(data) {
     $("#messages").css('visibility', 'visible');
     $('#messages').fadeIn();
     alert("Please refresh to update devices.")
+});
+
+ws.on('state change', function(data) {
+    var bg;
+    if (data.state == 'alert')
+        bg = 'red';
+    else if (data.state == 'armed')
+        bg = 'green'
+    else
+        bg = '';
+    $('.jumbotron').css('background-color', bg);
 });
 
 setTimeout(function() {

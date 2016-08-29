@@ -10,8 +10,8 @@ import hashlib
 import json
 
 from modules.bulb import Bulb
-#from modules.gcm import GCM
-from modules.utils import RGBfromhex
+from modules.utils import RGBfromhex, num
+from modules.motion import MotionController
 from models import *
 
 app = Flask(__name__)
@@ -22,6 +22,7 @@ socketio = SocketIO(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 devices = []
+mc = MotionController()
 
 # Temporary, until we allow multiple instances of a thing
 b = Bulb()
@@ -52,9 +53,11 @@ def login_required(f):
 
 @app.route('/', methods=['GET', 'POST'])
 def index(*args, **kwargs):
+    sec = SecurityController.get()
     bulbs = [bulb for bulb in devices if bulb.category == 'bulb']
     return render_template('index.html', bulbs=bulbs,
                                          devices=devices,
+                                         sec=sec,
                                          )
 
 
@@ -80,6 +83,23 @@ def command():
 def admin(action):
     pass
 
+
+@socketio.on('change state', namespace='/ws')
+@ws_login_required
+def change_state():
+    if not current_user.admin:
+        disconnect()
+    sec = SecurityController.get()
+    if sec.state == 'disabled':
+        sec.state = 'armed'
+        mc.start_detection()
+    elif sec.state == 'armed':
+        sec.state == 'disabled'
+        mc.stop_detection()
+    elif sec.state == 'alert':
+        sec.state == 'armed'
+    sec.save()
+    emit('state change', {'state': sec.state}, broadcast=True)
 
 @socketio.on('admin', namespace='/ws')
 @ws_login_required
@@ -128,7 +148,7 @@ def subscribe(subscriber):
         auth=subscriber.get('keys')['auth'],
         p256dh=subscriber.get('keys')['p256dh'],
         user=current_user.id)
-    if created or True:
+    if created:
         WebPusher(subscriber).send(
             json.dumps({'body': "Subscribed to push notifications!"}),
             gcm_key=API_KEY)
@@ -138,7 +158,7 @@ def subscribe(subscriber):
 @ws_login_required
 def request_change_color(message):
     emit('push color', {"device": message['device'], "color": message['color']}, broadcast=True)
-    for bulb in devices[int(message['device']) - 1].devices:
+    for bulb in devices[num(message['device'])].devices:
         Thread(target=bulb.change_color, args=(
             tuple(RGBfromhex(message['color'])) +
             (message.get('bright', 100),)
@@ -217,11 +237,11 @@ if __name__ == '__main__':
     db_init()
     for device in Device.select():
         devices.append(device.get_object())
-    devices.append(DeviceMapper(2, "Living Room", "bulb", devices=[
+    devices.append(DeviceMapper(0, "Living Room", "bulb", devices=[
         Bulb('172.16.42.199'),
         Bulb('172.16.42.200'),
     ]))
-    devices.append(DeviceMapper(3, "Bedroom", "bulb", devices=[
+    devices.append(DeviceMapper(1, "Bedroom", "bulb", devices=[
         Bulb('192.168.1.123'),
     ]))
     try:

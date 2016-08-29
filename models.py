@@ -1,6 +1,7 @@
 from peewee import *
 from passlib.hash import sha256_crypt
 import ast
+import uuid
 
 from main import app
 from modules.bulb import Bulb
@@ -14,14 +15,15 @@ else:
 def db_init():
     db.connect()
     try:
-        db.create_tables([User, Device, Subscriber])
+        db.create_tables([User, Device, Subscriber,
+                          SecurityController, Sensor, SecurityEvent,])
         print('Creating tables...')
         if app.debug:
             u = User.create(username='keane', password="")
             u.set_password('root')
             u.admin = True
             u.save()
-            Device.create(name='Bulby', category='bulb')
+            SecurityController.create()
     except OperationalError:
         pass
     db.close()
@@ -75,7 +77,11 @@ class Device(BaseModel):
     data = CharField(default='{}')
 
     def get_object(self):
+        """
+        Returns DeviceMapper instance of device.
+        """
         device = None
+        # Manually build device depending on the device type
         if self.category == 'bulb':
             device = Bulb(host=ast.literal_eval(self.data).get('host'))
         return DeviceMapper(self.id, self.name, self.category, [device])
@@ -85,4 +91,20 @@ class Subscriber(BaseModel):
     endpoint = CharField(unique=True)
     auth = CharField()
     p256dh = CharField()
-    user = ForeignKeyField(User, related_name='subscriber')
+    user = ForeignKeyField(User, related_name='subscribers')
+
+
+class SecurityController(BaseModel):
+    state = CharField(default='disabled')
+
+
+class Sensor(BaseModel):
+    name = CharField(unique=True)
+    type = CharField()
+    key = CharField(null=True)
+
+
+class SecurityEvent(BaseModel):
+    type = CharField()
+    controller = ForeignKeyField(SecurityController, related_name='events')
+    sensor = ForeignKeyField(Sensor, related_name='events')
