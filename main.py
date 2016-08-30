@@ -94,10 +94,10 @@ def change_state():
         sec.state = 'armed'
         mc.start_detection()
     elif sec.state == 'armed':
-        sec.state == 'disabled'
+        sec.state = 'disabled'
         mc.stop_detection()
     elif sec.state == 'alert':
-        sec.state == 'armed'
+        sec.state = 'armed'
     sec.save()
     emit('state change', {'state': sec.state}, broadcast=True)
 

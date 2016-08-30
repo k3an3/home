@@ -15,7 +15,7 @@ class MotionController:
     def __init__(self):
         self.base_url = BASE_URL
 
-    def get(url):
+    def get(self, url):
         return requests.get(self.base_url + url)
 
     def set_config(self, key, value):
