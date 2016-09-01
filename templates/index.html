@@ -192,8 +192,8 @@ body {
                 {% if current_user.admin %}
                 <div id="security" class="tab-pane fade in danger">
                     <div class="jumbotron" style="background-color:{% if sec.state == 'armed' %}green{% elif sec.state == 'alert' %}red{% else %}{% endif %}; color: {% if sec.state == 'armed' %}white{% elif sec.state == 'alert' %}white{% else %}{% endif %};">
-                        <h1 id="status">Status: {{ sec.state }}</h1>
-                        <button onclick="changeState()" class="btn btn-{% if sec.state == 'disabled' %}success">Enable{% elif sec.state == 'armed' %}danger">Disarm{% elif sec.state == 'alert' %}danger">Clear{% endif %}</button>
+                        <h1>Status: <span id="state">{{ sec.state }}</span></h1>
+                        <button id="statusbutton" onclick="changeState()" class="btn btn-{% if sec.state == 'disabled' %}success">Enable{% elif sec.state == 'armed' %}danger">Disarm{% elif sec.state == 'alert' %}warning">Clear{% endif %}</button>
                     </div>
                 </div>
                 <div id="admin" class="tab-pane fade in">
@@ -326,13 +326,31 @@ ws.on('message', function(data) {
 
 ws.on('state change', function(data) {
     var bg;
-    if (data.state == 'alert')
+    var color;
+    var state = $('#state');
+    var button = $('#statusbutton');
+
+    if (data.state == 'alert') {
         bg = 'red';
-    else if (data.state == 'armed')
+        color = 'white';
+        state.html('alert');
+        button.html('Clear');
+        button.removeAttr('class').addClass('btn btn-warning');
+    } else if (data.state == 'armed') {
         bg = 'green'
-    else
+        color = 'white';
+        state.html('armed');
+        button.html('Disable');
+        button.removeAttr('class').addClass('btn btn-danger');
+    } else {
         bg = '';
+        color = 'black';
+        state.html('disabled');
+        button.html('Enable');
+        button.removeAttr('class').addClass('btn btn-success');
+    }
     $('.jumbotron').css('background-color', bg);
+    $('.jumbotron').css('color', color);
 });
 
 setTimeout(function() {

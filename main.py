@@ -22,7 +22,7 @@ socketio = SocketIO(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 devices = []
-mc = MotionController()
+mc = MotionController(1)
 
 # Temporary, until we allow multiple instances of a thing
 b = Bulb()
@@ -81,16 +81,17 @@ def command():
     try:
         sensor = Sensor.get(key=request.form.get('device'))
     except Sensor.DoesNotExist:
-        abort(404)
+        abort(403)
     sec = SecurityController.get()
     if sec.state == 'armed':
         if command == 'eventstart':
             sec.alert()
             SecurityEvent.create(controller=sec, sensor=sensor)
-            emit('state change', {'state': sec.state}, broadcast=True)
-            WebPusher(subscriber).send(
-                json.dumps({'body': "New event alert!!!"}),
-                gcm_key=API_KEY)
+            socketio.emit('state change', {'state': sec.state}, namespace='/ws')
+            for subscriber in Subscriber.select():
+                WebPusher(subscriber.to_dict()).send(
+                    json.dumps({'body': "New event alert!!!"}),
+                    gcm_key=API_KEY)
         elif command == 'eventend':
             try:
                 event = SecurityEvent.get(controller=sec, sensor=sensor)
@@ -98,14 +99,8 @@ def command():
                 event.save()
                 # emit something here
             except SecurityEvent.DoesNotExist:
-                abort(404)
-    return (None, 204)
-
-
-@app.route('/api/admin/<action>')
-@login_required
-def admin(action):
-    pass
+                abort(412)
+    return ('', 204)
 
 
 @socketio.on('change state', namespace='/ws')
@@ -121,7 +116,7 @@ def change_state():
         sec.disable()
         mc.stop_detection()
     elif sec.state == 'alert':
-        sec.alert()
+        sec.arm()
     emit('state change', {'state': sec.state}, broadcast=True)
 
 
@@ -214,7 +209,7 @@ def _db_close(exc):
 
 @app.before_request
 def csrf_protect():
-    if request.method == "POST":
+    if request.method == "POST" and request.path != '/api/command':
         token = session.pop('_csrf_token', None)
         if not token or token != request.form.get('_csrf_token'):
             abort(403)

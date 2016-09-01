@@ -1,7 +1,9 @@
-from peewee import *
-from passlib.hash import sha256_crypt
 import ast
 import uuid
+import json
+
+from peewee import *
+from passlib.hash import sha256_crypt
 
 from main import app
 from modules.bulb import Bulb
@@ -24,6 +26,7 @@ def db_init():
             u.admin = True
             u.save()
             SecurityController.create()
+            Sensor.create(name='cam1', typeof='camera', key='cam1')
     except OperationalError:
         pass
     db.close()
@@ -92,6 +95,14 @@ class Subscriber(BaseModel):
     auth = CharField()
     p256dh = CharField()
     user = ForeignKeyField(User, related_name='subscribers')
+
+    def to_dict(self):
+        return {
+            'endpoint': self.endpoint,
+            'keys': {'auth': self.auth,
+                     'p256dh': self.p256dh
+                     }
+            }
 
 
 class SecurityController(BaseModel):

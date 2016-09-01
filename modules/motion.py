@@ -8,12 +8,12 @@ import requests
 
 
 # 0 is all threads, get this from somewhere else?
-BASE_URL = 'http://localhost:8080/0/'
+BASE_URL = 'http://localhost:8080/{}/'
 
 
 class MotionController:
-    def __init__(self):
-        self.base_url = BASE_URL
+    def __init__(self, thread=0):
+        self.base_url = BASE_URL.format(thread)
 
     def get(self, url):
         return requests.get(self.base_url + url)
