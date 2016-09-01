@@ -195,6 +195,15 @@ body {
                         <h1>Status: <span id="state">{{ sec.state }}</span></h1>
                         <button id="statusbutton" onclick="changeState()" class="btn btn-{% if sec.state == 'disabled' %}success">Enable{% elif sec.state == 'armed' %}danger">Disarm{% elif sec.state == 'alert' %}warning">Clear{% endif %}</button>
                     </div>
+                    <div class="col-md-8">
+                        {% if events %}
+                        {% for event in events %}
+                        {{ event.datetime }} {{ event.sensor }} 
+                        {% endfor %}
+                        {% else %}
+                        No events yet. Yay!
+                        {% endif %}
+                    </div>
                 </div>
                 <div id="admin" class="tab-pane fade in">
                     <div class="col-md-6">

@@ -1,6 +1,7 @@
 import ast
 import uuid
 import json
+import datetime
 
 from peewee import *
 from passlib.hash import sha256_crypt
@@ -131,3 +132,4 @@ class SecurityEvent(BaseModel):
     controller = ForeignKeyField(SecurityController, related_name='events')
     sensor = ForeignKeyField(Sensor, related_name='events')
     in_progress = BooleanField(default=True)
+    datetime = DateTimeField(default=datetime.datetime.now)

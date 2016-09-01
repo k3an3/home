@@ -46,9 +46,11 @@ def ws_login_required(f):
 def index(*args, **kwargs):
     sec = SecurityController.get()
     bulbs = [bulb for bulb in devices if bulb.category == 'bulb']
+    events = sec.events
     return render_template('index.html', bulbs=bulbs,
                                          devices=devices,
                                          sec=sec,
+                                         events=events,
                                          )
 
 
