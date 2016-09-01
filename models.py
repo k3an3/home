@@ -97,14 +97,26 @@ class Subscriber(BaseModel):
 class SecurityController(BaseModel):
     state = CharField(default='disabled')
 
+    def arm(self):
+        self.state = 'armed'
+        self.save()
+
+    def alert(self):
+        self.state = 'alert'
+        self.save()
+
+    def disable(self):
+        self.state = 'disabled'
+        self.save()
+
 
 class Sensor(BaseModel):
     name = CharField(unique=True)
-    type = CharField()
+    typeof = CharField()
     key = CharField(null=True)
 
 
 class SecurityEvent(BaseModel):
-    type = CharField()
     controller = ForeignKeyField(SecurityController, related_name='events')
     sensor = ForeignKeyField(Sensor, related_name='events')
+    in_progress = BooleanField(default=True)

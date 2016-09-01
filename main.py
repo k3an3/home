@@ -42,6 +42,7 @@ def ws_login_required(f):
     return wrapped
 
 
+"""
 def login_required(f):
     @functools.wraps(f)
     def wrapped(*args, **kwargs):
@@ -49,6 +50,7 @@ def login_required(f):
             return abort(403)
         return f(*args, **kwargs)
     return wrapped
+"""
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -74,9 +76,31 @@ def altjarvis(*args, **kwargs):
 
 
 @app.route('/api/command', methods=['POST'])
-@login_required
 def command():
-    pass
+    command = request.form.get('command')
+    try:
+        sensor = Sensor.get(key=request.form.get('device'))
+    except Sensor.DoesNotExist:
+        abort(404)
+    sec = SecurityController.get()
+    if sec.state == 'armed':
+        if command == 'eventstart':
+            sec.alert()
+            SecurityEvent.create(controller=sec, sensor=sensor)
+            emit('state change', {'state': sec.state}, broadcast=True)
+            WebPusher(subscriber).send(
+                json.dumps({'body': "New event alert!!!"}),
+                gcm_key=API_KEY)
+        elif command == 'eventend':
+            try:
+                event = SecurityEvent.get(controller=sec, sensor=sensor)
+                event.in_progress = False
+                event.save()
+                # emit something here
+            except SecurityEvent.DoesNotExist:
+                abort(404)
+    return (None, 204)
+
 
 @app.route('/api/admin/<action>')
 @login_required
@@ -91,37 +115,15 @@ def change_state():
         disconnect()
     sec = SecurityController.get()
     if sec.state == 'disabled':
-        sec.state = 'armed'
+        sec.arm()
         mc.start_detection()
     elif sec.state == 'armed':
-        sec.state = 'disabled'
+        sec.disable()
         mc.stop_detection()
     elif sec.state == 'alert':
-        sec.state = 'armed'
-    sec.save()
+        sec.alert()
     emit('state change', {'state': sec.state}, broadcast=True)
 
-@socketio.on('admin', namespace='/ws')
-@ws_login_required
-def admin_ws(data):
-    if not current_user.admin:
-        disconnect()
-    if data['action'] == 'add':
-        d, created = Device.create_or_get(id=data['id'], name=data['name'], category=data['category'], data=data['data'] or '{}')
-        if created:
-            devices.append(d.get_object())
-        else:
-            d.category = data['category']
-            d.data = data['data']
-            d.save()
-            old = devices.filter(lambda x: x.name == d.name)[0]
-            devices.insert(devices.index(old), d.get_object)
-            devices.delete(old)
-        emit('message', 'Devices updated, please refresh.', broadcast=True)
-    if data['action'] == 'delete':
-        d = Device.get(id=data['id'])
-        device.remove([device for device in devices if device.id == d.id][0])
-        d.delete_instance()
 
 ### TEST ###
 @socketio.on('send transcript', namespace='/jarvis')
@@ -139,6 +141,7 @@ def test_jarvis(transcript):
         b.change_color(0, 0, 255)
     emit('return transcript', transcript)
 ###
+
 
 @socketio.on('subscribe', namespace='/ws')
 @ws_login_required
