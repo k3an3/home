@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, make_response, flash, abort, session
+from flask import Flask, render_template, request, redirect, make_response, flash, abort, session, url_for
 from flask_socketio import SocketIO, emit, disconnect
 from flask_login import LoginManager, login_required, login_user, current_user, logout_user
 from pywebpush import WebPusher
@@ -42,17 +42,6 @@ def ws_login_required(f):
     return wrapped
 
 
-"""
-def login_required(f):
-    @functools.wraps(f)
-    def wrapped(*args, **kwargs):
-        if not current_user.is_authenticated:
-            return abort(403)
-        return f(*args, **kwargs)
-    return wrapped
-"""
-
-
 @app.route('/', methods=['GET', 'POST'])
 def index(*args, **kwargs):
     sec = SecurityController.get()
@@ -85,14 +74,19 @@ def command():
     sec = SecurityController.get()
     if sec.state == 'armed':
         if command == 'eventstart':
+            print("EVENT START")
             sec.alert()
             SecurityEvent.create(controller=sec, sensor=sensor)
             socketio.emit('state change', {'state': sec.state}, namespace='/ws')
             for subscriber in Subscriber.select():
-                WebPusher(subscriber.to_dict()).send(
-                    json.dumps({'body': "New event alert!!!"}),
-                    gcm_key=API_KEY)
+                try:
+                    WebPusher(subscriber.to_dict()).send(
+                        json.dumps({'body': "New event alert!!!"}),
+                        gcm_key=API_KEY)
+                except Exception as e:
+                    print(str(e))
         elif command == 'eventend':
+            print("EVENT END")
             try:
                 event = SecurityEvent.get(controller=sec, sensor=sensor)
                 event.in_progress = False
@@ -182,14 +176,14 @@ def login():
     if user.check_password(request.form.get('password')):
         login_user(user)
         flash('Logged in successfully.')
-    return redirect('/')
+    return redirect(url_for('index'))
 
 
 @app.route("/logout")
 @login_required
 def logout():
         logout_user()
-        return redirect('/')
+        return redirect(url_for('index'))
 
 
 # This hook ensures that a connection is opened to handle any queries

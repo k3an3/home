@@ -231,6 +231,7 @@ body {
                     </div>
                     {% endif %}
                 </div>
+                {% if current_user.is_authenticated %}
                 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
                 <script src="static/check.js"></script>
                 <script>
@@ -238,10 +239,6 @@ var ws = io.connect('//' + document.domain + ':' + location.port + '/ws');
 var last = "#FFFFFF"
 var bright = 100;
 var target = "0";
-
-function updateTarget(newTarget) {
-    target = newTarget;
-}
 
 function editDevice() {
     ws.emit('admin', {action: 'add', id: $('#id').val(), name: $('#name').val(), category: $('#category').val(), data: $('#data').val()});
@@ -307,12 +304,6 @@ ws.on('preview reset', function(msg) {
     $("#preview").css('visibility', 'hidden');
 });
 
-$('.nav a').click(function (e) {
-    e.preventDefault();
-    updateTarget($(this).context.hash.split('#')[1]);
-    $(this).tab('show');
-});
-
 $('#logout').click(function() {
     document.location = "/logout";
 });
@@ -338,7 +329,7 @@ ws.on('state change', function(data) {
         button.removeAttr('class').addClass('btn btn-warning');
     } else if (data.state == 'armed') {
         bg = 'green'
-        color = 'white';
+            color = 'white';
         state.html('armed');
         button.html('Disable');
         button.removeAttr('class').addClass('btn btn-danger');
@@ -356,6 +347,18 @@ ws.on('state change', function(data) {
 setTimeout(function() {
     $('#messages').fadeOut();
 }, 3000 );
+                </script>
+                {% endif %}
+                <script>
+$('.nav a').click(function (e) {
+    e.preventDefault();
+    updateTarget($(this).context.hash.split('#')[1]);
+    $(this).tab('show');
+});
+
+function updateTarget(newTarget) {
+    target = newTarget;
+}
                 </script>
     </body>
 </html>
