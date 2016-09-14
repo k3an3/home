@@ -1,0 +1,10 @@
+---
+Thing:
+    - Device:
+        name: "Test2"
+        category: "baulb"
+        driver: "sic"
+    - Device:
+        name: "Test1"
+        category: "bulb"
+        driver: "sick"
