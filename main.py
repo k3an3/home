@@ -232,8 +232,8 @@ if __name__ == '__main__':
     for device in Device.select():
         devices.append(device.get_object())
     devices.append(DeviceMapper(0, "Living Room", "bulb", devices=[
-        Bulb('172.16.42.199'),
-        Bulb('172.16.42.200'),
+        Bulb('172.16.42.203'),
+        Bulb('172.16.42.201'),
     ]))
     devices.append(DeviceMapper(1, "Bedroom", "bulb", devices=[
         Bulb('192.168.1.123'),
