@@ -1,10 +1,27 @@
 ---
-Thing:
-    - Device:
-        name: "Test2"
-        category: "baulb"
-        driver: "sic"
-    - Device:
-        name: "Test1"
-        category: "bulb"
-        driver: "sick"
+installed_drivers:
+    - bulb:
+        class: Bulb
+    - motion:
+        class: MotionController
+
+devices:
+    living_room:
+        - !device
+            name: Left
+            driver: bulb.Bulb
+            config:
+            config:
+            - ip_addr: 172.16.42.201
+        - !device
+            name: Right
+            driver: bulb.Bulb
+            config:
+            - ip_addr: 172.16.42.203
+
+    bedroom:
+        - !device
+            name: Bed
+            driver: bulb.Bulb
+            config:
+            - ip_addr: 192.168.1.123
