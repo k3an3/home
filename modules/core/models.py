@@ -97,6 +97,7 @@ class Driver(YAMLObject):
     yaml_tag = '!driver'
 
     def __init__(self, typeof, name, module, klass):
+        self.name = name
         if typeof == 'device':
             installed_devices[name] =  class_from_name(module, klass)
         elif typeof == 'sensor':
