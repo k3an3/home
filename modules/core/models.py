@@ -1,8 +1,20 @@
+"""
+models.py
+~~~~~~~~~
+
+Contains classes to represent objects created by the parser.
+"""
 import importlib
 import sys
 import yaml
 
 #from modules.iot import *
+
+# To be populated by the parser
+installed_devices = {}
+installed_sensors = {}
+devices = []
+sensors = []
 
 DEVICE_CATEGORIES = (
     'bulb', 'led', 'lock', 'outlet',
@@ -16,49 +28,81 @@ class YAMLConfigParseError(Exception):
     pass
 
 
-class InvalidDeviceCategoryError(YAMLConfigParseError):
+class InvalidDeviceError(YAMLConfigParseError):
     pass
 
 
-class InvalidSensorTypeYAMLConfigParseError(YAMLConfigParseError):
+class InvalidSensorError(YAMLConfigParseError):
     pass
 
 
-def class_from_name(name):
-    name = name.split('.')
+class InvalidDriverError(YAMLConfigParseError):
+    pass
+
+
+def class_from_name(module_name, class_name):
     return getattr(importlib.import_module(
-        'modules.iot.' + name[0]),
-        name[1]
+        'modules.iot.' + module_name),
+        class_name
         )
 
 
-class Device(yaml.YAMLObject):
+class YAMLObject(yaml.YAMLObject):
+    def __setstate__(self, kwargs):
+        self.__init__(**kwargs)
+
+    def __repr__(self):
+        return self.name
+
+
+class Device(YAMLObject):
     yaml_tag = '!device'
 
-    def __init__(self, name, driver, config):
+    def __init__(self, name, driver, config=None):
         self.name = name
-        self.driver = class_from_name(driver)
+        if driver not in installed_devices:
+            raise InvalidDeviceError()
+        # retreive the class for driver
+        driver = installed_devices[driver]
+        if config:
+            config_d = {}
+            for d in config:
+                config_d.update(d)
+            self.driver = driver(**config_d)
+        else:
+            self.driver = driver()
 
-    def __setstate__(self, args):
-        self.__init__(**args)
 
-    def __repr__(self):
-        return self.name
-
-
-class Sensor(yaml.YAMLObject):
+class Sensor(YAMLObject):
     yaml_tag = '!sensor'
 
-    def __init__(self, name, typeof, key, actions=[]):
-        if typeof not in SENSOR_TYPES:
-            raise InvalidSensorTypeException()
+    def __init__(self, name, driver, key, config=None, actions=[]):
         self.name = name
-        self.typeof = typeof
-        self.key = key
         self.actions = actions
+        self.key = key
+        if driver not in installed_sensors:
+            raise InvalidSensorError()
+        # retreive the class for driver
+        driver = installed_sensors[driver]
+        if config:
+            config_d = {}
+            for d in config:
+                config_d.update(d)
+            self.driver = driver(**config_d)
+        else:
+            self.driver = driver()
 
-    def __repr__(self):
-        return self.name
+
+class Driver(YAMLObject):
+    yaml_tag = '!driver'
+
+    def __init__(self, typeof, name, module, klass):
+        if typeof == 'device':
+            installed_devices[name] =  class_from_name(module, klass)
+        elif typeof == 'sensor':
+            installed_sensors[name] =  class_from_name(module, klass)
+        else:
+            raise InvalidDriverTypeError()
 
 
 class ActionGroup(yaml.YAMLObject):

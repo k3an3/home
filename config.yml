@@ -1,27 +1,36 @@
 ---
 installed_drivers:
-    - bulb:
-        class: Bulb
-    - motion:
-        class: MotionController
+    - !driver
+        typeof: device
+        name: bulb
+        module: bulb
+        klass: Bulb
+    - !driver
+        typeof: sensor
+        name: motion
+        module: motion
+        klass: MotionController
 
 devices:
     living_room:
         - !device
             name: Left
-            driver: bulb.Bulb
+            driver: bulb
             config:
-            config:
-            - ip_addr: 172.16.42.201
+            - host: 172.16.42.201
         - !device
             name: Right
-            driver: bulb.Bulb
+            driver: bulb
             config:
-            - ip_addr: 172.16.42.203
+            - host: 172.16.42.203
 
     bedroom:
         - !device
             name: Bed
-            driver: bulb.Bulb
+            driver: bulb
             config:
-            - ip_addr: 192.168.1.123
+            - host: 192.168.1.123
+        - !sensor
+            name: cam1
+            driver: motion
+            key: cam1
