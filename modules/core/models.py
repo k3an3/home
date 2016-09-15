@@ -11,40 +11,30 @@ import yaml
 #from modules.iot import *
 
 # To be populated by the parser
-installed_devices = {}
-installed_sensors = {}
+drivers = {}
 devices = []
-sensors = []
 
-DEVICE_CATEGORIES = (
-    'bulb', 'led', 'lock', 'outlet',
-)
-
-SENSOR_TYPES = (
-    'door', 'camera', 'other',
-)
 
 class YAMLConfigParseError(Exception):
     pass
 
 
-class InvalidDeviceError(YAMLConfigParseError):
+class DriverNotInstalledError(YAMLConfigParseError):
     pass
 
 
-class InvalidSensorError(YAMLConfigParseError):
-    pass
-
-
-class InvalidDriverError(YAMLConfigParseError):
+class DriverNotFoundError(YAMLConfigParseError):
     pass
 
 
 def class_from_name(module_name, class_name):
-    return getattr(importlib.import_module(
-        'modules.iot.' + module_name),
-        class_name
-        )
+    try:
+        return getattr(importlib.import_module(
+            'modules.iot.' + module_name),
+            class_name
+            )
+    except ImportError:
+        raise DriverNotFoundError()
 
 
 class YAMLObject(yaml.YAMLObject):
@@ -58,32 +48,13 @@ class YAMLObject(yaml.YAMLObject):
 class Device(YAMLObject):
     yaml_tag = '!device'
 
-    def __init__(self, name, driver, config=None):
+    def __init__(self, name, driver, config=None, key=None):
         self.name = name
-        if driver not in installed_devices:
-            raise InvalidDeviceError()
-        # retreive the class for driver
-        driver = installed_devices[driver]
-        if config:
-            config_d = {}
-            for d in config:
-                config_d.update(d)
-            self.driver = driver(**config_d)
-        else:
-            self.driver = driver()
-
-
-class Sensor(YAMLObject):
-    yaml_tag = '!sensor'
-
-    def __init__(self, name, driver, key, config=None, actions=[]):
-        self.name = name
-        self.actions = actions
         self.key = key
-        if driver not in installed_sensors:
-            raise InvalidSensorError()
+        if driver not in drivers:
+            raise DeviceNotInstalledError()
         # retreive the class for driver
-        driver = installed_sensors[driver]
+        driver = drivers[driver]
         if config:
             config_d = {}
             for d in config:
@@ -98,12 +69,7 @@ class Driver(YAMLObject):
 
     def __init__(self, typeof, name, module, klass):
         self.name = name
-        if typeof == 'device':
-            installed_devices[name] =  class_from_name(module, klass)
-        elif typeof == 'sensor':
-            installed_sensors[name] =  class_from_name(module, klass)
-        else:
-            raise InvalidDriverTypeError()
+        drivers[name] =  class_from_name(module, klass)
 
 
 class ActionGroup(yaml.YAMLObject):
@@ -115,5 +81,4 @@ class ActionGroup(yaml.YAMLObject):
 
 
 yaml.add_path_resolver('!device', ['Device'], dict)
-yaml.add_path_resolver('!sensor', ['Sensor'], dict)
 yaml.add_path_resolver('!action', ['ActionGroup'], dict)

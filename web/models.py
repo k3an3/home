@@ -18,8 +18,8 @@ else:
 def db_init():
     db.connect()
     try:
-        db.create_tables([User, Device, Subscriber,
-                          SecurityController, Sensor, SecurityEvent,])
+        db.create_tables([User, Subscriber,
+                          SecurityController, SecurityEvent,])
         print('Creating tables...')
         if app.debug:
             u = User.create(username='keane', password="")
@@ -31,18 +31,6 @@ def db_init():
     except OperationalError:
         pass
     db.close()
-
-
-class DeviceMapper:
-    """
-    In-memory representation of one or more devices with a relationship
-    to the driver module.
-    """
-    def __init__(self, id, name, category, devices):
-        self.id = id
-        self.name = name
-        self.category = category
-        self.devices = devices
 
 
 class BaseModel(Model):
@@ -75,21 +63,6 @@ class User(BaseModel):
         self.password = sha256_crypt.encrypt(password)
 
 
-class Device(BaseModel):
-    name = CharField(unique=True)
-    category = CharField()
-    data = CharField(default='{}')
-
-    def get_object(self):
-        """
-        Returns DeviceMapper instance of device.
-        """
-        device = None
-        # Manually build device depending on the device type
-        if self.category == 'bulb':
-            device = Bulb(host=ast.literal_eval(self.data).get('host'))
-        return DeviceMapper(self.id, self.name, self.category, [device])
-
 
 class Subscriber(BaseModel):
     endpoint = CharField(unique=True)
@@ -121,11 +94,6 @@ class SecurityController(BaseModel):
         self.state = 'disabled'
         self.save()
 
-
-class Sensor(BaseModel):
-    name = CharField(unique=True)
-    typeof = CharField()
-    key = CharField(null=True)
 
 
 class SecurityEvent(BaseModel):
