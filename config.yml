@@ -6,13 +6,11 @@ interfaces:
 
 installed_drivers:
     - !driver
-        typeof: device
         name: bulb
         module: bulb
         klass: Bulb
         interface: colormap
     - !driver
-        typeof: device
         name: motion
         module: motion
         klass: MotionController
@@ -40,3 +38,17 @@ devices:
             name: cam1
             driver: motion
             key: cam1
+            config:
+            - thread: 1
+
+actions:
+    - !action
+      name: arm
+      devices:
+      - name: cam1
+        method: start_detection
+    - !action
+      name: disable
+      devices:
+      - name: cam1
+        method: stop_detection

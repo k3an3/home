@@ -9,8 +9,9 @@ import functools
 import hashlib
 import json
 
-from modules.core.models import devices, interfaces
-from web.models import db_init, SecurityController, SecurityEvent, Subscriber, User
+from home.core.models import devices, interfaces, get_device_by_key, get_device_by_name, get_devices_by_group, get_action_by_name
+from web.models import db, db_init, SecurityController, SecurityEvent, Subscriber, User
+import home.core.utils as utils
 
 app = Flask(__name__)
 app.secret_key = '\xff\xe3\x84\xd0\xeb\x05\x1b\x89\x17\xce\xca\xaf\xdb\x8c\x13\xc0\xca\xe4'
@@ -20,6 +21,8 @@ socketio = SocketIO(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
+# TODO: remove
+sys.path.append(os.path.dirname("/home/keane/dev/home/home"))
 
 some_random_string = lambda: hashlib.sha1(os.urandom(128)).hexdigest()
 
@@ -54,12 +57,12 @@ def index():
 
 @app.route('/api/command', methods=['POST'])
 def command_api():
-    command = request.form.get('command')
     try:
-        sensor = Sensor.get(key=request.form.get('device'))
-    except Sensor.DoesNotExist:
+        device = get_device_by_key(request.form.get('device'))
+    except StopIteration:
         abort(403)
     sec = SecurityController.get()
+    command = request.form.get('command')
     if sec.state == 'armed':
         if command == 'eventstart':
             print("EVENT START")
@@ -82,7 +85,7 @@ def command_api():
                 # emit something here
             except SecurityEvent.DoesNotExist:
                 abort(412)
-    return ('', 204)
+    return '', 204
 
 
 @socketio.on('change state', namespace='/ws')
@@ -92,12 +95,15 @@ def change_state():
         disconnect()
     sec = SecurityController.get()
     if sec.state == 'disabled':
+        # Set to armed
         sec.arm()
-        mc.start_detection()
+        get_action_by_name('arm').run()
     elif sec.state == 'armed':
+        # Set to disabled
         sec.disable()
-        mc.stop_detection()
+        get_action_by_name('disable').run()
     elif sec.state == 'alert':
+        # Restore to armed
         sec.arm()
     emit('state change', {'state': sec.state}, broadcast=True)
 
@@ -120,13 +126,12 @@ def subscribe(subscriber):
 @ws_login_required
 def request_change_color(message):
     emit('push color', {"device": message['device'], "color": message['color']}, broadcast=True)
-    for bulb in devices[num(message['device'])].devices:
-        Thread(target=bulb.change_color, args=(
-            tuple(RGBfromhex(message['color'])) +
+    devices = get_devices_by_group(message['device'])
+    for device in devices:
+        Thread(target=device.dev.change_color, args=(
+            tuple(utils.RGBfromhex(message['color'])) +
             (message.get('bright', 100),)
         ))
-        bulb.change_color(*RGBfromhex(message['color']),
-                        brightness=message.get('bright', 100))
 
 
 @socketio.on('outmap', namespace="/ws")
@@ -166,7 +171,7 @@ def _db_connect():
 # This hook ensures that the connection is closed when we've finished
 # processing the request.
 @app.teardown_request
-def _db_close(exc):
+def _db_close():
     if not db.is_closed():
         db.close()
 
@@ -187,7 +192,7 @@ def generate_csrf_token():
 
 @app.after_request
 def add_header(response):
-    #response.headers['Content-Security-Policy'] = "connect-src 'self'"
+    # response.headers['Content-Security-Policy'] = "connect-src 'self'"
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response
 
@@ -197,15 +202,6 @@ app.jinja_env.globals['csrf_token'] = generate_csrf_token
 
 if __name__ == '__main__':
     db_init()
-    for device in Device.select():
-        devices.append(device.get_object())
-    devices.append(DeviceMapper(0, "Living Room", "bulb", devices=[
-        Bulb('172.16.42.203'),
-        Bulb('172.16.42.201'),
-    ]))
-    devices.append(DeviceMapper(1, "Bedroom", "bulb", devices=[
-        Bulb('192.168.1.123'),
-    ]))
     try:
         import eventlet
         eventlet.monkey_patch()

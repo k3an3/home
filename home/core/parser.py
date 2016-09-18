@@ -9,21 +9,24 @@ import os
 import sys
 import yaml
 
-from modules.core.models import drivers, devices
-
-# TODO: remove
-sys.path.append(os.path.dirname("/home/keane/dev/home/modules"))
+from home.core.models import drivers, devices, actions
 
 
 # TODO: user specified config
 with open('../../config.yml') as f:
     y = yaml.load(f)
     print("Installed drivers:")
-    for device in drivers:
-        print(device)
+    for driver in drivers:
+        print(driver)
     for group in y['devices']:
         for device in y['devices'][group]:
+            device.group = group
             devices.append(device)
     print("Active devices:")
     for device in devices:
         print(device)
+    for action in y['actions']:
+        actions.append(action)
+    print("Configured actions:")
+    for action in actions:
+        print(action.devices)

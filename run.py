@@ -2,7 +2,7 @@
 import os
 import sys
 
-from web.main import socketio, app
+from web.web import socketio, app
 
 sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 
