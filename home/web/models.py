@@ -1,12 +1,11 @@
-import ast
-import uuid
-import json
 import datetime
 
-from peewee import *
 from passlib.hash import sha256_crypt
+from peewee import SqliteDatabase, MySQLDatabase, CharField, BooleanField, ForeignKeyField, DateTimeField, \
+    OperationalError, Model
 
-from main import app
+from home.web.web import app
+
 
 # Based on configuration, use a different database.
 if app.debug:
@@ -14,11 +13,15 @@ if app.debug:
 else:
     db = MySQLDatabase(host="localhost", database="party", user="party", passwd="party")
 
+
 def db_init():
     db.connect()
     try:
-        db.create_tables([User, Subscriber,
-                          SecurityController, SecurityEvent,])
+        db.create_tables([User,
+                          Subscriber,
+                          SecurityController,
+                          SecurityEvent,
+                          ])
         print('Creating tables...')
         if app.debug:
             u = User.create(username='keane', password="")
@@ -26,7 +29,6 @@ def db_init():
             u.admin = True
             u.save()
             SecurityController.create()
-            Sensor.create(name='cam1', typeof='camera', key='cam1')
     except OperationalError:
         pass
     db.close()

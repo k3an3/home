@@ -1,17 +1,18 @@
-from flask import Flask, render_template, request, redirect, make_response, flash, abort, session, url_for
-from flask_socketio import SocketIO, emit, disconnect
-from flask_login import LoginManager, login_required, login_user, current_user, logout_user
-from pywebpush import WebPusher
-
-from threading import Thread
-import os
 import functools
 import hashlib
 import json
+import os
+import sys
+from threading import Thread
 
-from home.core.models import devices, interfaces, get_device_by_key, get_device_by_name, get_devices_by_group, get_action_by_name
-from web.models import db, db_init, SecurityController, SecurityEvent, Subscriber, User
+from flask import Flask, render_template, request, redirect, flash, abort, session, url_for
+from flask_login import LoginManager, login_required, login_user, current_user, logout_user
+from flask_socketio import SocketIO, emit, disconnect
+from pywebpush import WebPusher
+
 import home.core.utils as utils
+from home.core.models import devices, interfaces, get_device_by_key, get_devices_by_group, get_action
+from home.web.models import *
 
 app = Flask(__name__)
 app.secret_key = '\xff\xe3\x84\xd0\xeb\x05\x1b\x89\x17\xce\xca\xaf\xdb\x8c\x13\xc0\xca\xe4'
@@ -97,11 +98,11 @@ def change_state():
     if sec.state == 'disabled':
         # Set to armed
         sec.arm()
-        get_action_by_name('arm').run()
+        get_action('arm').run()
     elif sec.state == 'armed':
         # Set to disabled
         sec.disable()
-        get_action_by_name('disable').run()
+        get_action('disable').run()
     elif sec.state == 'alert':
         # Restore to armed
         sec.arm()
@@ -171,7 +172,7 @@ def _db_connect():
 # This hook ensures that the connection is closed when we've finished
 # processing the request.
 @app.teardown_request
-def _db_close():
+def _db_close(obj):
     if not db.is_closed():
         db.close()
 
