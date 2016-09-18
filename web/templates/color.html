@@ -1,0 +1,9 @@
+<h1>{{ bulb.name }}</h1>
+{% include 'colormap.html' %}
+<br><br>
+<!--<input type="range" id="slider">-->
+<input type="text" id="hex{{ bulb.id }}" oninput="updateColor();">
+<br><br>
+<button class="btn btn-secondary" onclick="clickColor('#000000');">Off</button>
+<br><br>
+<div id="preview{{ bulb.id }}" style="visibility: hidden; background-color: rgb(0, 0, 0);">&nbsp;</div>

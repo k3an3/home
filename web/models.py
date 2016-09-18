@@ -7,7 +7,6 @@ from peewee import *
 from passlib.hash import sha256_crypt
 
 from main import app
-from modules.bulb import Bulb
 
 # Based on configuration, use a different database.
 if app.debug:
@@ -63,7 +62,6 @@ class User(BaseModel):
         self.password = sha256_crypt.encrypt(password)
 
 
-
 class Subscriber(BaseModel):
     endpoint = CharField(unique=True)
     auth = CharField()
@@ -86,6 +84,10 @@ class SecurityController(BaseModel):
         self.state = 'armed'
         self.save()
 
+    def occupied(self):
+        self.state = 'occupied'
+        self.save()
+
     def alert(self):
         self.state = 'alert'
         self.save()
@@ -95,9 +97,8 @@ class SecurityController(BaseModel):
         self.save()
 
 
-
 class SecurityEvent(BaseModel):
     controller = ForeignKeyField(SecurityController, related_name='events')
-    sensor = ForeignKeyField(Sensor, related_name='events')
+    device = CharField()
     in_progress = BooleanField(default=True)
     datetime = DateTimeField(default=datetime.datetime.now)

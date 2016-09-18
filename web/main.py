@@ -9,10 +9,8 @@ import functools
 import hashlib
 import json
 
-from modules.bulb import Bulb
-from modules.utils import RGBfromhex, num
-from modules.motion import MotionController
-from models import *
+from modules.core.models import devices, interfaces
+from web.models import db_init, SecurityController, SecurityEvent, Subscriber, User
 
 app = Flask(__name__)
 app.secret_key = '\xff\xe3\x84\xd0\xeb\x05\x1b\x89\x17\xce\xca\xaf\xdb\x8c\x13\xc0\xca\xe4'
@@ -21,12 +19,7 @@ app.debug = True
 socketio = SocketIO(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
-devices = []
-mc = MotionController(1)
 
-# Temporary, until we allow multiple instances of a thing
-b = Bulb()
-# End Temporary
 
 some_random_string = lambda: hashlib.sha1(os.urandom(128)).hexdigest()
 
@@ -35,7 +28,6 @@ def ws_login_required(f):
     @functools.wraps(f)
     def wrapped(*args, **kwargs):
         if not current_user.is_authenticated:
-            print("D/C WS attempt")
             disconnect()
         else:
             return f(*args, **kwargs)
@@ -43,31 +35,25 @@ def ws_login_required(f):
 
 
 @app.route('/', methods=['GET', 'POST'])
-def index(*args, **kwargs):
+def index():
     sec = SecurityController.get()
-    bulbs = [bulb for bulb in devices if bulb.category == 'bulb']
     events = sec.events
-    return render_template('index.html', bulbs=bulbs,
-                                         devices=devices,
-                                         sec=sec,
-                                         events=events,
-                                         )
-
-
-### TEST ###
-@app.route('/jarvis_test')
-def jarvis(*args, **kwargs):
-    return render_template('jarvis.html')
-
-
-@app.route('/jarvis')
-def altjarvis(*args, **kwargs):
-    return render_template('altjarvis.html')
-###
+    interface_dict = {}
+    for i in interfaces:
+        interface_dict[i] = []
+    for d in devices:
+        interface_dict[d.device.interface] = d
+    return render_template('index.html',
+                           interfaces=interfaces,
+                           interface_dict=interface_dict,
+                           devices=devices,
+                           sec=sec,
+                           events=events,
+                           )
 
 
 @app.route('/api/command', methods=['POST'])
-def command():
+def command_api():
     command = request.form.get('command')
     try:
         sensor = Sensor.get(key=request.form.get('device'))
@@ -78,7 +64,7 @@ def command():
         if command == 'eventstart':
             print("EVENT START")
             sec.alert()
-            SecurityEvent.create(controller=sec, sensor=sensor)
+            SecurityEvent.create(controller=sec, device=device)
             socketio.emit('state change', {'state': sec.state}, namespace='/ws')
             for subscriber in Subscriber.select():
                 try:
@@ -90,7 +76,7 @@ def command():
         elif command == 'eventend':
             print("EVENT END")
             try:
-                event = SecurityEvent.get(controller=sec, sensor=sensor)
+                event = SecurityEvent.get(controller=sec, device=device)
                 event.in_progress = False
                 event.save()
                 # emit something here
@@ -114,24 +100,6 @@ def change_state():
     elif sec.state == 'alert':
         sec.arm()
     emit('state change', {'state': sec.state}, broadcast=True)
-
-
-### TEST ###
-@socketio.on('send transcript', namespace='/jarvis')
-def test_jarvis(transcript):
-    if "off" in transcript:
-        b.change_color(0, 0, 0)
-    elif "on" in transcript or \
-            "white" in transcript:
-        b.change_color(255, 255, 255)
-    elif "red" in transcript:
-        b.change_color(255, 0, 0)
-    elif "green" in transcript:
-        b.change_color(0, 255, 0)
-    elif "blue" in transcript:
-        b.change_color(0, 0, 255)
-    emit('return transcript', transcript)
-###
 
 
 @socketio.on('subscribe', namespace='/ws')

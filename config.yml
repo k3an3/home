@@ -1,12 +1,18 @@
 ---
+interfaces:
+    - !interface
+        name: Lights
+        template: color.html
+
 installed_drivers:
     - !driver
         typeof: device
         name: bulb
         module: bulb
         klass: Bulb
+        interface: colormap
     - !driver
-        typeof: sensor
+        typeof: device
         name: motion
         module: motion
         klass: MotionController
@@ -30,7 +36,7 @@ devices:
             driver: bulb
             config:
             - host: 192.168.1.123
-        - !sensor
+        - !device
             name: cam1
             driver: motion
             key: cam1

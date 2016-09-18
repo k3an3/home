@@ -9,10 +9,11 @@ import os
 import sys
 import yaml
 
+from modules.core.models import drivers, devices
+
 # TODO: remove
 sys.path.append(os.path.dirname("/home/keane/dev/home/modules"))
 
-from modules.core.models import drivers, devices
 
 # TODO: user specified config
 with open('../../config.yml') as f:
