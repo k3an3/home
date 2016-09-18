@@ -11,7 +11,7 @@ import yaml
 # from home.iot import *
 
 # To be populated by the parser
-drivers = {}
+drivers = []
 devices = []
 interfaces = {}
 actions = []
@@ -62,6 +62,10 @@ def get_action(action_name):
     return next(action for action in actions if action.name == action_name)
 
 
+def get_driver(driver_name):
+    return next(driver for driver in drivers if driver == driver_name)
+
+
 class YAMLObject(yaml.YAMLObject):
     def __setstate__(self, kwargs):
         self.__init__(**kwargs)
@@ -76,12 +80,12 @@ class Device(YAMLObject):
     def __init__(self, name, driver, config=None, key=None, group=None):
         self.name = name
         self.key = key
-        self.driver = driver
+        self.driver = get_driver(driver)
         self.group = group
         if driver not in drivers:
             raise DriverNotInstalledError()
         # retrieve the class for driver
-        dev = drivers[driver]
+        dev = self.driver.klass
         if config:
             config_d = {}
             for d in config:
@@ -97,7 +101,7 @@ class Driver(YAMLObject):
     def __init__(self, name, module, klass, interface=None):
         self.name = name
         self.interface = interface
-        drivers[name] = class_from_name(module, klass)
+        self.klass = class_from_name(module, klass)
 
 
 class Action(YAMLObject):

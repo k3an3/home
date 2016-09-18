@@ -2,10 +2,13 @@
 import os
 import sys
 
+from home.web.models import db_init
 from home.web.web import socketio, app
+from home.core.parser import parse
 
 sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 
+db_init()
 try:
     import eventlet
     eventlet.monkey_patch()
@@ -25,4 +28,5 @@ except ImportError:
         print('Using threading')
         create_thread_func = lambda f: threading.Thread(target=f)
         start_thread_func = lambda t: t.start()
+parse(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'config.yml'))
 socketio.run(app, debug=True)

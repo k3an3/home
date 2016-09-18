@@ -46,7 +46,8 @@ def index():
     for i in interfaces:
         interface_dict[i] = []
     for d in devices:
-        interface_dict[d.device.interface] = d
+        print(d.__dict__)
+        interface_dict[d.driver.interface] = d
     return render_template('index.html',
                            interfaces=interfaces,
                            interface_dict=interface_dict,

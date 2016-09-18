@@ -1,14 +1,14 @@
 import datetime
+import os
 
 from passlib.hash import sha256_crypt
 from peewee import SqliteDatabase, MySQLDatabase, CharField, BooleanField, ForeignKeyField, DateTimeField, \
     OperationalError, Model
 
-from home.web.web import app
-
 
 # Based on configuration, use a different database.
-if app.debug:
+# TODO: fix to use app.debug
+if True:
     db = SqliteDatabase('app.db')
 else:
     db = MySQLDatabase(host="localhost", database="party", user="party", passwd="party")
@@ -23,7 +23,8 @@ def db_init():
                           SecurityEvent,
                           ])
         print('Creating tables...')
-        if app.debug:
+        # TODO: fix to use app.debug
+        if True:
             u = User.create(username='keane', password="")
             u.set_password('root')
             u.admin = True
