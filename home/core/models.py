@@ -4,13 +4,10 @@ models.py
 
 Contains classes to represent objects created by the parser.
 """
-import importlib
-import sys
 import yaml
 
-# from home.iot import *
+from home.core.utils import class_from_name, method_from_name, get_device, get_driver
 
-# To be populated by the parser
 drivers = []
 devices = []
 interfaces = {}
@@ -27,43 +24,6 @@ class DriverNotInstalledError(YAMLConfigParseError):
 
 class DriverNotFoundError(YAMLConfigParseError):
     pass
-
-
-def class_from_name(module_name, class_name):
-    try:
-        return getattr(importlib.import_module(
-            'home.iot.' + module_name),
-            class_name
-        )
-    except ImportError:
-        raise DriverNotFoundError()
-
-
-def method_from_name(klass, method_name):
-    try:
-        return getattr(klass, method_name)
-    except AttributeError:
-        raise NotImplementedError()
-
-
-def get_device_by_key(key):
-    return next(device for device in devices if device.key == key)
-
-
-def get_device(name):
-    return next(device for device in devices if device.name == name)
-
-
-def get_devices_by_group(group_name):
-    return (device for device in devices if device.group == group_name)
-
-
-def get_action(action_name):
-    return next(action for action in actions if action.name == action_name)
-
-
-def get_driver(driver_name):
-    return next(driver for driver in drivers if driver == driver_name)
 
 
 class YAMLObject(yaml.YAMLObject):
