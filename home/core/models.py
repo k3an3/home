@@ -61,7 +61,6 @@ def get_action(action_name):
 
 
 def get_driver(driver_name):
-    print(drivers)
     return next(driver for driver in drivers if driver.name == driver_name)
 
 

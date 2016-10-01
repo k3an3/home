@@ -10,7 +10,7 @@ from flask_socketio import SocketIO, emit, disconnect
 from pywebpush import WebPusher
 
 import home.core.utils as utils
-from home.core.models import devices, interfaces, drivers, get_device_by_key, get_devices_by_group, get_action
+from home.core.models import devices, interfaces, get_device_by_key, get_devices_by_group, get_action
 from home.web.models import *
 
 app = Flask(__name__)
@@ -45,8 +45,9 @@ def index():
     for i in interfaces:
         interface_dict[i] = []
     for d in devices:
-        print(d.__dict__)
-        interface_dict[d.driver.interface] = d
+        if d.driver.interface:
+            interface_dict[d.driver.interface].append(d)
+    print(interface_dict)
     return render_template('index.html',
                            interfaces=interfaces,
                            interface_dict=interface_dict,

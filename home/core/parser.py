@@ -25,7 +25,7 @@ def parse(config):
         print("Active devices:")
         for device in devices:
             device.setup()
-            print(device.__dict__)
+            print(device)
         for action in y['actions']:
             actions.append(action)
         print("Configured actions:")

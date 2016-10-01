@@ -1,7 +1,7 @@
 ---
 interfaces:
     - !interface
-        name: Lights
+        name: colormap
         template: color.html
 
 installed_drivers:
