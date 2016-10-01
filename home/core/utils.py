@@ -4,10 +4,7 @@ utils.py
 
 This module contains various utilities.
 """
-import importlib
 import re
-
-from home.core.models import DriverNotFoundError, devices, actions, drivers
 
 
 def num(n):
@@ -40,52 +37,3 @@ def RGBfromhex(color_hex):
         green = int(color_hex[2:4], 16)
         blue = int(color_hex[4:6], 16)
     return red, green, blue
-
-
-def class_from_name(module_name, class_name):
-    """
-    Given a module name and class name, return a class.
-    :param module_name: Module name to import.
-    :param class_name: Class name to find in the module.
-    :return: The class object.
-    """
-    try:
-        return getattr(importlib.import_module(
-            'home.iot.' + module_name),
-            class_name
-        )
-    except ImportError:
-        raise DriverNotFoundError()
-
-
-def method_from_name(klass, method_name):
-    """
-    Given an imported class, return the given method pointer.
-    :param klass: An imported class containing the method.
-    :param method_name: The method name to find.
-    :return: The method pointer
-    """
-    try:
-        return getattr(klass, method_name)
-    except AttributeError:
-        raise NotImplementedError()
-
-
-def get_device_by_key(key):
-    return next(device for device in devices if device.key == key)
-
-
-def get_device(name):
-    return next(device for device in devices if device.name == name)
-
-
-def get_devices_by_group(group_name):
-    return (device for device in devices if device.group == group_name)
-
-
-def get_action(action_name):
-    return next(action for action in actions if action.name == action_name)
-
-
-def get_driver(driver_name):
-    return next(driver for driver in drivers if driver == driver_name)

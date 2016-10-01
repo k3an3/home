@@ -1,7 +1,6 @@
 import functools
 import hashlib
 import json
-import os
 import sys
 from threading import Thread
 
@@ -11,8 +10,7 @@ from flask_socketio import SocketIO, emit, disconnect
 from pywebpush import WebPusher
 
 import home.core.utils as utils
-from home.core.models import devices, interfaces, get_devices_by_group, get_action
-from home.core.utils import get_device_by_key, get_devices_by_group, get_action
+from home.core.models import devices, interfaces, drivers, get_device_by_key, get_devices_by_group, get_action
 from home.web.models import *
 
 app = Flask(__name__)

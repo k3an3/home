@@ -5,8 +5,6 @@ parser.py
 
 Parses YAML configuration files.
 """
-import os
-import sys
 import yaml
 
 from home.core.models import drivers, devices, actions
@@ -26,7 +24,8 @@ def parse(config):
                 devices.append(device)
         print("Active devices:")
         for device in devices:
-            print(device)
+            device.setup()
+            print(device.__dict__)
         for action in y['actions']:
             actions.append(action)
         print("Configured actions:")
