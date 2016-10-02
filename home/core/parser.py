@@ -7,16 +7,19 @@ Parses YAML configuration files.
 """
 import yaml
 
-from home.core.models import drivers, devices, actions
+from home.core.models import drivers, devices, actions, interfaces
 
 
 def parse(config):
     with open(config) as f:
         y = yaml.load(f)
+        for interface in y['interfaces']:
+            interfaces.append(interface)
         print("Installed drivers:")
         for driver in y['installed_drivers']:
             drivers.append(driver)
         for driver in drivers:
+            driver.setup()
             print(driver)
         for group in y['devices']:
             for device in y['devices'][group]:

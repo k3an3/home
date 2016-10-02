@@ -79,8 +79,14 @@ body {
                             <li><a href="#home">Home</a></li>
                             {% if current_user.is_authenticated %}
                             <li class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Lights<span class="caret"></span></a>
+                                {% for interface in interfaces %}
+                                    <script>alert('{{ interface_dict }}')</script>
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ interface.friendly_name }}<span class="caret"></span></a>
                                 <ul class="dropdown-menu">
+                                    {% for device in interface_dict[interface] %}
+                                        <script>alert('{{ interface }}')</script>
+                                        <li><a href="#{{ device.name }}">{{ device.name }}</a></li>
+                                    {%  endfor %}
                                     {% if bulbs %}
                                     <li class="dropdown-header">Bulbs</li>
                                     {% for bulb in bulbs %}
@@ -104,6 +110,7 @@ body {
                                     <li><a href="#">One more separated link</a></li>
                                     {% endif %}
                                 </ul>
+                                {% endfor %}
                                 {% if current_user.admin %}
                                 <li><a href="#security">Security</a></li>
                                 <li><a href="#admin">Admin</a></li>

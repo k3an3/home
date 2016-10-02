@@ -11,7 +11,7 @@ import yaml
 
 drivers = []
 devices = []
-interfaces = {}
+interfaces = []
 actions = []
 
 
@@ -62,6 +62,10 @@ def get_action(action_name):
 
 def get_driver(driver_name):
     return next(driver for driver in drivers if driver.name == driver_name)
+
+
+def get_interface(interface_name):
+    return next(interface for interface in interfaces if interface.name == interface_name)
 
 
 class YAMLConfigParseError(Exception):
@@ -115,6 +119,10 @@ class Driver(YAMLObject):
         self.interface = interface
         self.klass = class_from_name(module, klass)
 
+    def setup(self):
+        if self.interface:
+            self.interface = get_interface(self.interface)
+
 
 class Action(YAMLObject):
     yaml_tag = '!action'
@@ -133,9 +141,10 @@ class Action(YAMLObject):
 class Interface(YAMLObject):
     yaml_tag = '!interface'
 
-    def __init__(self, name, template):
+    def __init__(self, name, friendly_name, template):
         self.name = name
-        interfaces[name] = template
+        self.friendly_name = friendly_name
+        self.template = template
 
 
 yaml.add_path_resolver('!device', ['Device'], dict)

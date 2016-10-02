@@ -43,11 +43,11 @@ def index():
     events = sec.events
     interface_dict = {}
     for i in interfaces:
-        interface_dict[i] = []
+        interface_dict[i.name] = []
     for d in devices:
         if d.driver.interface:
-            interface_dict[d.driver.interface].append(d)
-    print(interface_dict)
+            interface_dict[d.driver.interface.name].append(d)
+        print(interface_dict)
     return render_template('index.html',
                            interfaces=interfaces,
                            interface_dict=interface_dict,
