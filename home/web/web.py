@@ -4,6 +4,7 @@ import json
 import sys
 from threading import Thread
 
+import subprocess
 from flask import Flask, render_template, request, redirect, flash, abort, session, url_for
 from flask_login import LoginManager, login_required, login_user, current_user, logout_user
 from flask_socketio import SocketIO, emit, disconnect
@@ -20,6 +21,11 @@ app.debug = True
 socketio = SocketIO(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
+
+try:
+    VERSION = 'v' + subprocess.check_output(['git', 'describe', '--tags', 'HEAD']).decode('UTF-8')
+except:
+    VERSION = 'unknown'
 
 # TODO: remove
 sys.path.append(os.path.dirname("/home/keane/dev/home/home"))
@@ -54,6 +60,7 @@ def index():
                            devices=devices,
                            sec=sec,
                            events=events,
+                           version=VERSION,
                            )
 
 

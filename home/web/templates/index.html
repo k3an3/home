@@ -80,11 +80,9 @@ body {
                             {% if current_user.is_authenticated %}
                             <li class="dropdown">
                                 {% for interface in interfaces %}
-                                    <script>alert('{{ interface_dict }}')</script>
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ interface.friendly_name }}<span class="caret"></span></a>
                                 <ul class="dropdown-menu">
                                     {% for device in interface_dict[interface] %}
-                                        <script>alert('{{ interface }}')</script>
                                         <li><a href="#{{ device.name }}">{{ device.name }}</a></li>
                                     {%  endfor %}
                                     {% if bulbs %}
@@ -121,6 +119,7 @@ body {
                         <ul class="nav navbar-nav navbar-right">
                             {% if current_user.is_authenticated %}
                             <li><a id="status">Status:</a></li>
+                            <li><a>{{ version }}</a></li>
                             <li><a href="#logout" id="logout">Logout {{ current_user.username }}</a></li>
                             {% else %}
                             <li><a href="#login">Login</a></li>
