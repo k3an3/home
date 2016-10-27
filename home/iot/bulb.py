@@ -63,12 +63,17 @@ class Bulb:
         blue = int(blue * brightness / 100)
         white = int(white * brightness / 100)
         color_hex = prepare_hex(red) + prepare_hex(green) + prepare_hex(blue)
+        if white:
+            color_mode = '0f'
+        else:
+            color_mode = 'f0'
 
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             s.connect((self.host, 5577))
             data = bytearray.fromhex('31' + color_hex
-                                     + prepare_hex(white) + '0f0f')
+                                     + prepare_hex(white)
+                                     + color_mode + '0f')
             data.append(sum(data) % 256)
             s.send(data)
         except Exception:
