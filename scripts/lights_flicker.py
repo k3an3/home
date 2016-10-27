@@ -1,8 +1,13 @@
+#!/usr/bin/env python3
 from time import sleep
 import random
 import threading
+import os
+import sys
 
-from bulb import Bulb
+sys.path.append(os.path.dirname('../'))
+
+from home.iot.bulb import Bulb
 
 
 b = Bulb(host='172.16.42.201')
