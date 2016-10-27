@@ -1,349 +1,365 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <meta name="description" content="">
-        <meta name="author" content="">
-        <link rel="icon" href="/static/favicon.ico">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="/static/favicon.ico">
 
-        <title>
-            {% block title %}
-            {% endblock %}
-        </title>
+    <title>
+        {% block title %}
+        {% endblock %}
+    </title>
 
-        <!-- Bootstrap core CSS -->
-        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/7.1.0/css/bootstrap-slider.min.css">
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
-        <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/7.1.0/bootstrap-slider.min.js"></script>
-        <link rel="manifest" href="/static/manifest.json">
-    </head>
-    <style>
-body {
-    padding-bottom: 2rem;
-}
-.form-signin {
-    max-width: 330px;
-    padding: 15px;
-    margin: 0 auto;
-}
-.form-signin .form-signin-heading,
-.form-signin .checkbox {
-    margin-bottom: 10px;
-}
-.form-signin .checkbox {
-    font-weight: normal;
-}
-.form-signin .form-control {
-    position: relative;
-    height: auto;
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
-    padding: 10px;
-    font-size: 16px;
-}
-.form-signin .form-control:focus {
-    z-index: 2;
-}
-.form-signin input[type="email"] {
-    margin-bottom: -1px;
-    border-bottom-right-radius: 0;
-    border-bottom-left-radius: 0;
-}
-.form-signin input[type="password"] {
-    margin-bottom: 10px;
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-}
-    </style>
-    <body>
-        <div class="container">
-            <!-- Static navbar -->
-            <nav class="navbar navbar-default">
-                <div class="container-fluid">
-                    <div class="navbar-header">
-                        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-                            <span class="sr-only">Toggle navigation</span>
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
-                        </button>
-                        <a class="navbar-brand" href="/">Home</a>
-                    </div>
-                    <div id="navbar" class="navbar-collapse collapse">
-                        <ul class="nav navbar-nav">
-                            <li><a href="#home">Home</a></li>
-                            {% if current_user.is_authenticated %}
-                            <li class="dropdown">
-                                {% for interface, devices in interfaces %}
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ interface.friendly_name }}<span class="caret"></span></a>
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/7.1.0/css/bootstrap-slider.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/7.1.0/bootstrap-slider.min.js"></script>
+    <link rel="manifest" href="/static/manifest.json">
+</head>
+<style>
+    body {
+        padding-bottom: 2rem;
+    }
+
+    .form-signin {
+        max-width: 330px;
+        padding: 15px;
+        margin: 0 auto;
+    }
+
+    .form-signin .form-signin-heading,
+    .form-signin .checkbox {
+        margin-bottom: 10px;
+    }
+
+    .form-signin .checkbox {
+        font-weight: normal;
+    }
+
+    .form-signin .form-control {
+        position: relative;
+        height: auto;
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+        padding: 10px;
+        font-size: 16px;
+    }
+
+    .form-signin .form-control:focus {
+        z-index: 2;
+    }
+
+    .form-signin input[type="email"] {
+        margin-bottom: -1px;
+        border-bottom-right-radius: 0;
+        border-bottom-left-radius: 0;
+    }
+
+    .form-signin input[type="password"] {
+        margin-bottom: 10px;
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+    }
+</style>
+<body>
+<div class="container">
+    <!-- Static navbar -->
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                        aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">Home</a>
+            </div>
+            <div id="navbar" class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li><a href="#home">Home</a></li>
+                    {% if current_user.is_authenticated %}
+                        <li class="dropdown">
+                            {% for interface, devices in interfaces %}
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
+                                   aria-haspopup="true" aria-expanded="false">{{ interface.friendly_name }}<span
+                                        class="caret"></span></a>
                                 <ul class="dropdown-menu">
                                     {% for device in devices %}
-                                        <li><a href="#{{ device.name }}">{{ device.name }}</a></li>
-                                    {%  endfor %}
+                                        <li><a href="#{{ device.uuid }}">{{ device.name }}</a></li>
+                                    {% endfor %}
                                     {#
                                     <li role="separator" class="divider"></li>
                                     <li class="dropdown-header">Other Group</li>
                                 #}
                                 </ul>
-                                {% endfor %}
-                                {% if current_user.admin %}
+                            {% endfor %}
+                            {% if current_user.admin %}
                                 <li><a href="#security">Security</a></li>
                                 <li><a href="#admin">Admin</a></li>
-                                {% endif %}
-                            </li>
                             {% endif %}
-                        </ul>
-                        <ul class="nav navbar-nav navbar-right">
-                            {% if current_user.is_authenticated %}
-                            <li><a id="status">Status:</a></li>
-                            <li><a>{{ version }}</a></li>
-                            <li><a href="#logout" id="logout">Logout {{ current_user.username }}</a></li>
-                            {% else %}
-                            <li><a href="#login">Login</a></li>
-                            {% endif %}
-                        </ul>
-                    </div><!--/.nav-collapse -->
-                </div><!--/.container-fluid -->
-            </nav>
-            {% with messages = get_flashed_messages() %}
-            {% if messages %}
+                        </li>
+                    {% endif %}
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    {% if current_user.is_authenticated %}
+                        <li><a id="status">Status:</a></li>
+                        <li><a>{{ version }}</a></li>
+                        <li><a href="#logout" id="logout">Logout {{ current_user.username }}</a></li>
+                    {% else %}
+                        <li><a href="#login">Login</a></li>
+                    {% endif %}
+                </ul>
+            </div><!--/.nav-collapse -->
+        </div><!--/.container-fluid -->
+    </nav>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
             <div style="text-align: center;">
                 <span id="messages" class="alert alert-warning">
                     {% for message in messages %}
-                    {{ message }}
+                        {{ message }}
                     {% endfor %}
                 </span>
             </div>
-            {% else %}
+        {% else %}
             <div style="text-align: center;" hidden>
                 <span id="messages" class="alert alert-warning">
                 </span>
             </div>
-            {% endif %}
-            {% endwith %}
+        {% endif %}
+    {% endwith %}
 
-            <div class="tab-content">
-                <div id="home" class="tab-pane fade in active" style="text-align: center;">
-                    <h1>Welcome Home</h1>
-                </div>
-                {% if current_user.is_authenticated %}
-                    {% for device in devices %}
-                        <div id="{{ device.name }}" class="tab-pane fade in" style="text-align: center;">
-                            <h1>{{ device.name }}</h1>
-                    {% include 'colormap.html' %}
-                    <br><br>
-                    <!--<input type="range" id="slider">-->
-                            <input type="text" id="hex{{ device.name }}" oninput="updateColor();">
-                    <br><br>
-                    <button class="btn btn-secondary" onclick="clickColor('#000000');">Off</button>
-                    <br><br>
-                            <div id="preview{{ device.name }}"
-                                 style="visibility: hidden; background-color: rgb(0, 0, 0);">&nbsp;</div>
-                </div>
-                {% endfor %}
-                {% endif %}
-                <div id="login" class="tab-pane fade in">
-
-                    <form class="form-signin" method="POST" action="/login">
-                        <h2 class="form-signin-heading">Please sign in</h2>
-                        <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
-                        <label for="inputEmail" class="sr-only">Email address</label>
-                        <input type="text" id="inputEmail" class="form-control" placeholder="Username" name="username" required autofocus>
-                        <label for="inputPassword" class="sr-only">Password</label>
-                        <input type="password" id="inputPassword" class="form-control" placeholder="Password" name="password" required>
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" value="remember-me"> Remember me
-                            </label>
-                        </div>
-                        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
-                    </form>
-
-                </div>
-                {% if current_user.admin %}
-                <div id="security" class="tab-pane fade in danger">
-                    <div class="jumbotron" style="background-color:{% if sec.state == 'armed' %}green{% elif sec.state == 'alert' %}red{% else %}{% endif %}; color: {% if sec.state == 'armed' %}white{% elif sec.state == 'alert' %}white{% else %}{% endif %};">
-                        <h1>Status: <span id="state">{{ sec.state }}</span></h1>
-                        <button id="statusbutton" onclick="changeState()" class="btn btn-{% if sec.state == 'disabled' %}success">Enable{% elif sec.state == 'armed' %}danger">Disarm{% elif sec.state == 'alert' %}warning">Clear{% endif %}</button>
-                    </div>
-                    <div class="col-md-8">
-                        {% if events %}
-                        {% for event in events %}
-                        {{ event.datetime }} {{ event.sensor }}
-                        {% endfor %}
-                        {% else %}
-                        No events yet. Yay!
-                        {% endif %}
-                    </div>
-                </div>
-                <div id="admin" class="tab-pane fade in">
-                    <div class="col-md-6">
-                        <div class="panel panel-primary">
-                            <div class="panel-heading">
-                                <h3 class="panel-title">Devices</h3>
-                            </div>
-                            {% for device in devices %}
-                            <div class="panel-body">
-                                <strong>id=</strong>{{ device.id }}
-                                <strong>name=</strong>{{ device.name }}
-                                <strong>category=</strong>{{ device.category }}
-                                <strong>devices=</strong>{% for device_ in device.devices %}
-                                {{ device_.data }}{% endfor %}
-                                {#count={{ device.devices|length }} #}
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="panel">
-                            <form id="device_form">
-                                <input type="hidden" id="id">
-                                Name:
-                                <input class="form-control" id="name">
-                                Category:
-                                <input class="form-control" id="category">
-                                Data (Python3 dictionary):
-                                <input class="form-control" id="data">
-                                <br>
-                                <input class="btn btn-primary" value="Submit" onclick="editDevice()">
-                            </form>
-                        </div>
-                    </div>
+    <div class="tab-content">
+        <div id="home" class="tab-pane fade in active" style="text-align: center;">
+            <h1>Welcome Home</h1>
+        </div>
+        {% if current_user.is_authenticated %}
+            {% for device in devices %}
+                <div id="{{ device.uuid }}" class="tab-pane fade in" style="text-align: center;">
+                    {% if device.driver.interface.template %}
+                        {% include device.driver.interface.template %}
                     {% endif %}
                 </div>
-                {% if current_user.is_authenticated %}
-                <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
-                <script src="static/check.js"></script>
-                <script>
-var ws = io.connect('//' + document.domain + ':' + location.port + '/ws');
-var last = "#FFFFFF"
-var bright = 100;
-var target = "0";
+            {% endfor %}
+        {% endif %}
+        <div id="login" class="tab-pane fade in">
 
-function editDevice() {
-    ws.emit('admin', {action: 'add', id: $('#id').val(), name: $('#name').val(), category: $('#category').val(), data: $('#data').val()});
-}
+            <form class="form-signin" method="POST" action="/login">
+                <h2 class="form-signin-heading">Please sign in</h2>
+                <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
+                <label for="inputEmail" class="sr-only">Email address</label>
+                <input type="text" id="inputEmail" class="form-control" placeholder="Username" name="username" required
+                       autofocus>
+                <label for="inputPassword" class="sr-only">Password</label>
+                <input type="password" id="inputPassword" class="form-control" placeholder="Password" name="password"
+                       required>
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" value="remember-me"> Remember me
+                    </label>
+                </div>
+                <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+            </form>
 
-function mouseOverColor(hex) {
-    ws.emit('change color', {color: hex, bright: bright, device: target});
-    $("#preview").css('background-color', hex);
-    $("#preview").css('visibility', 'visible');
-    $("#hex").val(hex);
-    return false;
-}
+        </div>
+        {% if current_user.admin %}
+            <div id="security" class="tab-pane fade in danger">
+                <div class="jumbotron"
+                     style="background-color:{% if sec.state == 'armed' %}green{% elif sec.state == 'alert' %}red{% else %}{% endif %}; color: {% if sec.state == 'armed' %}white{% elif sec.state == 'alert' %}white{% else %}{% endif %};">
+                    <h1>Status: <span id="state">{{ sec.state }}</span></h1>
+                    <button id="statusbutton" onclick="changeState()"
+                            class="btn btn-{% if sec.state == 'disabled' %}success">
+                                Enable{% elif sec.state == 'armed' %}danger">Disarm{% elif sec.state == 'alert' %}
+                                warning">Clear{% endif %}</button>
+                </div>
+                <div class="col-md-8">
+                    {% if events %}
+                        {% for event in events %}
+                            {{ event.datetime }} {{ event.sensor }}
+                        {% endfor %}
+                    {% else %}
+                        No events yet. Yay!
+                    {% endif %}
+                </div>
+            </div>
+            <div id="admin" class="tab-pane fade in">
+            <div class="col-md-6">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Devices</h3>
+                    </div>
+                    {% for device in devices %}
+                        <div class="panel-body">
+                            <strong>id=</strong>{{ device.id }}
+                            <strong>name=</strong>{{ device.uuid }}
+                            <strong>category=</strong>{{ device.category }}
+                            <strong>devices=</strong>{% for device_ in device.devices %}
+                            {{ device_.data }}{% endfor %}
+                            {#count={{ device.devices|length }} #}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="panel">
+                    <form id="device_form">
+                        <input type="hidden" id="id">
+                        Name:
+                        <input class="form-control" id="name">
+                        Category:
+                        <input class="form-control" id="category">
+                        Data (Python3 dictionary):
+                        <input class="form-control" id="data">
+                        <br>
+                        <input class="btn btn-primary" value="Submit" onclick="editDevice()">
+                    </form>
+                </div>
+            </div>
+        {% endif %}
+        </div>
+        {% if current_user.is_authenticated %}
+            <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+            <script src="static/check.js"></script>
+            <script>
+                var ws = io.connect('//' + document.domain + ':' + location.port + '/ws');
+                var last = "#FFFFFF"
+                var bright = 100;
+                var target = "0";
 
-function clickColor(hex) {
-    mouseOverColor(hex);
-    last = hex;
-    return false;
-}
+                function editDevice() {
+                    ws.emit('admin', {
+                        action: 'add',
+                        id: $('#id').val(),
+                        name: $('#name').val(),
+                        category: $('#category').val(),
+                        data: $('#data').val()
+                    });
+                }
 
-function updateColor() {
-    mouseOverColor($("#hex").val());
-    last = $("#hex").val();
-    return false;
-}
+                function mouseOverColor(hex) {
+                    ws.emit('change color', {color: hex, bright: bright, device: target});
+                    $("#preview").css('background-color', hex);
+                    $("#preview").css('visibility', 'visible');
+                    $("#hex").val(hex);
+                    return false;
+                }
 
-function mouseOutMap() {
-    ws.emit('change color', {color: last, bright: bright, device: target});
-    ws.emit('outmap', {color: last, bright: bright, device: target});
-    $("#hex").val(last);
-    $("#preview").css('visibility', 'hidden');
-    return false;
-}
+                function clickColor(hex) {
+                    mouseOverColor(hex);
+                    last = hex;
+                    return false;
+                }
 
-function changeState() {
-    ws.emit('change state');
-}
+                function updateColor() {
+                    mouseOverColor($("#hex").val());
+                    last = $("#hex").val();
+                    return false;
+                }
 
-ws.on('push color', function(data) {
-    console.log(data.device==target);
-    if (data.device == target) {
-        $("#preview" + target).css('background-color', data.color);
-        $("#preview" + target).css('visibility', 'visible');
-        $("#hex" + target).val(data.color);
-    }
-});
+                function mouseOutMap() {
+                    ws.emit('change color', {color: last, bright: bright, device: target});
+                    ws.emit('outmap', {color: last, bright: bright, device: target});
+                    $("#hex").val(last);
+                    $("#preview").css('visibility', 'hidden');
+                    return false;
+                }
 
-$('#slider').slider();
-$("#slider").on("change", function(){
-    bright = $('#slider').val() * 10;
-    ws.emit('change color', {color: last, bright: bright});
-});
+                function changeState() {
+                    ws.emit('change state');
+                }
 
-ws.on('disconnect', function() {
-    $('#status').html('Status: <span style="color:red">Disconnected</span>');
-});
+                ws.on('push color', function (data) {
+                    console.log(data.device == target);
+                    if (data.device == target) {
+                        $("#preview" + target).css('background-color', data.color);
+                        $("#preview" + target).css('visibility', 'visible');
+                        $("#hex" + target).val(data.color);
+                    }
+                });
 
-ws.on('connect', function() {
-    $('#status').html('Status: <span style="color:green">Connected</span>');
-});
+                $('#slider').slider();
+                $("#slider").on("change", function () {
+                    bright = $('#slider').val() * 10;
+                    ws.emit('change color', {color: last, bright: bright});
+                });
 
-ws.on('preview reset', function(msg) {
-    $("#hex").val(msg);
-    $("#preview").css('visibility', 'hidden');
-});
+                ws.on('disconnect', function () {
+                    $('#status').html('Status: <span style="color:red">Disconnected</span>');
+                });
 
-$('#logout').click(function() {
-    document.location = "/logout";
-});
+                ws.on('connect', function () {
+                    $('#status').html('Status: <span style="color:green">Connected</span>');
+                });
 
-ws.on('message', function(data) {
-    $('#messages').html(data);
-    $("#messages").css('visibility', 'visible');
-    $('#messages').fadeIn();
-    alert("Please refresh to update devices.")
-});
+                ws.on('preview reset', function (msg) {
+                    $("#hex").val(msg);
+                    $("#preview").css('visibility', 'hidden');
+                });
 
-ws.on('state change', function(data) {
-    var bg;
-    var color;
-    var state = $('#state');
-    var button = $('#statusbutton');
+                $('#logout').click(function () {
+                    document.location = "/logout";
+                });
 
-    if (data.state == 'alert') {
-        bg = 'red';
-        color = 'white';
-        state.html('alert');
-        button.html('Clear');
-        button.removeAttr('class').addClass('btn btn-warning');
-    } else if (data.state == 'armed') {
-        bg = 'green'
-            color = 'white';
-        state.html('armed');
-        button.html('Disable');
-        button.removeAttr('class').addClass('btn btn-danger');
-    } else {
-        bg = '';
-        color = 'black';
-        state.html('disabled');
-        button.html('Enable');
-        button.removeAttr('class').addClass('btn btn-success');
-    }
-    $('.jumbotron').css('background-color', bg);
-    $('.jumbotron').css('color', color);
-});
+                ws.on('message', function (data) {
+                    $('#messages').html(data);
+                    $("#messages").css('visibility', 'visible');
+                    $('#messages').fadeIn();
+                    alert("Please refresh to update devices.")
+                });
 
-setTimeout(function() {
-    $('#messages').fadeOut();
-}, 3000 );
-                </script>
-                {% endif %}
-                <script>
-$('.nav a').click(function (e) {
-    e.preventDefault();
-    updateTarget($(this).context.hash.split('#')[1]);
-    $(this).tab('show');
-});
+                ws.on('state change', function (data) {
+                    var bg;
+                    var color;
+                    var state = $('#state');
+                    var button = $('#statusbutton');
 
-function updateTarget(newTarget) {
-    target = newTarget;
-}
-                </script>
-    </body>
+                    if (data.state == 'alert') {
+                        bg = 'red';
+                        color = 'white';
+                        state.html('alert');
+                        button.html('Clear');
+                        button.removeAttr('class').addClass('btn btn-warning');
+                    } else if (data.state == 'armed') {
+                        bg = 'green'
+                        color = 'white';
+                        state.html('armed');
+                        button.html('Disable');
+                        button.removeAttr('class').addClass('btn btn-danger');
+                    } else {
+                        bg = '';
+                        color = 'black';
+                        state.html('disabled');
+                        button.html('Enable');
+                        button.removeAttr('class').addClass('btn btn-success');
+                    }
+                    $('.jumbotron').css('background-color', bg);
+                    $('.jumbotron').css('color', color);
+                });
+
+                setTimeout(function () {
+                    $('#messages').fadeOut();
+                }, 3000);
+            </script>
+        {% endif %}
+        <script>
+            $('.nav a').click(function (e) {
+                e.preventDefault();
+                updateTarget($(this).context.hash.split('#')[1]);
+                $(this).tab('show');
+            });
+
+            function updateTarget(newTarget) {
+                target = newTarget;
+            }
+        </script>
+</body>
 </html>

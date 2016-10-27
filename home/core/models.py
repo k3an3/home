@@ -4,10 +4,10 @@ models.py
 
 Contains classes to represent objects created by the parser.
 """
-import importlib
 
 import yaml
 
+from home.core.utils import class_from_name, method_from_name, random_string
 
 drivers = []
 devices = []
@@ -15,41 +15,12 @@ interfaces = []
 actions = []
 
 
-def class_from_name(module_name, class_name):
-    """
-    Given a module name and class name, return a class.
-    :param module_name: Module name to import.
-    :param class_name: Class name to find in the module.
-    :return: The class object.
-    """
-    try:
-        return getattr(importlib.import_module(
-            'home.iot.' + module_name),
-            class_name
-        )
-    except ImportError:
-        raise DriverNotFoundError()
-
-
-def method_from_name(klass, method_name):
-    """
-    Given an imported class, return the given method pointer.
-    :param klass: An imported class containing the method.
-    :param method_name: The method name to find.
-    :return: The method pointer
-    """
-    try:
-        return getattr(klass, method_name)
-    except AttributeError:
-        raise NotImplementedError()
-
-
 def get_device_by_key(key):
     return next(device for device in devices if device.key == key)
 
 
-def get_device(name):
-    return next(device for device in devices if device.name == name)
+def get_device(uuid):
+    return next(device for device in devices if device.uuid == uuid)
 
 
 def get_devices_by_group(group_name):
@@ -97,6 +68,7 @@ class Device(YAMLObject):
         self.driver = driver
         self.group = group
         self.config = config
+        self.uuid = random_string()
 
     def setup(self):
         # retrieve the class for driver

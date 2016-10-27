@@ -1,5 +1,4 @@
 import functools
-import hashlib
 import json
 import subprocess
 import sys
@@ -11,7 +10,8 @@ from flask_socketio import SocketIO, emit, disconnect
 from pywebpush import WebPusher
 
 import home.core.utils as utils
-from home.core.models import devices, interfaces, get_device_by_key, get_devices_by_group, get_action
+from home.core.models import devices, interfaces, get_device_by_key, get_action, get_device
+from home.core.utils import random_string
 from home.web.models import *
 
 app = Flask(__name__)
@@ -29,8 +29,6 @@ except:
 
 # TODO: remove
 sys.path.append(os.path.dirname("/home/keane/dev/home/home"))
-
-some_random_string = lambda: hashlib.sha1(os.urandom(128)).hexdigest()
 
 
 def ws_login_required(f):
@@ -50,7 +48,6 @@ def index():
     interface_list = []
     for i in interfaces:
         interface_list.append((i, [d for d in devices if d.driver.interface == i]))
-    print(interface_list)
     return render_template('index.html',
                            interfaces=interface_list,
                            devices=devices,
@@ -130,13 +127,15 @@ def subscribe(subscriber):
 @socketio.on('change color', namespace='/ws')
 @ws_login_required
 def request_change_color(message):
-    emit('push color', {"device": message['device'], "color": message['color']}, broadcast=True)
-    devices = get_devices_by_group(message['device'])
+    emit('push color', {"device": message['device'], "color": message['color']},
+         broadcast=True)
+    # devices = get_devices_by_group(message['device'])
+    devices = (get_device(message['device']),)
     for device in devices:
         Thread(target=device.dev.change_color, args=(
-            tuple(utils.RGBfromhex(message['color'])) +
-            (message.get('bright', 100),)
-        ))
+            *utils.RGBfromhex(message['color']),
+            0, message.get('bright', 100)
+        )).start()
 
 
 @socketio.on('outmap', namespace="/ws")
@@ -191,7 +190,7 @@ def csrf_protect():
 
 def generate_csrf_token():
     if '_csrf_token' not in session:
-        session['_csrf_token'] = some_random_string()
+        session['_csrf_token'] = random_string()
     return session['_csrf_token']
 
 
