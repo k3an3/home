@@ -5,6 +5,7 @@ local/
 lib/ 
 lib64
 include/
+env/
 pip-selfcheck.json
 pyvenv.cfg
 app.db

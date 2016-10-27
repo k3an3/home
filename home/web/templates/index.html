@@ -79,34 +79,16 @@ body {
                             <li><a href="#home">Home</a></li>
                             {% if current_user.is_authenticated %}
                             <li class="dropdown">
-                                {% for interface in interfaces %}
+                                {% for interface, devices in interfaces %}
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ interface.friendly_name }}<span class="caret"></span></a>
                                 <ul class="dropdown-menu">
-                                    {% for device in interface_dict[interface] %}
+                                    {% for device in devices %}
                                         <li><a href="#{{ device.name }}">{{ device.name }}</a></li>
                                     {%  endfor %}
-                                    {% if bulbs %}
-                                    <li class="dropdown-header">Bulbs</li>
-                                    {% for bulb in bulbs %}
-                                    <li><a href="#{{ bulb.id }}">{{ bulb.name }}</a></li>
-                                    {% endfor %}
-                                    {% endif %}
-                                    {% if leds %}
-                                    {% if bulbs %}
+                                    {#
                                     <li role="separator" class="divider"></li>
-                                    {% endif %}
-                                    <li class="dropdown-header">LEDs</li>
-                                    <li><a href="#leds">LED Strip</a></li>
-                                    <li role="separator" class="divider"></li>
-                                    {% endif %}
-                                    {% if other %}
-                                    {% if previous_thing or first_thing_etc %}
-                                    <li role="separator" class="divider"></li>
-                                    {% endif %}
                                     <li class="dropdown-header">Other Group</li>
-                                    <li><a href="#">Separated link</a></li>
-                                    <li><a href="#">One more separated link</a></li>
-                                    {% endif %}
+                                #}
                                 </ul>
                                 {% endfor %}
                                 {% if current_user.admin %}
@@ -150,30 +132,18 @@ body {
                     <h1>Welcome Home</h1>
                 </div>
                 {% if current_user.is_authenticated %}
-                {% for bulb in bulbs %}
-                <div id="{{ bulb.id }}" class="tab-pane fade in" style="text-align: center;">
-                    <h1>{{ bulb.name }}</h1>
+                    {% for device in devices %}
+                        <div id="{{ device.name }}" class="tab-pane fade in" style="text-align: center;">
+                            <h1>{{ device.name }}</h1>
                     {% include 'colormap.html' %}
                     <br><br>
                     <!--<input type="range" id="slider">-->
-                    <input type="text" id="hex{{ bulb.id }}" oninput="updateColor();">
+                            <input type="text" id="hex{{ device.name }}" oninput="updateColor();">
                     <br><br>
                     <button class="btn btn-secondary" onclick="clickColor('#000000');">Off</button>
                     <br><br>
-                    <div id="preview{{ bulb.id }}" style="visibility: hidden; background-color: rgb(0, 0, 0);">&nbsp;</div>
-                </div>
-                {% endfor %}
-                {% for led in leds %}
-                <div id="leds" class="tab-pane fade in" style="text-align: center;">
-                    <h1>{{ led.name }}</h1>
-                    {% include 'colormap.html' %}
-                    <br><br>
-                    <!--<input type="range" id="slider">-->
-                    <input type="text" id="hex" oninput="updateColor();">
-                    <br><br>
-                    <button class="btn btn-secondary" onclick="clickColor('#000000');">Off</button>
-                    <br><br>
-                    <div id="preview" style="visibility: hidden; background-color: rgb(0, 0, 0);">&nbsp;</div>
+                            <div id="preview{{ device.name }}"
+                                 style="visibility: hidden; background-color: rgb(0, 0, 0);">&nbsp;</div>
                 </div>
                 {% endfor %}
                 {% endif %}
@@ -204,7 +174,7 @@ body {
                     <div class="col-md-8">
                         {% if events %}
                         {% for event in events %}
-                        {{ event.datetime }} {{ event.sensor }} 
+                        {{ event.datetime }} {{ event.sensor }}
                         {% endfor %}
                         {% else %}
                         No events yet. Yay!
@@ -215,7 +185,7 @@ body {
                     <div class="col-md-6">
                         <div class="panel panel-primary">
                             <div class="panel-heading">
-                                <h3 class="panel-title">Devices</h3> 
+                                <h3 class="panel-title">Devices</h3>
                             </div>
                             {% for device in devices %}
                             <div class="panel-body">

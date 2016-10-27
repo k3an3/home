@@ -6,7 +6,10 @@ bulb.py
 This module is for communicating with the MagicHome LED bulb over the network.
 
 Wire protocol:
-8 bytes
+
+-------------------------------------
+|header(1)|data(5-70)|0f|checksum(1)|
+-------------------------------------
 
 header:
     31 color & white
@@ -50,6 +53,7 @@ class Bulb:
     """
     A class representing a single MagicHome LED Bulb.
     """
+
     def __init__(self, host=DEFAULT_BULB_HOST):
         self.host = host
 
@@ -62,7 +66,8 @@ class Bulb:
         green = int(green * brightness / 100)
         blue = int(blue * brightness / 100)
         white = int(white * brightness / 100)
-        color_hex = prepare_hex(red) + prepare_hex(green) + prepare_hex(blue)
+        color_hex = prepare_hex(red) + prepare_hex(green) + prepare_hex(blue) \
+                    + prepare_hex(white)
         if white:
             color_mode = '0f'
         else:
@@ -70,10 +75,12 @@ class Bulb:
 
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
+            # TCP port 5577
             s.connect((self.host, 5577))
+            # Build packet
             data = bytearray.fromhex('31' + color_hex
-                                     + prepare_hex(white)
                                      + color_mode + '0f')
+            # Compute checksum
             data.append(sum(data) % 256)
             s.send(data)
         except Exception:

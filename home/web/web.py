@@ -1,10 +1,10 @@
 import functools
 import hashlib
 import json
+import subprocess
 import sys
 from threading import Thread
 
-import subprocess
 from flask import Flask, render_template, request, redirect, flash, abort, session, url_for
 from flask_login import LoginManager, login_required, login_user, current_user, logout_user
 from flask_socketio import SocketIO, emit, disconnect
@@ -47,16 +47,12 @@ def ws_login_required(f):
 def index():
     sec = SecurityController.get()
     events = sec.events
-    interface_dict = {}
+    interface_list = []
     for i in interfaces:
-        interface_dict[i.name] = []
-    for d in devices:
-        if d.driver.interface:
-            interface_dict[d.driver.interface.name].append(d)
-        print(interface_dict)
+        interface_list.append((i, [d for d in devices if d.driver.interface == i]))
+    print(interface_list)
     return render_template('index.html',
-                           interfaces=interfaces,
-                           interface_dict=interface_dict,
+                           interfaces=interface_list,
                            devices=devices,
                            sec=sec,
                            events=events,
