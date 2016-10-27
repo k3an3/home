@@ -3,7 +3,7 @@ interfaces:
     - !interface
         name: colormap
         friendly_name: Lights
-        template: color.html
+        template: bulb.html
 
 installed_drivers:
     - !driver

@@ -2,7 +2,6 @@ import functools
 import json
 import subprocess
 import sys
-from threading import Thread
 
 from flask import Flask, render_template, request, redirect, flash, abort, session, url_for
 from flask_login import LoginManager, login_required, login_user, current_user, logout_user
@@ -129,13 +128,10 @@ def subscribe(subscriber):
 def request_change_color(message):
     emit('push color', {"device": message['device'], "color": message['color']},
          broadcast=True)
-    # devices = get_devices_by_group(message['device'])
-    devices = (get_device(message['device']),)
-    for device in devices:
-        Thread(target=device.dev.change_color, args=(
-            *utils.RGBfromhex(message['color']),
-            0, message.get('bright', 100)
-        )).start()
+    device = get_device(message['device'])
+    device.dev.change_color(*utils.RGBfromhex(message['color']),
+                            0, message.get('bright', 100), '41'
+                            )
 
 
 @socketio.on('outmap', namespace="/ws")

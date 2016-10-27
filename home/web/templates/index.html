@@ -94,7 +94,7 @@
                                         class="caret"></span></a>
                                 <ul class="dropdown-menu">
                                     {% for device in devices %}
-                                        <li><a href="#{{ device.uuid }}">{{ device.name }}</a></li>
+                                        <li><a href="#{{ device.name }}">{{ device.name }}</a></li>
                                     {% endfor %}
                                     {#
                                     <li role="separator" class="divider"></li>
@@ -144,7 +144,7 @@
         </div>
         {% if current_user.is_authenticated %}
             {% for device in devices %}
-                <div id="{{ device.uuid }}" class="tab-pane fade in" style="text-align: center;">
+                <div id="{{ device.name }}" class="tab-pane fade in" style="text-align: center;">
                     {% if device.driver.interface.template %}
                         {% include device.driver.interface.template %}
                     {% endif %}
@@ -200,7 +200,7 @@
                     {% for device in devices %}
                         <div class="panel-body">
                             <strong>id=</strong>{{ device.id }}
-                            <strong>name=</strong>{{ device.uuid }}
+                            <strong>name=</strong>{{ device.name }}
                             <strong>category=</strong>{{ device.category }}
                             <strong>devices=</strong>{% for device_ in device.devices %}
                             {{ device_.data }}{% endfor %}

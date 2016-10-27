@@ -45,6 +45,7 @@ import socket
 import sys
 
 DEFAULT_BULB_HOST = '172.16.42.201'
+SUPPORTED_MODES = ['31', '41']
 
 prepare_hex = lambda x: format(x, 'x').zfill(2)
 
@@ -57,11 +58,13 @@ class Bulb:
     def __init__(self, host=DEFAULT_BULB_HOST):
         self.host = host
 
-    def change_color(self, red=0, green=0, blue=0, white=0, brightness=100):
+    def change_color(self, red=0, green=0, blue=0, white=0, brightness=100, mode='31'):
         """
         Provided RGB values and a brightness, change the color of the
         bulb with a TCP socket.
         """
+        if mode not in SUPPORTED_MODES:
+            raise NotImplementedError
         red = int(red * brightness / 100)
         green = int(green * brightness / 100)
         blue = int(blue * brightness / 100)
@@ -78,7 +81,7 @@ class Bulb:
             # TCP port 5577
             s.connect((self.host, 5577))
             # Build packet
-            data = bytearray.fromhex('31' + color_hex
+            data = bytearray.fromhex(mode + color_hex
                                      + color_mode + '0f')
             # Compute checksum
             data.append(sum(data) % 256)

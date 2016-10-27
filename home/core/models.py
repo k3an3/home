@@ -19,8 +19,12 @@ def get_device_by_key(key):
     return next(device for device in devices if device.key == key)
 
 
-def get_device(uuid):
+def get_device_by_uuid(uuid):
     return next(device for device in devices if device.uuid == uuid)
+
+
+def get_device(name):
+    return next(device for device in devices if device.name == name)
 
 
 def get_devices_by_group(group_name):
@@ -105,7 +109,7 @@ class Action(YAMLObject):
 
     def run(self):
         for config in self.devices:
-            dev = get_device(config['name'])
+            dev = get_device_by_uuid(config['name'])
             method = method_from_name(dev.dev, config['method'])
             method()
 
@@ -122,4 +126,3 @@ class Interface(YAMLObject):
 yaml.add_path_resolver('!device', ['Device'], dict)
 yaml.add_path_resolver('!action', ['ActionGroup'], dict)
 yaml.add_path_resolver('!interface', ['Interface'], dict)
-

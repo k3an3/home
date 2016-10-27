@@ -71,4 +71,4 @@ def method_from_name(klass, method_name):
         raise NotImplementedError()
 
 
-random_string = lambda x=128: hashlib.sha1(os.urandom(x)).hexdigest()
+random_string = lambda: hashlib.sha1(os.urandom(128)).hexdigest()
