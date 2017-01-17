@@ -111,7 +111,10 @@ class Action(YAMLObject):
         for config in self.devices:
             dev = get_device(config['name'])
             method = method_from_name(dev.dev, config['method'])
-            method()
+            try:
+                method()
+            except Exception as e:
+                return(str(e))
 
 
 class Interface(YAMLObject):

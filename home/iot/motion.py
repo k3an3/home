@@ -7,13 +7,12 @@ Module to interact with Motion's HTTP API.
 import requests
 
 
-# 0 is all threads, get this from somewhere else?
-BASE_URL = 'http://localhost:8080/{}/'
+BASE_URL = 'http://{}/{}/'
 
 
 class MotionController:
-    def __init__(self, thread=0):
-        self.base_url = BASE_URL.format(thread)
+    def __init__(self, thread=0, host="localhost:8080"):
+        self.base_url = BASE_URL.format(host, thread)
 
     def get(self, url):
         return requests.get(self.base_url + url)

@@ -2,7 +2,7 @@ import datetime
 import os
 
 from passlib.hash import sha256_crypt
-from peewee import SqliteDatabase, MySQLDatabase, CharField, BooleanField, ForeignKeyField, DateTimeField, \
+from peewee import SqliteDatabase, MySQLDatabase, CharField, BooleanField, ForeignKeyField, IntegerField, DateTimeField, \
     OperationalError, Model
 
 
@@ -99,9 +99,16 @@ class SecurityController(BaseModel):
         self.state = 'disabled'
         self.save()
 
+    def is_alert(self):
+        return self.state == 'alert'
+
+    def is_armed(self):
+        return self.state == 'armed'
+
 
 class SecurityEvent(BaseModel):
     controller = ForeignKeyField(SecurityController, related_name='events')
     device = CharField()
     in_progress = BooleanField(default=True)
     datetime = DateTimeField(default=datetime.datetime.now)
+    duration = IntegerField(null=True)
