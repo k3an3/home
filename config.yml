@@ -53,3 +53,6 @@ actions:
       devices:
       - name: cam1
         method: stop_detection
+
+config:
+    - location

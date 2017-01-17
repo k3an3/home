@@ -286,11 +286,9 @@
                     }
                 });
 
-                $('#slider').slider();
-                $("#slider").on("change", function () {
-                    bright = $('#slider').val() * 10;
-                    ws.emit('change color', {color: last, bright: bright});
-                });
+                function changewhite(val) {
+                   ws.emit('change color', {color: "000000", white: val, bright: bright, device: target});
+                }
 
                 ws.on('disconnect', function () {
                     $('#status').html('Status: <span style="color:red">Disconnected</span>');

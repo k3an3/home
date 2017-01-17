@@ -109,7 +109,7 @@ class Action(YAMLObject):
 
     def run(self):
         for config in self.devices:
-            dev = get_device_by_uuid(config['name'])
+            dev = get_device(config['name'])
             method = method_from_name(dev.dev, config['method'])
             method()
 

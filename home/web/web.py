@@ -130,7 +130,7 @@ def request_change_color(message):
          broadcast=True)
     device = get_device(message['device'])
     device.dev.change_color(*utils.RGBfromhex(message['color']),
-                            0, message.get('bright', 100), '41'
+                            utils.num(message.get('white', 0)), message.get('bright', 100), '41'
                             )
 
 

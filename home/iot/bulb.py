@@ -69,8 +69,8 @@ class Bulb:
         green = int(green * brightness / 100)
         blue = int(blue * brightness / 100)
         white = int(white * brightness / 100)
-        color_hex = prepare_hex(red) + prepare_hex(green) + prepare_hex(blue) \
-                    + prepare_hex(white)
+        color_hex = (prepare_hex(red) + prepare_hex(green) + prepare_hex(blue)
+                     + prepare_hex(white))
         if white:
             color_mode = '0f'
         else:
