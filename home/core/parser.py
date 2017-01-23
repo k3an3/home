@@ -18,17 +18,15 @@ def parse(config):
         print("Installed drivers:")
         for driver in y['installed_drivers']:
             drivers.append(driver)
-        for driver in drivers:
             driver.setup()
             print(driver)
+        print("Active devices:")
         for group in y['devices']:
             for device in y['devices'][group]:
                 device.group = group
                 devices.append(device)
                 device.setup()
-        print("Active devices:")
+        print("Configured actions:")
         for action in y['actions']:
             actions.append(action)
-        print("Configured actions:")
-        for action in actions:
             print(action.devices)

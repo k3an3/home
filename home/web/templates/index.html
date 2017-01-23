@@ -182,7 +182,7 @@
                 </div>
                 <span class="label label-warning" id="warning"></span>
                 <div class="col-md-8">
-                    <table class="table">
+                    <table class="table" id="events">
                         <thead>
                         <tr>
                             <th>#</th>
@@ -248,7 +248,7 @@
             <script src="static/check.js"></script>
             <script>
                 var ws = io.connect('//' + document.domain + ':' + location.port + '/ws');
-                var last = "#FFFFFF";;;;;;;;;;;;
+                var last = "#FFFFFF";
                 var bright = 100;
                 var target = "0";
 
@@ -331,6 +331,10 @@
                     alert("Please refresh to update devices.")
                 });
 
+                ws.on('event', function (data) {
+                    var table = $('#events');
+                });
+
                 ws.on('state change', function (data) {
                     var bg;
                     var color;
@@ -344,7 +348,7 @@
                         button.html('Clear');
                         button.removeAttr('class').addClass('btn btn-warning');
                     } else if (data.state == 'armed') {
-                        bg = 'green';;;;;;;;;;;;
+                        bg = 'green';
                         color = 'white';
                         state.html('armed');
                         button.html('Disable');

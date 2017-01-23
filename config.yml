@@ -56,7 +56,7 @@ actions:
     - !action
       name: alert
       devices:
-      - name: Bad
+      - name: Bed
         method: change_color
         config:
         - white: 255
