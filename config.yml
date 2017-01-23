@@ -53,6 +53,13 @@ actions:
       devices:
       - name: cam1
         method: stop_detection
+    - !action
+      name: alert
+      devices:
+      - name: Bad
+        method: change_color
+        config:
+        - white: 255
 
 
 config:

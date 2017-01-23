@@ -6,6 +6,7 @@ import sys
 from flask import Flask, render_template, request, redirect, flash, abort, session, url_for
 from flask_login import LoginManager, login_required, login_user, current_user, logout_user
 from flask_socketio import SocketIO, emit, disconnect
+
 try:
     from pywebpush import WebPusher
 except AttributeError:
@@ -83,8 +84,11 @@ def command_api():
         elif command == 'eventend':
             print("EVENT END")
             try:
-                event = SecurityEvent.get(controller=sec, device=device)
+                event = SecurityEvent.filter(controller=sec,
+                                             device=device).order_by(
+                    SecurityEvent.id.desc()).get()
                 event.duration = (datetime.datetime.now() - event.datetime).total_seconds()
+                print(event.duration)
                 event.in_progress = False
                 event.save()
                 # emit something here

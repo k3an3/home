@@ -193,7 +193,7 @@
                         </thead>
                         <tbody>
                         {% if events %}
-                            {% for event in events %}
+                            {% for event in events|reverse %}
                                 <tr>
                                     <td>{{ event.id }}</td>
                                     <td>{{ event.device }}</td>
@@ -248,7 +248,7 @@
             <script src="static/check.js"></script>
             <script>
                 var ws = io.connect('//' + document.domain + ':' + location.port + '/ws');
-                var last = "#FFFFFF"
+                var last = "#FFFFFF";;;;;;;;;;;;
                 var bright = 100;
                 var target = "0";
 
@@ -344,7 +344,7 @@
                         button.html('Clear');
                         button.removeAttr('class').addClass('btn btn-warning');
                     } else if (data.state == 'armed') {
-                        bg = 'green'
+                        bg = 'green';;;;;;;;;;;;
                         color = 'white';
                         state.html('armed');
                         button.html('Disable');

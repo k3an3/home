@@ -55,6 +55,10 @@ class DriverNotFoundError(YAMLConfigParseError):
     pass
 
 
+class DeviceNotFoundError(YAMLConfigParseError):
+    pass
+
+
 class YAMLObject(yaml.YAMLObject):
     def __setstate__(self, kwargs):
         self.__init__(**kwargs)
@@ -73,6 +77,7 @@ class Device(YAMLObject):
         self.group = group
         self.config = config
         self.uuid = random_string()
+        self.dev = None
 
     def setup(self):
         # retrieve the class for driver
@@ -112,9 +117,12 @@ class Action(YAMLObject):
             dev = get_device(config['name'])
             method = method_from_name(dev.dev, config['method'])
             try:
-                method()
+                if config.get('config'):
+                    method(*config['config'])
+                else:
+                    method()
             except Exception as e:
-                return(str(e))
+                print(str(e))
 
 
 class Interface(YAMLObject):

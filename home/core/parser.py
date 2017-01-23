@@ -25,10 +25,8 @@ def parse(config):
             for device in y['devices'][group]:
                 device.group = group
                 devices.append(device)
+                device.setup()
         print("Active devices:")
-        for device in devices:
-            device.setup()
-            print(device)
         for action in y['actions']:
             actions.append(action)
         print("Configured actions:")
