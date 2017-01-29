@@ -70,6 +70,13 @@ actions:
         method: change_color
         config:
          white: 0
+    - !action
+      name: wake
+      devices:
+      - name: Bed
+        method: change_color
+        config:
+         white: 255
 
 
 config:
