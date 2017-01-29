@@ -172,6 +172,13 @@ def change_password():
     return redirect(url_for('index'))
 
 
+@app.route("/update")
+@login_required
+def update_app():
+    if current_user.admin:
+        utils.update()
+
+
 @app.route("/logout")
 @login_required
 def logout():

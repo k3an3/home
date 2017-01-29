@@ -112,7 +112,7 @@
                 <ul class="nav navbar-nav navbar-right">
                     {% if current_user.is_authenticated %}
                         <li><a id="status">Status:</a></li>
-                        <li><a>{{ version }}</a></li>
+                        <li><a{% if current_user.admin %} href="/update"{% endif %}>{{ version }}</a></li>
                         <li><a href="#logout" id="logout">Logout {{ current_user.username }}</a></li>
                     {% else %}
                         <li><a href="#login">Login</a></li>
@@ -233,7 +233,7 @@
             <script src="static/check.js"></script>
             <script>
                 var ws = io.connect('//' + document.domain + ':' + location.port + '/ws');
-                var last = "#FFFFFF";;;
+                var last = "#FFFFFF";
                 var bright = 100;
                 var target = "0";
 
@@ -329,7 +329,7 @@
                         button.html('Clear');
                         button.removeAttr('class').addClass('btn btn-warning');
                     } else if (data.state == 'armed') {
-                        bg = 'green';;;
+                        bg = 'green';
                         color = 'white';
                         state.html('armed');
                         button.html('Disable');
