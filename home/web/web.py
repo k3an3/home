@@ -13,7 +13,7 @@ except AttributeError:
     print("Failed to load PyWebpush due to a bug in this version of pyelliptic")
 
 import home.core.utils as utils
-from home.core.models import devices, interfaces, get_device_by_key, get_action, get_device
+from home.core.models import devices, interfaces, get_device_by_key, get_action, get_device, actions
 from home.core.utils import random_string
 from home.web.models import *
 import home.core.parser as parser
@@ -58,6 +58,7 @@ def index():
                            devices=devices,
                            sec=sec,
                            events=events,
+                           actions=actions,
                            version=VERSION,
                            )
 
