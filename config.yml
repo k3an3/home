@@ -77,6 +77,30 @@ actions:
         method: change_color
         config:
          white: 255
+    - !action
+      name: living room on
+      devices:
+      - name: Left
+        method: change_color
+        config:
+         white: 255
+      - name: Right
+        method: change_color
+        config:
+         white: 255
+    - !action
+      name: movie mode
+      devices:
+      - name: Left
+        method: change_color
+        config:
+         red: 16
+         blue: 30
+      - name: Right
+        method: change_color
+        config:
+         red: 16
+         blue: 30
 
 
 config:
