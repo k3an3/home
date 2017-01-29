@@ -8,6 +8,7 @@ import hashlib
 import importlib
 import os
 import re
+import subprocess
 
 
 def num(n):
@@ -72,3 +73,15 @@ def method_from_name(klass, method_name):
 
 
 random_string = lambda: hashlib.sha1(os.urandom(128)).hexdigest()
+
+
+def reload():
+    subprocess.call(['sudo', 'systemctl', 'restart', 'home'])
+
+
+def update():
+    subprocess.call(['git', 'stash'])
+    subprocess.call(['git', 'pull', 'origin', 'master'])
+    subprocess.call(['git', 'stash', 'apply'])
+    subprocess.call(['/srv/home/env/bin/pip', 'install', '-r', 'requirements.txt', '--upgrade'])
+    reload()

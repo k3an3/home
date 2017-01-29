@@ -112,7 +112,7 @@
                 <ul class="nav navbar-nav navbar-right">
                     {% if current_user.is_authenticated %}
                         <li><a id="status">Status:</a></li>
-                        <li><a>{{ version }}</a></li>
+                        <li><a{% if current_user.admin %} href="/update"{% endif %}>{{ version }}</a></li>
                         <li><a href="#logout" id="logout">Logout {{ current_user.username }}</a></li>
                     {% else %}
                         <li><a href="#login">Login</a></li>
@@ -216,28 +216,30 @@
                     </div>
                     {% for device in devices %}
                         <div class="panel-body">
-                            <strong>id=</strong>{{ device.id }}
                             <strong>name=</strong>{{ device.name }}
-                            <strong>category=</strong>{{ device.category }}
-                            <strong>devices=</strong>{% for device_ in device.devices %}
-                            {{ device_.data }}{% endfor %}
-                            {#count={{ device.devices|length }} #}
+                            <strong>driver=</strong>{{ device.driver }}
+                            <strong>config=</strong>{{ device.config }}
                         </div>
                     {% endfor %}
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="panel">
-                    <form id="device_form">
-                        <input type="hidden" id="id">
-                        Name:
-                        <input class="form-control" id="name">
-                        Category:
-                        <input class="form-control" id="category">
-                        Data (Python3 dictionary):
-                        <input class="form-control" id="data">
+                    <form id="password_form" method="POST" action="/user/password">
+                        <input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
+                        {% if current_user.admin %}
+                            User:
+                            <input class="form-control" name="username">
+                        {% else %}
+                            Old Password:
+                            <input class="form-control" type="password" name="password">
+                        {% endif %}
+                        New Password:
+                        <input class="form-control" type="password" name="new_password">
+                        Confirm New Password:
+                        <input class="form-control" type="password" name="new_password_confirm">
                         <br>
-                        <input class="btn btn-primary" value="Submit" onclick="editDevice()">
+                        <input type="submit" class="btn btn-primary" value="Submit">
                     </form>
                 </div>
             </div>
