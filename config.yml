@@ -89,6 +89,17 @@ actions:
         config:
          white: 255
     - !action
+      name: living room off
+      devices:
+      - name: Left
+        method: change_color
+        config:
+         white: 0
+      - name: Right
+        method: change_color
+        config:
+         white: 0
+    - !action
       name: movie mode
       devices:
       - name: Left
