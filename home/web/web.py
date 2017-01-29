@@ -6,7 +6,10 @@ import sys
 from flask import Flask, render_template, request, redirect, flash, abort, session, url_for
 from flask_login import LoginManager, login_required, login_user, current_user, logout_user, fresh_login_required
 from flask_socketio import SocketIO, emit, disconnect
-from pywebpush import WebPusher
+try:
+    from pywebpush import WebPusher
+except AttributeError:
+    print("Failed to load PyWebpush due to a bug in this version of pyelliptic")
 
 import home.core.utils as utils
 from home.core.models import devices, interfaces, get_device_by_key, get_action, get_device
@@ -65,7 +68,7 @@ def command_api():
         abort(403)
     sec = SecurityController.get()
     command = request.form.get('command')
-    if sec.state == 'armed':
+    if sec.is_armed() or sec.is_alert():
         if command == 'eventstart':
             print("EVENT START")
             sec.alert()
@@ -82,6 +85,7 @@ def command_api():
             print("EVENT END")
             try:
                 event = SecurityEvent.get(controller=sec, device=device)
+                event.duration = (datetime.datetime.now() - event.datetime).total_seconds()
                 event.in_progress = False
                 event.save()
                 # emit something here
@@ -99,18 +103,19 @@ def change_state():
     if not current_user.admin:
         disconnect()
     sec = SecurityController.get()
+    message = ""
     if sec.state == 'disabled':
         # Set to armed
         sec.arm()
-        get_action('arm').run()
+        message = get_action('arm').run()
     elif sec.state == 'armed':
         # Set to disabled
         sec.disable()
-        get_action('disable').run()
+        message = get_action('disable').run()
     elif sec.state == 'alert':
         # Restore to armed
         sec.arm()
-    emit('state change', {'state': sec.state}, broadcast=True)
+    emit('state change', {'state': sec.state, 'message': message}, broadcast=True)
 
 
 @socketio.on('subscribe', namespace='/ws')

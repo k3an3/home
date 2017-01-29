@@ -178,17 +178,34 @@
                     <h1>Status: <span id="state">{{ sec.state }}</span></h1>
                     <button id="statusbutton" onclick="changeState()"
                             class="btn btn-{% if sec.state == 'disabled' %}success">
-                                Enable{% elif sec.state == 'armed' %}danger">Disarm{% elif sec.state == 'alert' %}
-                                warning">Clear{% endif %}</button>
+                                Enable{% elif sec.state == 'armed' %}danger">Disarm{% elif sec.state == 'alert' %}warning">Clear{% endif %}</button>
                 </div>
+                <span class="label label-warning" id="warning"></span>
                 <div class="col-md-8">
-                    {% if events %}
-                        {% for event in events %}
-                            {{ event.datetime }} {{ event.sensor }}
-                        {% endfor %}
-                    {% else %}
-                        No events yet. Yay!
-                    {% endif %}
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Sensor</th>
+                            <th>Start Time</th>
+                            <th>Duration (seconds)</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% if events %}
+                            {% for event in events %}
+                                <tr>
+                                    <td>{{ event.id }}</td>
+                                    <td>{{ event.device }}</td>
+                                    <td>{{ event.datetime }}</td>
+                                    <td>{{ event.duration }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            No events yet. Yay!
+                        {% endif %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
             <div id="admin" class="tab-pane fade in">
@@ -289,7 +306,7 @@
                 });
 
                 function changewhite(val) {
-                   ws.emit('change color', {color: "000000", white: val, bright: bright, device: target});
+                    ws.emit('change color', {color: "000000", white: val, bright: bright, device: target});
                 }
 
                 ws.on('disconnect', function () {
@@ -343,6 +360,8 @@
                     }
                     $('.jumbotron').css('background-color', bg);
                     $('.jumbotron').css('color', color);
+                    if (data.message != "")
+                        $('#warning').html(data.message);
                 });
 
                 setTimeout(function () {
