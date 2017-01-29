@@ -44,6 +44,8 @@ tail:
 import socket
 import sys
 
+from home.core.utils import num
+
 DEFAULT_BULB_HOST = '172.16.42.201'
 SUPPORTED_MODES = ['31', '41']
 
@@ -65,10 +67,10 @@ class Bulb:
         """
         if mode not in SUPPORTED_MODES:
             raise NotImplementedError
-        red = int(red * brightness / 100)
-        green = int(green * brightness / 100)
-        blue = int(blue * brightness / 100)
-        white = int(white * brightness / 100)
+        red = num(red * brightness / 100)
+        green = num(green * brightness / 100)
+        blue = num(blue * brightness / 100)
+        white = num(white * brightness / 100)
         color_hex = (prepare_hex(red) + prepare_hex(green) + prepare_hex(blue)
                      + prepare_hex(white))
         if white:

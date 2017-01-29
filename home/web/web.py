@@ -51,7 +51,7 @@ def index():
     events = sec.events
     interface_list = []
     for i in interfaces:
-        interface_list.append((i, [d for d in devices if d.driver.interface == i]))
+        interface_list.append((i, [d for d in devices if d.driver and d.driver.interface == i]))
     return render_template('index.html',
                            interfaces=interface_list,
                            devices=devices,
@@ -69,10 +69,16 @@ def command_api():
         abort(403)
     sec = SecurityController.get()
     command = request.form.get('command')
+    try:
+        get_action(command).run()
+        return '', 204
+    except StopIteration:
+        print("No action found for", command)
     if sec.is_armed() or sec.is_alert():
         if command == 'eventstart':
             print("EVENT START")
             sec.alert()
+            get_action('alert').run()
             SecurityEvent.create(controller=sec, device=device)
             socketio.emit('state change', {'state': sec.state}, namespace='/ws')
             for subscriber in Subscriber.select():
@@ -81,7 +87,7 @@ def command_api():
                         json.dumps({'body': "New event alert!!!"}),
                         gcm_key=API_KEY)
                 except Exception as e:
-                    print(str(e))
+                    print("Webpusher:", str(e))
         elif command == 'eventend':
             print("EVENT END")
             try:
@@ -95,9 +101,6 @@ def command_api():
                 # emit something here
             except SecurityEvent.DoesNotExist:
                 abort(412)
-        action = get_action(command)
-        if action:
-            action.run()
     return '', 204
 
 

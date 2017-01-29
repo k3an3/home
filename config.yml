@@ -41,6 +41,9 @@ devices:
             key: cam1
             config:
             - thread: 1
+        - !device
+            name: sleep
+            key: sleep
 
 actions:
     - !action
@@ -59,7 +62,14 @@ actions:
       - name: Bed
         method: change_color
         config:
-        - white: 255
+         white: 255
+    - !action
+      name: sleep
+      devices:
+      - name: Bed
+        method: change_color
+        config:
+         white: 0
 
 
 config:
