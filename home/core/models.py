@@ -117,10 +117,8 @@ class Action(YAMLObject):
             method = method_from_name(dev.dev, config['method'])
             try:
                 if config.get('config'):
-                    print(config['config'])
                     method(**config['config'])
                 else:
-                    print(2)
                     method()
             except Exception as e:
                 print("Action:", str(e))

@@ -12,6 +12,10 @@ from home.core.models import drivers, devices, actions, interfaces
 
 def parse(config):
     with open(config) as f:
+        drivers.clear()
+        devices.clear()
+        actions.clear()
+        interfaces.clear()
         y = yaml.load(f)
         for interface in y['interfaces']:
             interfaces.append(interface)
@@ -26,6 +30,7 @@ def parse(config):
                 device.group = group
                 devices.append(device)
                 device.setup()
+                print(device)
         print("Configured actions:")
         for action in y['actions']:
             actions.append(action)

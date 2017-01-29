@@ -16,6 +16,7 @@ import home.core.utils as utils
 from home.core.models import devices, interfaces, get_device_by_key, get_action, get_device
 from home.core.utils import random_string
 from home.web.models import *
+import home.core.parser as parser
 
 app = Flask(__name__)
 app.secret_key = '\xff\xe3\x84\xd0\xeb\x05\x1b\x89\x17\xce\xca\xaf\xdb\x8c\x13\xc0\xca\xe4'
@@ -189,6 +190,15 @@ def change_password():
 def update_app():
     if current_user.admin:
         utils.update()
+    return redirect(url_for('index'))
+
+
+@app.route("/reload")
+@login_required
+def reload():
+    if current_user.admin:
+        parser.parse("config.yml")
+    return redirect(url_for('index'))
 
 
 @app.route("/logout")

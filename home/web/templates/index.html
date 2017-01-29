@@ -112,7 +112,7 @@
                 <ul class="nav navbar-nav navbar-right">
                     {% if current_user.is_authenticated %}
                         <li><a id="status">Status:</a></li>
-                        <li><a{% if current_user.admin %} href="/update"{% endif %}>{{ version }}</a></li>
+                        <li><a>{{ version }}</a></li>
                         <li><a href="#logout" id="logout">Logout {{ current_user.username }}</a></li>
                     {% else %}
                         <li><a href="#login">Login</a></li>
@@ -212,7 +212,7 @@
             <div class="col-md-6">
                 <div class="panel panel-primary">
                     <div class="panel-heading">
-                        <h3 class="panel-title">Devices</h3>
+                        <h3 class="panel-title">Devices <a href="/reload">(reload)</a></h3>
                     </div>
                     {% for device in devices %}
                         <div class="panel-body">
@@ -241,6 +241,7 @@
                         <br>
                         <input type="submit" class="btn btn-primary" value="Submit">
                     </form>
+                    <a href="/update">App Update</a>
                 </div>
             </div>
         {% endif %}
