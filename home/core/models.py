@@ -124,7 +124,6 @@ class Action(YAMLObject):
                     method()
             except Exception as e:
                 print("Action:", str(e))
-                raise e
 
 
 class Interface(YAMLObject):
