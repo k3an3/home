@@ -4,7 +4,7 @@ import subprocess
 import sys
 
 from flask import Flask, render_template, request, redirect, flash, abort, session, url_for
-from flask_login import LoginManager, login_required, login_user, current_user, logout_user
+from flask_login import LoginManager, login_required, login_user, current_user, logout_user, fresh_login_required
 from flask_socketio import SocketIO, emit, disconnect
 from pywebpush import WebPusher
 
@@ -37,6 +37,7 @@ def ws_login_required(f):
             disconnect()
         else:
             return f(*args, **kwargs)
+
     return wrapped
 
 
@@ -86,6 +87,9 @@ def command_api():
                 # emit something here
             except SecurityEvent.DoesNotExist:
                 abort(412)
+        action = get_action(command)
+        if action:
+            action.run()
     return '', 204
 
 
@@ -154,11 +158,25 @@ def login():
     return redirect(url_for('index'))
 
 
+@app.route("/user/password", methods=['POST'])
+@fresh_login_required
+@login_required
+def change_password():
+    if current_user.admin:
+        user = User.get(username=request.form.get('username'))
+    elif current_user.check_password(request.form.get('password')):
+        user = current_user
+    if request.form.get('new_password') == request.form.get('new_password_confirm'):
+        user.set_password(request.form.get('new_password'))
+        user.save()
+    return redirect(url_for('index'))
+
+
 @app.route("/logout")
 @login_required
 def logout():
-        logout_user()
-        return redirect(url_for('index'))
+    logout_user()
+    return redirect(url_for('index'))
 
 
 # This hook ensures that a connection is opened to handle any queries
@@ -199,11 +217,11 @@ def add_header(response):
 
 app.jinja_env.globals['csrf_token'] = generate_csrf_token
 
-
 if __name__ == '__main__':
     db_init()
     try:
         import eventlet
+
         eventlet.monkey_patch()
         print('Using eventlet')
         create_thread_func = lambda f: f
@@ -212,12 +230,14 @@ if __name__ == '__main__':
         try:
             import gevent
             import gevent.monkey
+
             gevent.monkey.patch_all()
             print('Using gevent')
             create_thread_func = lambda f: gevent.Greenlet(f)
             start_thread_func = lambda t: t.start()
         except ImportError:
             import threading
+
             print('Using threading')
             create_thread_func = lambda f: threading.Thread(target=f)
             start_thread_func = lambda t: t.start()
