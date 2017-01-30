@@ -1,5 +1,6 @@
 amqp==2.1.4
 billiard==3.5.0.2
+broadlink==0.3
 celery==4.0.2
 cffi==1.9.1
 click==6.7

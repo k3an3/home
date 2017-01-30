@@ -106,6 +106,14 @@ def command_api():
     return '', 204
 
 
+@socketio.on('action', namespace='/ws')
+@ws_login_required
+def ws_action(data):
+    if not current_user.admin:
+        disconnect()
+    get_action(data.get('action')).run()
+
+
 @socketio.on('change state', namespace='/ws')
 @ws_login_required
 def change_state():

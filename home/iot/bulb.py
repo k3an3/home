@@ -46,8 +46,9 @@ import sys
 
 from home.core.utils import num
 
-DEFAULT_BULB_HOST = '172.16.42.201'
-SUPPORTED_MODES = ['31', '41']
+SUPPORTED_MODES = ['31', '41', '61']
+SUPPORTED_FUNCTIONS = list(range(25, 39))
+TAIL = '0f'
 
 prepare_hex = lambda x: format(x, 'x').zfill(2)
 
@@ -57,34 +58,39 @@ class Bulb:
     A class representing a single MagicHome LED Bulb.
     """
 
-    def __init__(self, host=DEFAULT_BULB_HOST):
+    def __init__(self, host):
         self.host = host
 
-    def change_color(self, red=0, green=0, blue=0, white=0, brightness=100, mode='31'):
+    def change_color(self, red=0, green=0, blue=0, white=0, brightness=100, mode='31', function=None, speed='1f'):
         """
         Provided RGB values and a brightness, change the color of the
         bulb with a TCP socket.
         """
         if mode not in SUPPORTED_MODES:
             raise NotImplementedError
-        red = num(red * brightness / 100)
-        green = num(green * brightness / 100)
-        blue = num(blue * brightness / 100)
-        white = num(white * brightness / 100)
-        color_hex = (prepare_hex(red) + prepare_hex(green) + prepare_hex(blue)
-                     + prepare_hex(white))
-        if white:
-            color_mode = '0f'
-        else:
-            color_mode = 'f0'
 
+        if function:
+            if num(function) not in SUPPORTED_FUNCTIONS:
+                raise NotImplementedError
+            data = bytearray.fromhex(mode + function + speed + TAIL)
+        else:
+            red = num(red * brightness / 100)
+            green = num(green * brightness / 100)
+            blue = num(blue * brightness / 100)
+            white = num(white * brightness / 100)
+            color_hex = (prepare_hex(red) + prepare_hex(green) + prepare_hex(blue)
+                         + prepare_hex(white))
+            if white:
+                color_mode = '0f'
+            else:
+                color_mode = 'f0'
+            # Build packet
+            data = bytearray.fromhex(mode + color_hex
+                                     + color_mode + TAIL)
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             # TCP port 5577
             s.connect((self.host, 5577))
-            # Build packet
-            data = bytearray.fromhex(mode + color_hex
-                                     + color_mode + '0f')
             # Compute checksum
             data.append(sum(data) % 256)
             s.send(data)

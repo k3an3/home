@@ -228,7 +228,8 @@
                     </div>
                     {% for action in actions %}
                         <div class="panel-body">
-                            <strong>name=</strong>{{ action.name }}
+                            <strong>name=</strong><a
+                                onclick="ws.emit('action', {action: '{{ action.name }}'});">{{ action.name }}</a>
                             <strong>config=</strong>{{ action.devices }}
                         </div>
                     {% endfor %}
