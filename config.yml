@@ -15,6 +15,10 @@ installed_drivers:
         name: motion
         module: motion
         klass: MotionController
+    - !driver
+        name: plug
+        module: plug
+        klass: Plug
 
 devices:
     living_room:
@@ -28,6 +32,12 @@ devices:
             driver: bulb
             config:
             - host: 192.168.1.125
+        - !device
+            name: Cabinet
+            driver: plug
+            config:
+            - host: 192.168.1.126
+            - mac: B4:43:0D:C1:CB:18
 
     bedroom:
         - !device

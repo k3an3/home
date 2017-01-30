@@ -66,22 +66,24 @@ def index():
 @app.route('/api/command', methods=['POST'])
 def command_api():
     try:
-        device = get_device_by_key(request.form.get('device'))
+        key = get_device_by_key(request.form.get('key'))
     except StopIteration:
         abort(403)
+    if request.form.get('device'):
+        device = get_device(request.form.get('device'))
     sec = SecurityController.get()
-    command = request.form.get('command')
+    action = request.form.get('action')
     try:
-        get_action(command).run()
+        get_action(action).run()
         return '', 204
     except StopIteration:
-        print("No action found for", command)
+        print("No action found for", action)
     if sec.is_armed() or sec.is_alert():
-        if command == 'eventstart':
+        if action == 'eventstart':
             print("EVENT START")
             sec.alert()
             get_action('alert').run()
-            SecurityEvent.create(controller=sec, device=device)
+            SecurityEvent.create(controller=sec, device=key)
             socketio.emit('state change', {'state': sec.state}, namespace='/ws')
             for subscriber in Subscriber.select():
                 try:
@@ -90,11 +92,11 @@ def command_api():
                         gcm_key=API_KEY)
                 except Exception as e:
                     print("Webpusher:", str(e))
-        elif command == 'eventend':
+        elif action == 'eventend':
             print("EVENT END")
             try:
                 event = SecurityEvent.filter(controller=sec,
-                                             device=device).order_by(
+                                             device=key).order_by(
                     SecurityEvent.id.desc()).get()
                 event.duration = (datetime.datetime.now() - event.datetime).total_seconds()
                 print(event.duration)
