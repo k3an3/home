@@ -118,13 +118,13 @@ actions:
       - name: Left
         method: change_color
         config:
-         mode: 61
-         function: 25
+         mode: '61'
+         function: '25'
       - name: Right
         method: change_color
         config:
-         mode: 61
-         function: 25
+         mode: '61'
+         function: '25'
 
 
 config:
