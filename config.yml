@@ -120,11 +120,13 @@ actions:
         config:
          mode: '61'
          function: '25'
+         speed: '0e'
       - name: Right
         method: change_color
         config:
          mode: '61'
          function: '25'
+         speed: '0e'
 
 
 config:
