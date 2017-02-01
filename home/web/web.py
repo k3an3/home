@@ -71,6 +71,9 @@ def command_api():
         abort(403)
     if request.form.get('device'):
         device = get_device(request.form.get('device'))
+        method = utils.method_from_name(type(device.dev), request.form.get('method'))
+        method(device.dev)
+        return '', 204
     sec = SecurityController.get()
     action = request.form.get('action')
     try:

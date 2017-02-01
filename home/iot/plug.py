@@ -10,7 +10,7 @@ class Plug:
     A class representing a single Broadlink smart plug
     """
     def __init__(self, host, mac):
-        self.device = broadlink.device(host=(host, PORT,), mac=bytearray.fromhex(''.join(mac.split(':'))))
+        self.device = broadlink.gendevice(0x2711, (host, 80), bytearray.fromhex(mac.replace(':', '')))
         try:
             self.auth()
         except socket.timeout:

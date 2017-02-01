@@ -51,9 +51,11 @@ devices:
             key: cam1
             config:
             - thread: 1
-        - !device
-            name: sleep
-            key: sleep
+
+    clients:
+         - !device
+             name: sleep
+             key: sleep
 
 actions:
     - !action
@@ -109,19 +111,23 @@ actions:
         method: change_color
         config:
          white: 0
+      - name: Cabinet
+        method: 'off'
     - !action
       name: movie mode
       devices:
       - name: Left
         method: change_color
         config:
-         white: 15
+         white: 10
          mode: '41'
       - name: Right
         method: change_color
         config:
-         white: 15
+         white: 10
          mode: '41'
+      - name: Cabinet
+        method: 'off'
     - !action
       name: party mode
       devices:
@@ -130,13 +136,15 @@ actions:
         config:
          mode: '61'
          function: '25'
-         speed: '0e'
+         speed: '0a'
       - name: Right
         method: change_color
         config:
          mode: '61'
          function: '25'
-         speed: '0e'
+         speed: '0a'
+      - name: Cabinet
+        method: 'on'
 
 
 config:
