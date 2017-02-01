@@ -115,13 +115,13 @@ actions:
       - name: Left
         method: change_color
         config:
-         red: 16
-         blue: 30
+         white: 15
+         mode: '41'
       - name: Right
         method: change_color
         config:
-         red: 16
-         blue: 30
+         white: 15
+         mode: '41'
     - !action
       name: party mode
       devices:

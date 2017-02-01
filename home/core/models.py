@@ -4,6 +4,7 @@ models.py
 
 Contains classes to represent objects created by the parser.
 """
+import threading
 
 import yaml
 
@@ -116,10 +117,8 @@ class Action(YAMLObject):
             dev = get_device(config['name'])
             method = method_from_name(dev.dev, config['method'])
             try:
-                if config.get('config'):
-                    method(**config['config'])
-                else:
-                    method()
+                t = threading.Thread(target=method, kwargs=config.get('config'))
+                t.start()
             except Exception as e:
                 print("Action:", str(e))
 
