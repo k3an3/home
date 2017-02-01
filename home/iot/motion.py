@@ -11,6 +11,9 @@ BASE_URL = 'http://{}/{}/'
 
 
 class MotionController:
+    """
+    Driver for interfacing with the Motion API.
+    """
     def __init__(self, thread=0, host="localhost:8080"):
         self.base_url = BASE_URL.format(host, thread)
 

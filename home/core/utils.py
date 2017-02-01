@@ -76,10 +76,16 @@ random_string = lambda: hashlib.sha1(os.urandom(128)).hexdigest()
 
 
 def reload():
+    """
+    Restart the application.
+    """
     subprocess.call(['sudo', 'systemctl', 'restart', 'home'])
 
 
 def update():
+    """
+    Perform an update from git.
+    """
     subprocess.call(['git', 'stash'])
     subprocess.call(['git', 'pull', 'origin', 'master'])
     subprocess.call(['git', 'stash', 'apply'])

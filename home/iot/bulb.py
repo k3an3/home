@@ -102,6 +102,11 @@ class Bulb:
             pass
 
     def sunlight(self):
+        """
+        Calculate an appropriate brightness for the bulb depending on
+        current sunlight.
+        :return: White brightness
+        """
         a = Astral()
         a.solar_depression = 'civil'
         city = a[config.LOCATION]

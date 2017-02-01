@@ -10,11 +10,11 @@ import yaml
 
 from home.core.utils import class_from_name, method_from_name, random_string
 
+# Arrays to store object instances
 drivers = []
 devices = []
 interfaces = []
 actions = []
-rooms = []
 
 
 def get_device_by_key(key):
@@ -62,6 +62,9 @@ class DeviceNotFoundError(YAMLConfigParseError):
 
 
 class YAMLObject(yaml.YAMLObject):
+    """
+    Base class for YAML objects, simply to print the correct name
+    """
     def __setstate__(self, kwargs):
         self.__init__(**kwargs)
 
@@ -70,6 +73,9 @@ class YAMLObject(yaml.YAMLObject):
 
 
 class Device(YAMLObject):
+    """
+    Representation of a specific physical instance of a driver.
+    """
     yaml_tag = '!device'
 
     def __init__(self, name, driver=None, config=None, key=None, group=None):
@@ -82,6 +88,9 @@ class Device(YAMLObject):
         self.dev = None
 
     def setup(self):
+        """
+        Set up the driver that this device will use
+        """
         # retrieve the class for driver
         if self.driver:
             self.driver = get_driver(self.driver)
@@ -94,6 +103,9 @@ class Device(YAMLObject):
 
 
 class Driver(YAMLObject):
+    """
+    Represents the driver for a type of device.
+    """
     yaml_tag = '!driver'
 
     def __init__(self, name, module, klass, interface=None):
@@ -102,11 +114,17 @@ class Driver(YAMLObject):
         self.klass = class_from_name(module, klass)
 
     def setup(self):
+        """
+        Set up frontend, if it exists
+        """
         if self.interface:
             self.interface = get_interface(self.interface)
 
 
 class Action(YAMLObject):
+    """
+    Executes one or more actions when triggered.
+    """
     yaml_tag = '!action'
 
     def __init__(self, name, devices=[]):
@@ -114,6 +132,9 @@ class Action(YAMLObject):
         self.devices = devices
 
     def run(self):
+        """
+        Run the configured actions in multiple threads.
+        """
         for config in self.devices:
             dev = get_device(config['name'])
             method = method_from_name(dev.dev, config['method'])
@@ -125,6 +146,9 @@ class Action(YAMLObject):
 
 
 class Interface(YAMLObject):
+    """
+    Represents an HTML frontend to control a device.
+    """
     yaml_tag = '!interface'
 
     def __init__(self, name, friendly_name, template):
@@ -133,6 +157,7 @@ class Interface(YAMLObject):
         self.template = template
 
 
+# Set up YAML object instantiation
 yaml.add_path_resolver('!device', ['Device'], dict)
 yaml.add_path_resolver('!action', ['ActionGroup'], dict)
 yaml.add_path_resolver('!interface', ['Interface'], dict)

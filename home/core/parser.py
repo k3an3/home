@@ -11,6 +11,11 @@ from home.core.models import drivers, devices, actions, interfaces
 
 
 def parse(file='config.yml', data=None):
+    """
+    Load device config from a YAML file or blob.
+    :param file: File to parse
+    :param data: TODO
+    """
     with open(file) as f:
         drivers.clear()
         devices.clear()
