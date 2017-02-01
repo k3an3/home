@@ -20,7 +20,10 @@ class Plug:
         return self.device.auth()
 
     def power(self, state):
-        self.device.set_power(state)
+        try:
+            self.device.set_power(state)
+        except Exception as e:
+            print("Plug: " + str(e))
 
     def on(self):
         self.power(True)
