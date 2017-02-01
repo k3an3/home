@@ -45,6 +45,7 @@ import socket
 import sys
 from datetime import datetime
 
+import pytz
 from astral import Astral
 
 from home import config
@@ -111,10 +112,11 @@ class Bulb:
         a.solar_depression = 'civil'
         city = a[config.LOCATION]
         sun = city.sun(date=datetime.now(), local=True)
-        if datetime.now() < sun['sunrise']:
-            white = 255 - (datetime.now() - sun['sunrise']) * 200 / 6
-        elif datetime.now() > sun['sunset']:
-            white = 255 - (datetime.now() - sun['sunset']) * 200 / 6
+        dt = datetime.utcnow().replace(tzinfo=pytz.UTC)
+        if dt < sun['sunrise']:
+            white = 255 - (sun['sunrise'] - dt).total_seconds() / 3600 * 200 / 6
+        elif dt > sun['sunset']:
+            white = 255 - (dt - sun['sunset']).total_seconds() / 3600 * 200 / 6
         self.change_color(white=white)
 
 
