@@ -147,7 +147,12 @@ actions:
     - !action
       name: bedroom vacant
       devices:
+      - name: cam1
+        method: stop_detection
       - name: Bed
         method: change_color
         config:
          white: 0
+      - name: cam1
+        delay: 1
+        method: start_detection

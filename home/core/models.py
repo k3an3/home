@@ -5,6 +5,7 @@ models.py
 Contains classes to represent objects created by the parser.
 """
 import threading
+from time import sleep
 
 import yaml
 
@@ -140,6 +141,8 @@ class Action(YAMLObject):
             method = method_from_name(dev.dev, config['method'])
             try:
                 t = threading.Thread(target=method, kwargs=config.get('config'))
+                if config.get('delay'):
+                    sleep(config['delay'])
                 t.start()
             except Exception as e:
                 print("Action:", str(e))

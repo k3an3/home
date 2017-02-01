@@ -12,7 +12,7 @@ import sys
 
 import requests
 
-CONTROLLER_URL = "http://localhost:5000/api/command"
+CONTROLLER_URL = "https://105ww.xyz/api/command"
 
 if len(sys.argv) < 3:
     print("Usage: ./motion.py <camera_key> <action>")
