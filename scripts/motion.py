@@ -8,8 +8,9 @@ or ends. Sends a request to the security controller's command HTTP API.
 
 Usage: ./motion.py <camera_key> <start_or_end>
 """
-import requests
 import sys
+
+import requests
 
 CONTROLLER_URL = "http://localhost:5000/api/command"
 
@@ -18,8 +19,8 @@ if len(sys.argv) < 3 or sys.argv[2] not in ['start', 'end']:
     sys.exit(0)
 
 data = {
-    'device': sys.argv[1],
-    'command': 'event' + sys.argv[2],
+    'key': sys.argv[1],
+    'action': sys.argv[2],
 }
 
 requests.post(CONTROLLER_URL, data=data)

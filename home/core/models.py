@@ -14,6 +14,7 @@ drivers = []
 devices = []
 interfaces = []
 actions = []
+rooms = []
 
 
 def get_device_by_key(key):

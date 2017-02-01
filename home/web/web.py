@@ -88,9 +88,10 @@ def command_api():
             print("EVENT START")
             sec.alert()
             get_action('alert').run()
-            SecurityEvent.create(controller=sec, device=key)
+            # SecurityEvent.create(controller=sec, device=key)
             socketio.emit('state change', {'state': sec.state}, namespace='/ws')
             for subscriber in Subscriber.select():
+                pass
                 try:
                     WebPusher(subscriber.to_dict()).send(
                         json.dumps({'body': "New event alert!!!"}),

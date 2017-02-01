@@ -145,3 +145,17 @@ actions:
          speed: '0a'
       - name: Cabinet
         method: 'on'
+    - !action
+      name: bedroom occupied
+      devices:
+      - name: Bed
+        method: change_color
+        config:
+         white: 255
+    - !action
+      name: bedroom vacant
+      devices:
+      - name: Bed
+        method: change_color
+        config:
+         white: 0
