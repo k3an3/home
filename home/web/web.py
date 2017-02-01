@@ -13,17 +13,13 @@ import sys
 from flask import Flask, render_template, request, redirect, flash, abort, session, url_for
 from flask_login import LoginManager, login_required, login_user, current_user, logout_user, fresh_login_required
 from flask_socketio import SocketIO, emit, disconnect
+from pywebpush import WebPusher
 
-try:
-    from pywebpush import WebPusher
-except AttributeError:
-    print("Failed to load PyWebpush due to a bug in this version of pyelliptic")
-
+import home.core.parser as parser
 import home.core.utils as utils
 from home.core.models import devices, interfaces, get_device_by_key, get_action, get_device, actions
 from home.core.utils import random_string
 from home.web.models import *
-import home.core.parser as parser
 
 app = Flask(__name__)
 app.secret_key = '\xff\xe3\x84\xd0\xeb\x05\x1b\x89\x17\xce\xca\xaf\xdb\x8c\x13\xc0\xca\xe4'

@@ -14,8 +14,8 @@ import requests
 
 CONTROLLER_URL = "http://localhost:5000/api/command"
 
-if len(sys.argv) < 3 or sys.argv[2] not in ['start', 'end']:
-    print("Usage: ./motion.py <camera_key> <start_or_end>")
+if len(sys.argv) < 3:
+    print("Usage: ./motion.py <camera_key> <action>")
     sys.exit(0)
 
 data = {
