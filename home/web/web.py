@@ -230,6 +230,13 @@ def change_password():
     return redirect(url_for('index'))
 
 
+@socketio.on('update', namespace='/ws')
+@ws_login_required
+def ws_update_app():
+    if current_user.admin:
+        utils.update()
+
+
 @app.route("/update")
 @login_required
 def update_app():

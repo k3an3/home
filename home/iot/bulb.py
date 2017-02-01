@@ -113,6 +113,7 @@ class Bulb:
         city = a[config.LOCATION]
         sun = city.sun(date=datetime.now(), local=True)
         dt = datetime.utcnow().replace(tzinfo=pytz.UTC)
+        white = 255
         if dt < sun['sunrise']:
             white = 255 - (sun['sunrise'] - dt).total_seconds() / 3600 * 200 / 6
         elif dt > sun['sunset']:
