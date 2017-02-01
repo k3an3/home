@@ -9,11 +9,6 @@ import importlib
 import os
 import re
 import subprocess
-from datetime import datetime
-
-from astral import Astral
-
-from home import config
 
 
 def num(n):
@@ -75,17 +70,6 @@ def method_from_name(klass, method_name):
         return getattr(klass, method_name)
     except AttributeError:
         raise NotImplementedError()
-
-
-def sunlight():
-    a = Astral()
-    a.solar_depression = 'civil'
-    city = a[config.LOCATION]
-    sun = city.sun(date=datetime.now(), local=True)
-    if datetime.now() < sun['sunrise']:
-        return 255 * (datetime.now() - sun['sunrise']) / 6
-    elif datetime.now() > sun['sunset']:
-        return 255 * (datetime.now() - sun['sunset']) / 6
 
 
 random_string = lambda: hashlib.sha1(os.urandom(128)).hexdigest()

@@ -86,20 +86,14 @@ actions:
       name: wake
       devices:
       - name: Bed
-        method: change_color
-        config:
-         white: 255
+        method: sunlight
     - !action
       name: living room on
       devices:
       - name: Left
-        method: change_color
-        config:
-         white: 255
+        method: sunlight
       - name: Right
-        method: change_color
-        config:
-         white: 255
+        method: sunlight
     - !action
       name: living room off
       devices:
@@ -149,9 +143,7 @@ actions:
       name: bedroom occupied
       devices:
       - name: Bed
-        method: change_color
-        config:
-         white: 255
+        method: sunlight
     - !action
       name: bedroom vacant
       devices:

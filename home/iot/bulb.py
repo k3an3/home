@@ -43,7 +43,11 @@ tail:
 """
 import socket
 import sys
+from datetime import datetime
 
+from astral import Astral
+
+from home import config
 from home.core.utils import num
 
 SUPPORTED_MODES = ['31', '41', '61']
@@ -97,10 +101,17 @@ class Bulb:
         except Exception:
             pass
 
+    def sunlight(self):
+        a = Astral()
+        a.solar_depression = 'civil'
+        city = a[config.LOCATION]
+        sun = city.sun(date=datetime.now(), local=True)
+        if datetime.now() < sun['sunrise']:
+            white = 255 - (datetime.now() - sun['sunrise']) * 200 / 6
+        elif datetime.now() > sun['sunset']:
+            white = 255 - (datetime.now() - sun['sunset']) * 200 / 6
+        self.change_color(white=white)
 
-class SunBulb:
-    def __init__(self, bulb):
-        self.bulb = bulb
 
 if __name__ == '__main__':
     if len(sys.argv) < 4:
