@@ -10,8 +10,8 @@ import yaml
 from home.core.models import drivers, devices, actions, interfaces
 
 
-def parse(config):
-    with open(config) as f:
+def parse(file='config.yml', data=None):
+    with open(file) as f:
         drivers.clear()
         devices.clear()
         actions.clear()

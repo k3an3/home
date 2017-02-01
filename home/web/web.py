@@ -1,3 +1,4 @@
+import ast
 import functools
 import json
 import subprocess
@@ -72,7 +73,8 @@ def command_api():
     if request.form.get('device'):
         device = get_device(request.form.get('device'))
         method = utils.method_from_name(type(device.dev), request.form.get('method'))
-        method(device.dev)
+        config = ast.literal_eval(request.form.get('config'))
+        method(device.dev, **config)
         return '', 204
     sec = SecurityController.get()
     action = request.form.get('action')

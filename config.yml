@@ -145,7 +145,3 @@ actions:
          speed: '0a'
       - name: Cabinet
         method: 'on'
-
-
-config:
-    - location: Des Moines
