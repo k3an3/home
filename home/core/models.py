@@ -139,6 +139,7 @@ class Action(YAMLObject):
         for config in self.devices:
             dev = get_device(config['name'])
             method = method_from_name(dev.dev, config['method'])
+            print("Execute action", config['method'])
             try:
                 t = threading.Thread(target=method, kwargs=config.get('config'))
                 if config.get('delay'):
