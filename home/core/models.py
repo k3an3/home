@@ -96,10 +96,7 @@ class Device(YAMLObject):
         if self.driver:
             self.driver = get_driver(self.driver)
             dev = self.driver.klass
-            if self.config:
-                config_d = {}
-                for d in self.config:
-                    config_d.update(d)
+            config_d = self.config if self.config else {}
             self.dev = dev(**config_d)
 
 

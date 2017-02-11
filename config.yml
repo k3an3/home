@@ -19,6 +19,10 @@ installed_drivers:
         name: plug
         module: plug
         klass: Plug
+    - !driver
+        name: wol
+        module: wol
+        klass: WakeOnLAN
 
 devices:
     living_room:
@@ -26,31 +30,36 @@ devices:
             name: Left
             driver: bulb
             config:
-            - host: 192.168.1.124
+             host: 192.168.1.124
         - !device
             name: Right
             driver: bulb
             config:
-            - host: 192.168.1.125
+             host: 192.168.1.125
         - !device
             name: Cabinet
             driver: plug
             config:
-            - host: 192.168.1.126
-            - mac: B4:43:0D:C1:CB:18
+             host: 192.168.1.126
+             mac: B4:43:0D:C1:CB:18
 
     bedroom:
         - !device
             name: Bed
             driver: bulb
             config:
-            - host: 192.168.1.123
+             host: 192.168.1.123
         - !device
             name: cam1
             driver: motion
             key: cam1
             config:
-            - thread: 1
+             thread: 1
+        - !device
+            name: Desktop
+            driver: wol
+            config:
+             mac: 44:8a:5b:2c:38:d9
 
     clients:
          - !device
@@ -87,6 +96,8 @@ actions:
       devices:
       - name: Bed
         method: sunlight
+      - name: Desktop
+        method: wake
     - !action
       name: living room on
       devices:
