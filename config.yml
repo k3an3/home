@@ -60,6 +60,7 @@ devices:
             driver: wol
             config:
              mac: 44:8a:5b:2c:38:d9
+             manual_interface: eno1
 
     clients:
          - !device
