@@ -127,15 +127,19 @@ class Action(YAMLObject):
 
     def __init__(self, name, devices=[]):
         self.name = name
-        self.devices = devices
+        self.devices = []
+        self.devs = devices
+
+    def setup(self):
+        for dev in self.devs:
+            self.devices.append((get_device(dev['name']), dev))
 
     def run(self):
         """
         Run the configured actions in multiple threads.
         """
-        for config in self.devices:
-            dev = get_device(config['name'])
-            method = method_from_name(dev.dev, config['method'])
+        for device, config in self.devices:
+            method = method_from_name(device.dev, config['method'])
             print("Execute action", config['method'])
             try:
                 t = threading.Thread(target=method, kwargs=config.get('config'))

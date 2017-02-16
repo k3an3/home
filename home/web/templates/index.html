@@ -352,6 +352,10 @@
                     var table = $('#events');
                 });
 
+                ws.on('update', function(data) {
+                    document.location = "/";
+                });
+
                 ws.on('state change', function (data) {
                     var bg;
                     var color;

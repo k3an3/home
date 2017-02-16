@@ -235,6 +235,7 @@ def change_password():
 def ws_update_app():
     if current_user.admin:
         utils.update()
+    emit('update', {}, broadcast=True)
 
 
 @app.route("/update")

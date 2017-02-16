@@ -39,4 +39,5 @@ def parse(file='config.yml', data=None):
         print("Configured actions:")
         for action in y['actions']:
             actions.append(action)
+            action.setup()
             print(action.devices)
