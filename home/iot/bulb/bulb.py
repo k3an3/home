@@ -124,15 +124,15 @@ class Bulb:
     def sunlight(self):
         self.change_color(white=calc_sunlight())
 
-    def fade(self, start=None, stop=None, speed=1):
+    def fade(self, start=None, stop=None, bright=None, speed=1):
         speed = abs(speed)
         if start:
-            bright = 255
+            bright = bright or 255
             while bright > 0:
                 self.change_color(**start, brightness=bright, mode='41')
                 bright -= speed
         if stop:
-            bright = 0
+            bright = bright or 0
             while bright < 255:
                 self.change_color(**stop, brightness=bright, mode='41')
                 bright += speed

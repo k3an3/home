@@ -1,4 +1,4 @@
-from shlex import quote
+import re
 
 import paramiko
 
@@ -11,6 +11,7 @@ class SSH:
         self.port = port
         self.host = host
         self.ssh = paramiko.SSHClient()
+        self.ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
     def send(self, command):
         self.ssh.connect(self.host,
@@ -18,4 +19,8 @@ class SSH:
                          self.username,
                          self.password,
                          key_filename=self.keyfile)
-        return self.ssh.exec_command(quote(command))
+        return self.ssh.exec_command(escape(command))[2].readlines()
+
+
+def escape(command):
+    return re.sub(r'[;&|]', '', command)

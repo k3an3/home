@@ -81,7 +81,7 @@ class Device(YAMLObject):
 
     def __init__(self, name, driver=None, config=None, key=None, group=None):
         self.name = name
-        self.key = key
+        self.key = key  # deprecated?
         self.driver = driver
         self.group = group
         self.config = config

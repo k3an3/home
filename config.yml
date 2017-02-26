@@ -23,6 +23,10 @@ installed_drivers:
         name: wol
         module: wol
         klass: WakeOnLAN
+    - !driver
+        name: sshfirewall
+        module: firewall
+        klass: SSHFirewall
 
 devices:
     living_room:
@@ -42,6 +46,13 @@ devices:
             config:
              host: 192.168.1.126
              mac: B4:43:0D:C1:CB:18
+        - !device
+            name: r1
+            driver: sshfirewall
+            config:
+             host: 172.24.0.1
+             keyfile: /home/keane/.ssh/id_rsa
+             path: /usr/sbin/iptables
 
     bedroom:
         - !device
@@ -61,11 +72,6 @@ devices:
             config:
              mac: 44:8a:5b:2c:38:d9
              manual_interface: eno1
-
-    clients:
-         - !device
-             name: sleep
-             key: sleep
 
 actions:
     - !action

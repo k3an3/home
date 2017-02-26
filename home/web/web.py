@@ -7,16 +7,18 @@ Flask web application for Home.
 import ast
 import json
 
-from flask import Flask, render_template, request, redirect, abort, url_for, session
+from flask import Flask, render_template, request, redirect, abort, url_for, session, flash
 from flask_login import LoginManager, login_required, current_user
+from flask_login import login_user, fresh_login_required, logout_user
 from flask_socketio import SocketIO, emit, disconnect
+from peewee import DoesNotExist
 from pywebpush import WebPusher
 
 import home.core.parser as parser
 import home.core.utils as utils
 from home.core.models import devices, interfaces, get_action, get_device, actions
 from home.web.models import *
-from home.web.models import User
+from home.web.models import User, APIClient
 from home.web.utils import ws_login_required, generate_csrf_token, VERSION
 
 app = Flask(__name__)
@@ -55,18 +57,21 @@ def command_api():
     """
     try:
         key = APIClient.get(token=request.form.get('key'))
-    except StopIteration:
+    except DoesNotExist:
         abort(403)
     if request.form.get('device'):
         device = get_device(request.form.get('device'))
         method = utils.method_from_name(type(device.dev), request.form.get('method'))
         config = ast.literal_eval(request.form.get('config', '{}'))
+        print("Execute command", device.name, method, config)
         method(device.dev, **config)
         return '', 204
     sec = SecurityController.get()
     action = request.form.get('action')
     try:
-        get_action(action).run()
+        action = get_action(action)
+        print("Run action", action)
+        action.run()
         return '', 204
     except StopIteration:
         print("No action found for", action)
@@ -201,7 +206,7 @@ app.jinja_env.globals['csrf_token'] = generate_csrf_token
 
 @app.before_request
 def csrf_protect():
-    if request.method == "POST" and request.path != '/api/command':
+    if request.method == "POST" and not request.path.startswith('/api/'):
         token = session.pop('_csrf_token', None)
         if not token or token != request.form.get('_csrf_token'):
             abort(403)
@@ -217,3 +222,60 @@ def add_header(response):
 @login_manager.user_loader
 def user_loader(user_id):
     return User.get(username=user_id)
+
+
+@app.route('/login', methods=['POST'])
+def login():
+    user = User.get(username=request.form.get('username'))
+    if user.check_password(request.form.get('password')):
+        login_user(user)
+        flash('Logged in successfully.')
+    return redirect(url_for('index'))
+
+
+@app.route("/user/password", methods=['POST'])
+@fresh_login_required
+@login_required
+def change_password():
+    if current_user.admin:
+        user = User.get(username=request.form.get('username'))
+    elif current_user.check_password(request.form.get('password')):
+        user = current_user
+    if request.form.get('new_password') == request.form.get('new_password_confirm'):
+        user.set_password(request.form.get('new_password'))
+        user.save()
+    return redirect(url_for('index'))
+
+
+@app.route("/user/create", methods=['POST'])
+@fresh_login_required
+@login_required
+def create_user():
+    if not current_user.admin:
+        abort(403)
+    if request.form.get('api'):
+        APIClient.create(name=request.form.get('username'))
+    else:
+        if len(request.form.get('password')):
+            u = User.create(username=request.form.get('username'),
+                            password="")
+            u.set_password(request.form.get('password'))
+            u.admin = request.form.get('admin')
+            u.save()
+        else:
+            abort(500)
+    return redirect(url_for('index'))
+
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
+
+
+@socketio.on('revoke', namespace='/ws')
+@ws_login_required
+def revoke(message):
+    client = APIClient.get(name=message.get('name'))
+    client.delete_instance()
