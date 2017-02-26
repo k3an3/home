@@ -6,7 +6,7 @@ FIREWALL_TYPES = {
 }
 
 
-class Firewall(SSH):
+class SSHFirewall(SSH):
     def __init__(self, firewall="iptables", *args, **kwargs):
         super().__init__(*args, **kwargs)
         if firewall not in FIREWALL_TYPES:

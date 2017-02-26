@@ -2,9 +2,9 @@
 import os
 import sys
 
+from home.core.parser import parse
 from home.web.models import db_init
 from home.web.web import socketio, app
-from home.core.parser import parse
 
 sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 

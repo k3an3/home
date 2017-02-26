@@ -91,12 +91,12 @@ actions:
       - name: Bed
         method: change_color
         config:
-         white: 0
+         last: true
     - !action
       name: wake
       devices:
       - name: Bed
-        method: sunlight
+        method: fade_sunlight
       - name: Desktop
         method: wake
     - !action

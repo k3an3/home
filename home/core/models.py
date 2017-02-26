@@ -87,6 +87,7 @@ class Device(YAMLObject):
         self.config = config
         self.uuid = random_string()
         self.dev = None
+        self.last = ()
 
     def setup(self):
         """

@@ -22,7 +22,6 @@ from home.web.utils import ws_login_required, generate_csrf_token, VERSION
 app = Flask(__name__)
 app.secret_key = '\xff\xe3\x84\xd0\xeb\x05\x1b\x89\x17\xce\xca\xaf\xdb\x8c\x13\xc0\xca\xe4'
 API_KEY = 'AIzaSyCa349yW3-oWMbYRHl21V1IgGRyM6O7PW4'
-app.debug = True
 socketio = SocketIO(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -43,6 +42,7 @@ def index():
                            devices=devices,
                            sec=sec,
                            events=events,
+                           clients=APIClient.select(),
                            actions=actions,
                            version=VERSION,
                            )
@@ -60,7 +60,7 @@ def command_api():
     if request.form.get('device'):
         device = get_device(request.form.get('device'))
         method = utils.method_from_name(type(device.dev), request.form.get('method'))
-        config = ast.literal_eval(request.form.get('config', {}))
+        config = ast.literal_eval(request.form.get('config', '{}'))
         method(device.dev, **config)
         return '', 204
     sec = SecurityController.get()

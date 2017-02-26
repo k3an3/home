@@ -17,6 +17,10 @@ function editDevice() {
     });
 }
 
+function revoke(name) {
+    ws.emit('revoke', {name: name});
+}
+
 ws.on('disconnect', function () {
     $('#status').html('Status: <span style="color:red">Disconnected</span>');
 });

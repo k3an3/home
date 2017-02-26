@@ -234,6 +234,22 @@
                         </div>
                     {% endfor %}
                 </div>
+                {% if current_user.admin %}
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">API Clients</h3>
+                        </div>
+                        {% for client in clients %}
+                            <div class="panel-body">
+                                <strong>name=</strong>{{ client.name }}
+                                <strong>token=</strong>{{ client.token }}
+                                <button onclick="revoke('{{ client.name }}');this.parentNode.style.display = 'none';"
+                                        class="btn btn-danger">Revoke
+                                </button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
             </div>
             <div class="col-md-6">
                 <div class="panel">
@@ -261,15 +277,17 @@
                             Username:
                             <input class="form-control" name="username" autocomplete="off">
                             Password:
-                            <input class="form-control" type="password" name="password" autocomplete="off">
+                            <input class="form-control" id="password1" type="password" name="password"
+                                   autocomplete="off">
                             <br>
                             <div class="btn-group" data-toggle="buttons">
-                                <label class="btn btn-warning">
-                                    <input type="radio" data-toggle="button" aria-pressed="false"
+                                <label class="btn btn-warning" onclick="$('#password1').toggle()">
+                                    <input type="radio" name="api" data-toggle="button" aria-pressed="false" id="api"
                                            autocomplete="off">API</input>
                                 </label>
                                 <label class="btn btn-danger">
-                                    <input type="radio" data-toggle="button" aria-pressed="false" autocomplete="off">Admin</input>
+                                    <input type="radio" name="admin" data-toggle="button" aria-pressed="false"
+                                           autocomplete="off">Admin</input>
                                 </label>
                             </div>
                             <br>
@@ -284,10 +302,10 @@
             </div>
         {% endif %}
         </div>
+        <script src="static/js/index.js"></script>
         {% if current_user.is_authenticated %}
             <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
             <script src="static/js/check.js"></script>
-            <script src="static/js/index.js"></script>
             <script src="static/js/main.js"></script>
             <script src="static/js/color.js"></script>
         {% endif %}
