@@ -5,21 +5,19 @@ web.py
 Flask web application for Home.
 """
 import ast
-import functools
 import json
-import subprocess
-import sys
 
-from flask import Flask, render_template, request, redirect, flash, abort, session, url_for
-from flask_login import LoginManager, login_required, login_user, current_user, logout_user, fresh_login_required
+from flask import Flask, render_template, request, redirect, abort, url_for, session
+from flask_login import LoginManager, login_required, current_user
 from flask_socketio import SocketIO, emit, disconnect
 from pywebpush import WebPusher
 
 import home.core.parser as parser
 import home.core.utils as utils
-from home.core.models import devices, interfaces, get_device_by_key, get_action, get_device, actions
-from home.core.utils import random_string
+from home.core.models import devices, interfaces, get_action, get_device, actions
 from home.web.models import *
+from home.web.models import User
+from home.web.utils import ws_login_required, generate_csrf_token, VERSION
 
 app = Flask(__name__)
 app.secret_key = '\xff\xe3\x84\xd0\xeb\x05\x1b\x89\x17\xce\xca\xaf\xdb\x8c\x13\xc0\xca\xe4'
@@ -28,30 +26,6 @@ app.debug = True
 socketio = SocketIO(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
-
-try:
-    VERSION = 'v' + subprocess.check_output(['git', 'describe', '--tags', 'HEAD']).decode('UTF-8')
-except:
-    VERSION = 'unknown'
-
-# TODO: remove
-sys.path.append(os.path.dirname("/home/keane/dev/home/home"))
-
-
-def ws_login_required(f):
-    """
-    Authenticate Websocket requests
-    :param f: Decorated function
-    :return: Function
-    """
-    @functools.wraps(f)
-    def wrapped(*args, **kwargs):
-        if not current_user.is_authenticated:
-            disconnect()
-        else:
-            return f(*args, **kwargs)
-
-    return wrapped
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -80,7 +54,7 @@ def command_api():
     Command API used by devices.
     """
     try:
-        key = get_device_by_key(request.form.get('key'))
+        key = APIClient.get(token=request.form.get('key'))
     except StopIteration:
         abort(403)
     if request.form.get('device'):
@@ -115,7 +89,7 @@ def command_api():
             print("EVENT END")
             try:
                 event = SecurityEvent.filter(controller=sec,
-                                             device=key).order_by(
+                                             device=key.name).order_by(
                     SecurityEvent.id.desc()).get()
                 event.duration = (datetime.datetime.now() - event.datetime).total_seconds()
                 print(event.duration)
@@ -179,57 +153,6 @@ def subscribe(subscriber):
             gcm_key=API_KEY)
 
 
-@socketio.on('change color', namespace='/ws')
-@ws_login_required
-def request_change_color(message):
-    """
-    Change the bulb's color. Consider moving this to a module in a bulb package.
-    """
-    emit('push color', {"device": message['device'], "color": message['color']},
-         broadcast=True)
-    device = get_device(message['device'])
-    device.dev.change_color(*utils.RGBfromhex(message['color']),
-                            utils.num(message.get('white', 0)), message.get('bright', 100), '41'
-                            )
-
-
-@socketio.on('outmap', namespace="/ws")
-@ws_login_required
-def reset_color_preview(message):
-    """
-    Consider moving this to a module in a bulb package.
-    """
-    emit('preview reset', message['color'], broadcast=True)
-
-
-@login_manager.user_loader
-def user_loader(user_id):
-    return User.get(username=user_id)
-
-
-@app.route('/login', methods=['POST'])
-def login():
-    user = User.get(username=request.form.get('username'))
-    if user.check_password(request.form.get('password')):
-        login_user(user)
-        flash('Logged in successfully.')
-    return redirect(url_for('index'))
-
-
-@app.route("/user/password", methods=['POST'])
-@fresh_login_required
-@login_required
-def change_password():
-    if current_user.admin:
-        user = User.get(username=request.form.get('username'))
-    elif current_user.check_password(request.form.get('password')):
-        user = current_user
-    if request.form.get('new_password') == request.form.get('new_password_confirm'):
-        user.set_password(request.form.get('new_password'))
-        user.save()
-    return redirect(url_for('index'))
-
-
 @socketio.on('update', namespace='/ws')
 @ws_login_required
 def ws_update_app():
@@ -254,13 +177,6 @@ def reload():
     return redirect(url_for('index'))
 
 
-@app.route("/logout")
-@login_required
-def logout():
-    logout_user()
-    return redirect(url_for('index'))
-
-
 @app.before_request
 def _db_connect():
     """
@@ -280,6 +196,9 @@ def _db_close(obj):
         db.close()
 
 
+app.jinja_env.globals['csrf_token'] = generate_csrf_token
+
+
 @app.before_request
 def csrf_protect():
     if request.method == "POST" and request.path != '/api/command':
@@ -288,44 +207,13 @@ def csrf_protect():
             abort(403)
 
 
-def generate_csrf_token():
-    if '_csrf_token' not in session:
-        session['_csrf_token'] = random_string()
-    return session['_csrf_token']
-
-
 @app.after_request
 def add_header(response):
-    # response.headers['Content-Security-Policy'] = "connect-src 'self'"
+    response.headers['Content-Security-Policy'] = "connect-src 'self'"
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response
 
 
-app.jinja_env.globals['csrf_token'] = generate_csrf_token
-
-# TODO: Remove the following
-if __name__ == '__main__':
-    db_init()
-    try:
-        import eventlet
-
-        eventlet.monkey_patch()
-        print('Using eventlet')
-        create_thread_func = lambda f: f
-        start_thread_func = lambda f: eventlet.spawn(f)
-    except ImportError:
-        try:
-            import gevent
-            import gevent.monkey
-
-            gevent.monkey.patch_all()
-            print('Using gevent')
-            create_thread_func = lambda f: gevent.Greenlet(f)
-            start_thread_func = lambda t: t.start()
-        except ImportError:
-            import threading
-
-            print('Using threading')
-            create_thread_func = lambda f: threading.Thread(target=f)
-            start_thread_func = lambda t: t.start()
-    socketio.run(app, debug=True)
+@login_manager.user_loader
+def user_loader(user_id):
+    return User.get(username=user_id)

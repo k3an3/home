@@ -238,6 +238,7 @@
             <div class="col-md-6">
                 <div class="panel">
                     <form id="password_form" method="POST" action="/user/password">
+                        <h3>Reset Password</h3>
                         <input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
                         {% if current_user.admin %}
                             User:
@@ -253,6 +254,29 @@
                         <br>
                         <input type="submit" class="btn btn-primary" value="Submit">
                     </form>
+                    {% if current_user.admin %}
+                        <form id="user_form" method="POST" action="/user/create">
+                            <h3>Create User</h3>
+                            <input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
+                            Username:
+                            <input class="form-control" name="username" autocomplete="off">
+                            Password:
+                            <input class="form-control" type="password" name="password" autocomplete="off">
+                            <br>
+                            <div class="btn-group" data-toggle="buttons">
+                                <label class="btn btn-warning">
+                                    <input type="radio" data-toggle="button" aria-pressed="false"
+                                           autocomplete="off">API</input>
+                                </label>
+                                <label class="btn btn-danger">
+                                    <input type="radio" data-toggle="button" aria-pressed="false" autocomplete="off">Admin</input>
+                                </label>
+                            </div>
+                            <br>
+                            <br>
+                            <input type="submit" class="btn btn-primary" value="Submit">
+                        </form>
+                    {% endif %}
                     <br>
                     <a href="javascript:void(0)" onclick="ws.emit('update')">Update</a>
                     <a href="/reload">Reload</a>
@@ -262,146 +286,13 @@
         </div>
         {% if current_user.is_authenticated %}
             <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
-            <script src="static/check.js"></script>
-            <script>
-                var ws = io.connect('//' + document.domain + ':' + location.port + '/ws');
-                var last = "#FFFFFF";
-                var bright = 100;
-                var target = "0";
-
-                function editDevice() {
-                    ws.emit('admin', {
-                        action: 'add',
-                        id: $('#id').val(),
-                        name: $('#name').val(),
-                        category: $('#category').val(),
-                        data: $('#data').val()
-                    });
-                }
-
-                function mouseOverColor(hex) {
-                    ws.emit('change color', {color: hex, bright: bright, device: target});
-                    $("#preview").css('background-color', hex);
-                    $("#preview").css('visibility', 'visible');
-                    $("#hex").val(hex);
-                    return false;
-                }
-
-                function clickColor(hex) {
-                    mouseOverColor(hex);
-                    last = hex;
-                    return false;
-                }
-
-                function updateColor() {
-                    mouseOverColor($("#hex").val());
-                    last = $("#hex").val();
-                    return false;
-                }
-
-                function mouseOutMap() {
-                    ws.emit('change color', {color: last, bright: bright, device: target});
-                    ws.emit('outmap', {color: last, bright: bright, device: target});
-                    $("#hex").val(last);
-                    $("#preview").css('visibility', 'hidden');
-                    return false;
-                }
-
-                function changeState() {
-                    ws.emit('change state');
-                }
-
-                ws.on('push color', function (data) {
-                    console.log(data.device == target);
-                    if (data.device == target) {
-                        $("#preview" + target).css('background-color', data.color);
-                        $("#preview" + target).css('visibility', 'visible');
-                        $("#hex" + target).val(data.color);
-                    }
-                });
-
-                function changewhite(val) {
-                    ws.emit('change color', {color: "000000", white: val, bright: bright, device: target});
-                }
-
-                ws.on('disconnect', function () {
-                    $('#status').html('Status: <span style="color:red">Disconnected</span>');
-                });
-
-                ws.on('connect', function () {
-                    $('#status').html('Status: <span style="color:green">Connected</span>');
-                });
-
-                ws.on('preview reset', function (msg) {
-                    $("#hex").val(msg);
-                    $("#preview").css('visibility', 'hidden');
-                });
-
-                $('#logout').click(function () {
-                    document.location = "/logout";
-                });
-
-                ws.on('message', function (data) {
-                    $('#messages').html(data);
-                    $("#messages").css('visibility', 'visible');
-                    $('#messages').fadeIn();
-                    alert("Please refresh to update devices.")
-                });
-
-                ws.on('event', function (data) {
-                    var table = $('#events');
-                });
-
-                ws.on('update', function(data) {
-                    document.location = "/";
-                });
-
-                ws.on('state change', function (data) {
-                    var bg;
-                    var color;
-                    var state = $('#state');
-                    var button = $('#statusbutton');
-
-                    if (data.state == 'alert') {
-                        bg = 'red';
-                        color = 'white';
-                        state.html('alert');
-                        button.html('Clear');
-                        button.removeAttr('class').addClass('btn btn-warning');
-                    } else if (data.state == 'armed') {
-                        bg = 'green';
-                        color = 'white';
-                        state.html('armed');
-                        button.html('Disable');
-                        button.removeAttr('class').addClass('btn btn-danger');
-                    } else {
-                        bg = '';
-                        color = 'black';
-                        state.html('disabled');
-                        button.html('Enable');
-                        button.removeAttr('class').addClass('btn btn-success');
-                    }
-                    $('.jumbotron').css('background-color', bg);
-                    $('.jumbotron').css('color', color);
-                    if (data.message != "")
-                        $('#warning').html(data.message);
-                });
-
-                setTimeout(function () {
-                    $('#messages').fadeOut();
-                }, 3000);
-            </script>
+            <script src="static/js/check.js"></script>
+            <script src="static/js/index.js"></script>
+            <script src="static/js/main.js"></script>
+            <script src="static/js/color.js"></script>
         {% endif %}
         <script>
-            $('.nav a').click(function (e) {
-                e.preventDefault();
-                updateTarget($(this).context.hash.split('#')[1]);
-                $(this).tab('show');
-            });
 
-            function updateTarget(newTarget) {
-                target = newTarget;
-            }
         </script>
 </body>
 </html>

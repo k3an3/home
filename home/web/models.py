@@ -1,13 +1,11 @@
 import datetime
-import os
 
 from passlib.hash import sha256_crypt
 from peewee import SqliteDatabase, MySQLDatabase, CharField, BooleanField, ForeignKeyField, IntegerField, DateTimeField, \
     OperationalError, Model
 
+from home.core.utils import random_string
 
-# Based on configuration, use a different database.
-# TODO: fix to use app.debug
 if True:
     db = SqliteDatabase('app.db')
 else:
@@ -21,6 +19,7 @@ def db_init():
                           Subscriber,
                           SecurityController,
                           SecurityEvent,
+                          APIClient
                           ])
         print('Creating tables...')
         # TODO: fix to use app.debug
@@ -63,6 +62,11 @@ class User(BaseModel):
 
     def set_password(self, password):
         self.password = sha256_crypt.encrypt(password)
+
+
+class APIClient(BaseModel):
+    name = CharField(unique=True)
+    token = CharField(default=random_string)
 
 
 class Subscriber(BaseModel):
