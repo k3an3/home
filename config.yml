@@ -51,7 +51,7 @@ devices:
             driver: sshfirewall
             config:
              host: 172.24.0.1
-             keyfile: /home/keane/.ssh/id_rsa
+             keyfile: /srv/www/home/.ssh/id_rsa
              path: /usr/sbin/iptables
 
     bedroom:
