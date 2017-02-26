@@ -260,7 +260,7 @@ def create_user():
             u = User.create(username=request.form.get('username'),
                             password="")
             u.set_password(request.form.get('password'))
-            u.admin = request.form.get('admin')
+            u.admin = True if request.form.get('admin') else False
             u.save()
         else:
             abort(500)
