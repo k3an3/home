@@ -97,7 +97,7 @@ actions:
       - name: Bed
         method: change_color
         config:
-         last: true
+         white: 0
     - !action
       name: wake
       devices:
