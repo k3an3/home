@@ -143,7 +143,7 @@ class Action(YAMLObject):
             method = method_from_name(device.dev, config['method'])
             print("Execute action", config['method'])
             try:
-                t = threading.Thread(target=method, kwargs=config.get('config'))
+                t = threading.Thread(target=method, kwargs=config['config'])
                 if config.get('delay'):
                     sleep(config['delay'])
                 t.start()

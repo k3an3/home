@@ -4,7 +4,6 @@ web.py
 
 Flask web application for Home.
 """
-import ast
 import json
 
 from flask import Flask, render_template, request, redirect, abort, url_for, session, flash
@@ -55,16 +54,16 @@ def command_api():
     """
     Command API used by devices.
     """
+    post = request.form.to_dict()
     try:
-        key = APIClient.get(token=request.form.get('key'))
+        key = APIClient.get(token=post.pop('key'))
     except DoesNotExist:
         abort(403)
     if request.form.get('device'):
-        device = get_device(request.form.get('device'))
-        method = utils.method_from_name(type(device.dev), request.form.get('method'))
-        config = ast.literal_eval(request.form.get('config', '{}'))
-        print("Execute command", device.name, method, config)
-        method(device.dev, **config)
+        device = get_device(post.pop('device'))
+        method = utils.method_from_name(type(device.dev), post.pop('method'))
+        print("Execute command on", device.name, method, post)
+        method(device.dev, **post)
         return '', 204
     sec = SecurityController.get()
     action = request.form.get('action')
@@ -166,6 +165,17 @@ def ws_update_app():
     emit('update', {}, broadcast=True)
 
 
+@app.route('/api/update', methods=['POST'])
+def api_update_app():
+    # Restrict to certain clients
+    try:
+        APIClient.get(key=request.form.get('secret'))
+    except Exception:
+        abort(403)
+    utils.update()
+    emit('update', {}, broadcast=True)
+
+
 @app.route("/update")
 @login_required
 def update_app():
@@ -214,7 +224,7 @@ def csrf_protect():
 
 @app.after_request
 def add_header(response):
-    response.headers['Content-Security-Policy'] = "connect-src 'self'"
+    response.headers['Content-Security-Policy'] = "default-src 'self'"
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response
 

@@ -37,18 +37,18 @@ class SSHFirewall(SSH):
             )
 
 
-@app.route('/api/firewall/unblock', methods=['POST'])
+@app.route('/api/firewall/unblock', methods=['GET', 'POST'])
 def unblock_this():
     # Todo: expire automatically
     try:
-        APIClient.get(token=request.form.get('key'))
-        device = get_device(request.form.get('device'))
+        APIClient.get(token=request.values.get('key'))
+        device = get_device(request.values.get('device'))
     except (DoesNotExist, StopIteration):
         abort(403)
     # Eventually, inheritance on "Firewall" class
     if not isinstance(device.driver.klass, SSHFirewall.__class__):
         raise NotImplementedError
     device.dev.unblock(saddr=request.remote_addr,
-                       proto=request.form.get('proto'),
-                       dport=request.form.get('dport'))
+                       proto=request.values.get('proto'),
+                       dport=request.values.get('dport'))
     return '', 204
