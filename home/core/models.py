@@ -6,7 +6,7 @@ Contains classes to represent objects created by the parser.
 """
 from multiprocessing import Process
 from time import sleep
-from typing import Callable, Generator
+from typing import Iterator
 
 import yaml
 
@@ -137,7 +137,7 @@ class Action(YAMLObject):
         for dev in self.devs:
             self.devices.append((get_device(dev['name']), dev))
 
-    def prerun(self) -> Generator[Callable]:
+    def prerun(self) -> Iterator[Process]:
         for device, config in self.devices:
             method = method_from_name(device.dev, config['method'])
             print("Execute action", config['method'])
