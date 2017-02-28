@@ -41,4 +41,5 @@ six
 vine
 wakeonlan
 Wave
+websocket-client
 Werkzeug

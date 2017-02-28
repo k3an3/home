@@ -4,6 +4,10 @@ interfaces:
         name: colormap
         friendly_name: Lights
         template: bulb.html
+    - !interface
+        name: music
+        friendly_name: Music
+        template: music.html
 
 installed_drivers:
     - !driver
