@@ -85,7 +85,7 @@ HF_COMMAND_OK = '+ok'.encode()
 prepare_hex = lambda x: format(x, 'x').zfill(2)
 
 
-def calc_sunlight():
+def calc_sunlight() -> int:
     """
     Calculate an appropriate brightness for the bulb depending on
     current sunlight.
@@ -111,15 +111,13 @@ class Bulb:
 
     def __init__(self, host):
         self.host = host
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.socket.connect((self.host, CONTROL_PORT))
 
-    def auth(self):
+    def auth(self) -> None:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.sendto(HF_COMMAND, (self.host, HF_COMMAND_PORT))
         s.sendto(HF_COMMAND_OK, (self.host, HF_COMMAND_PORT))
 
-    def change_color(self, red=0, green=0, blue=0, white=0, brightness=255, mode='31', function=None, speed='1f'):
+    def change_color(self, red=0, green=0, blue=0, white=0, brightness=255, mode='31', function=None, speed='1f') -> None:
         """
         Provided RGB values and a brightness, change the color of the
         bulb with a TCP socket.
@@ -145,20 +143,20 @@ class Bulb:
             # Build packet
             data = bytearray.fromhex(mode + color_hex
                                      + color_mode + TAIL)
-        # s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             # TCP port 5577
-            # s.connect((self.host, CONTROL_PORT))
+            s.connect((self.host, CONTROL_PORT))
             # Compute checksum
             data.append(sum(data) % 256)
-            self.sock.send(data)
+            s.send(data)
         except Exception:
             pass
 
-    def sunlight(self):
+    def sunlight(self) -> None:
         self.change_color(white=calc_sunlight())
 
-    def fade(self, start=None, stop=None, bright=None, speed=1):
+    def fade(self, start=None, stop=None, bright=None, speed=1) -> None:
         speed = abs(speed)
         if start:
             bright = bright or 255
@@ -178,7 +176,7 @@ class Bulb:
 if __name__ == '__main__':
     if len(sys.argv) < 4:
         sys.exit('Nope')
-    colors = list(map(lambda x: int(x), sys.argv[1:]))
+    colors = list(map(lambda x: int(x), sys.argv[2:]))
     print(colors)
-    b = Bulb()
+    b = Bulb(sys.argv[1])
     b.change_color(*colors)

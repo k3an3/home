@@ -11,7 +11,7 @@ import re
 import subprocess
 
 
-def num(n):
+def num(n: str) -> int:
     """
     Given a string, attempt to convert to int. Otherwise, return 0.
     :param n: A string containing a number.
@@ -24,7 +24,7 @@ def num(n):
     return n
 
 
-def RGBfromhex(color_hex):
+def RGBfromhex(color_hex: str) -> (int, int, int):
     """
     Given a string in the format '#xxxxxx', where '#' is optional and
     'xxxxxx' represents 3 hexadecimal bytes, convert to RGB integer
@@ -43,7 +43,7 @@ def RGBfromhex(color_hex):
     return red, green, blue
 
 
-def class_from_name(module_name, class_name):
+def class_from_name(module_name: str, class_name: str):
     """
     Given a module name and class name, return a class.
     :param module_name: Module name to import.
@@ -59,7 +59,7 @@ def class_from_name(module_name, class_name):
         raise NotImplementedError()
 
 
-def method_from_name(klass, method_name):
+def method_from_name(klass: str, method_name: str):
     """
     Given an imported class, return the given method pointer.
     :param klass: An imported class containing the method.
@@ -72,7 +72,7 @@ def method_from_name(klass, method_name):
         raise NotImplementedError()
 
 
-def random_string():
+def random_string() -> str:
     return hashlib.sha256(os.urandom(128)).hexdigest()
 
 

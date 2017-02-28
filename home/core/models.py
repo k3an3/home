@@ -89,7 +89,7 @@ class Device(YAMLObject):
         self.dev = None
         self.last = ()
 
-    def setup(self):
+    def setup(self) -> None:
         """
         Set up the driver that this device will use
         """
@@ -112,7 +112,7 @@ class Driver(YAMLObject):
         self.interface = interface
         self.klass = class_from_name(module, klass)
 
-    def setup(self):
+    def setup(self) -> None:
         """
         Set up frontend, if it exists
         """
@@ -131,11 +131,11 @@ class Action(YAMLObject):
         self.devices = []
         self.devs = devices
 
-    def setup(self):
+    def setup(self) -> None:
         for dev in self.devs:
             self.devices.append((get_device(dev['name']), dev))
 
-    def run(self):
+    def run(self) -> None:
         """
         Run the configured actions in multiple threads.
         """
