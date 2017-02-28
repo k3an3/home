@@ -1,10 +1,9 @@
 from flask import abort
 from flask import request
-from peewee import DoesNotExist
 
 from home.core.models import get_device
 from home.iot.wrappers import SSH
-from home.web.models import APIClient
+from home.web.utils import api_login_required
 from home.web.web import app
 
 FIREWALL_TYPES = {
@@ -38,13 +37,13 @@ class SSHFirewall(SSH):
 
 
 @app.route('/api/firewall/unblock', methods=['GET', 'POST'])
-def unblock_this():
+@api_login_required
+def unblock_this(*args, **kwargs):
     # Todo: expire automatically
     try:
-        APIClient.get(token=request.values.get('key'))
         device = get_device(request.values.get('device'))
-    except (DoesNotExist, StopIteration):
-        abort(403)
+    except StopIteration:
+        abort(404)
     # Eventually, inheritance on "Firewall" class
     if not isinstance(device.driver.klass, SSHFirewall.__class__):
         raise NotImplementedError
