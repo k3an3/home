@@ -224,7 +224,7 @@ def csrf_protect():
 
 @app.after_request
 def add_header(response):
-    response.headers['Content-Security-Policy'] = "default-src 'self'"
+    #response.headers['Content-Security-Policy'] = "default-src 'self'"
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response
 

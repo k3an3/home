@@ -8,10 +8,7 @@
     <meta name="author" content="">
     <link rel="icon" href="/static/favicon.ico">
 
-    <title>
-        {% block title %}
-        {% endblock %}
-    </title>
+    <title>Home</title>
 
     <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="static/dist/css/bootstrap.min.css">
@@ -296,8 +293,10 @@
                         </form>
                     {% endif %}
                     <br>
+                {% if current_user.admin %}
                     <a href="javascript:void(0)" onclick="ws.emit('update')">Update</a>
                     <a href="/reload">Reload</a>
+                {% endif %}
                 </div>
             </div>
         </div>

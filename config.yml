@@ -174,3 +174,8 @@ actions:
       - name: cam1
         delay: 1
         method: start_detection
+    - !action
+      name: unblock
+      devices:
+      - name: r1
+        method: unblock

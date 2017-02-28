@@ -55,6 +55,33 @@ SUPPORTED_MODES = ['31', '41', '61']
 SUPPORTED_FUNCTIONS = list(range(25, 39))
 TAIL = '0f'
 
+seven_color_cross_fade = 0x25
+red_gradual_change = 0x26
+green_gradual_change = 0x27
+blue_gradual_change = 0x28
+yellow_gradual_change = 0x29
+cyan_gradual_change = 0x2a
+purple_gradual_change = 0x2b
+white_gradual_change = 0x2c
+red_green_cross_fade = 0x2d
+red_blue_cross_fade = 0x2e
+green_blue_cross_fade = 0x2f
+seven_color_strobe_flash = 0x30
+red_strobe_flash = 0x31
+green_strobe_flash = 0x32
+blue_stobe_flash = 0x33
+yellow_strobe_flash = 0x34
+cyan_strobe_flash = 0x35
+purple_strobe_flash = 0x36
+white_strobe_flash = 0x37
+seven_color_jumping = 0x38
+
+CONTROL_PORT = 5577
+# The HFLPB100's control/debug module
+HF_COMMAND_PORT = 48899
+HF_COMMAND = 'HF-A11ASSISTHREAD'.encode()
+HF_COMMAND_OK = '+ok'.encode()
+
 prepare_hex = lambda x: format(x, 'x').zfill(2)
 
 
@@ -84,6 +111,13 @@ class Bulb:
 
     def __init__(self, host):
         self.host = host
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.socket.connect((self.host, CONTROL_PORT))
+
+    def auth(self):
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.sendto(HF_COMMAND, (self.host, HF_COMMAND_PORT))
+        s.sendto(HF_COMMAND_OK, (self.host, HF_COMMAND_PORT))
 
     def change_color(self, red=0, green=0, blue=0, white=0, brightness=255, mode='31', function=None, speed='1f'):
         """
@@ -111,13 +145,13 @@ class Bulb:
             # Build packet
             data = bytearray.fromhex(mode + color_hex
                                      + color_mode + TAIL)
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             # TCP port 5577
-            s.connect((self.host, 5577))
+            # s.connect((self.host, CONTROL_PORT))
             # Compute checksum
             data.append(sum(data) % 256)
-            s.send(data)
+            self.sock.send(data)
         except Exception:
             pass
 
