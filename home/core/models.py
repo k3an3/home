@@ -4,8 +4,9 @@ models.py
 
 Contains classes to represent objects created by the parser.
 """
-import threading
+from multiprocessing import Process
 from time import sleep
+from typing import Callable, Generator
 
 import yaml
 
@@ -66,6 +67,7 @@ class YAMLObject(yaml.YAMLObject):
     """
     Base class for YAML objects, simply to print the correct name
     """
+
     def __setstate__(self, kwargs):
         self.__init__(**kwargs)
 
@@ -135,18 +137,27 @@ class Action(YAMLObject):
         for dev in self.devs:
             self.devices.append((get_device(dev['name']), dev))
 
-    def run(self) -> None:
-        """
-        Run the configured actions in multiple threads.
-        """
+    def prerun(self) -> Generator[Callable]:
         for device, config in self.devices:
             method = method_from_name(device.dev, config['method'])
             print("Execute action", config['method'])
             try:
-                t = threading.Thread(target=method, kwargs=config['config'])
+                # t = threading.Thread(target=method, kwargs=config['config'])
+                t = Process(target=method, kwargs=config['config'])
                 if config.get('delay'):
-                    sleep(config['delay'])
-                t.start()
+                    yield t, config.get('delay')
+            except Exception as e:
+                print("Action prep:", str(e))
+
+    def run(self) -> None:
+        """
+        Run the configured actions in multiple processes.
+        """
+        for task, delay in self.prerun(self):
+            try:
+                if delay:
+                    sleep(delay)
+                task.start()
             except Exception as e:
                 print("Action:", str(e))
 
