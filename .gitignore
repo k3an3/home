@@ -8,3 +8,4 @@ env/
 pip-selfcheck.json
 pyvenv.cfg
 app.db
+.idea/
