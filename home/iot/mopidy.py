@@ -19,8 +19,8 @@ class Mopidy:
                         on_close=self.on_close)
         self.id = 1
 
-    def send(self, method, params={}):
-        msg = {"jsonrpc": "2.0", "id": 1, 'method': method, 'params': params}
+    def send(self, method, **kwargs):
+        msg = {"jsonrpc": "2.0", "id": 1, 'method': method, 'params': dict(kwargs)}
         self.id += 1
         self.ws.send(json.dumps(msg))
         return self.ws.recv()
@@ -69,7 +69,7 @@ class Mopidy:
         return self.send('core.playlists.as_list')
 
     def add_track(self, uri):
-        return self.send('core.tracklist.add')
+        return self.send('core.tracklist.add', uri=uri)
 
     def get_tracks(self):
         return self.send('core.tracklist.get_tracks')

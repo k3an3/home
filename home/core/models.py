@@ -4,6 +4,7 @@ models.py
 
 Contains classes to represent objects created by the parser.
 """
+import os
 import threading
 from time import sleep
 
@@ -160,7 +161,7 @@ class Interface(YAMLObject):
     def __init__(self, name, friendly_name, template):
         self.name = name
         self.friendly_name = friendly_name
-        self.template = template
+        self.template = os.path.join('iot', template)
 
 
 # Set up YAML object instantiation

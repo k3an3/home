@@ -85,18 +85,24 @@
                     {% if current_user.is_authenticated %}
                         <li class="dropdown">
                             {% for interface, devices in interfaces %}
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
-                                   aria-haspopup="true" aria-expanded="false">{{ interface.friendly_name }}<span
-                                        class="caret"></span></a>
-                                <ul class="dropdown-menu">
+                                {% if devices|length <= 1 %}
+                                    {% for device in devices %}
+                                        <li><a href="#{{ device.name }}">{{ interface.friendly_name }}</a></li>
+                                    {% endfor %}
+                                {% else %}
+                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
+                                       aria-haspopup="true" aria-expanded="false">{{ interface.friendly_name }}<span
+                                            class="caret"></span></a>
+                                    <ul class="dropdown-menu">
                                     {% for device in devices %}
                                         <li><a href="#{{ device.name }}">{{ device.name }}</a></li>
                                     {% endfor %}
+                                    </ul>
+                                {% endif %}
                                     {#
                                     <li role="separator" class="divider"></li>
                                     <li class="dropdown-header">Other Group</li>
                                 #}
-                                </ul>
                             {% endfor %}
                             {% if current_user.admin %}
                                 <li><a href="#security">Security</a></li>
