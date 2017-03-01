@@ -137,15 +137,15 @@ class Action(YAMLObject):
         for dev in self.devs:
             self.devices.append((get_device(dev['name']), dev))
 
-    def prerun(self) -> Iterator[Process]:
+    def prerun(self) -> (Iterator[Process], Iterator[int]):
         for device, config in self.devices:
             method = method_from_name(device.dev, config['method'])
             print("Execute action", config['method'])
             try:
                 # t = threading.Thread(target=method, kwargs=config['config'])
                 t = Process(target=method, kwargs=config['config'])
-                if config.get('delay'):
-                    yield t, config.get('delay')
+
+            yield t, config.get('delay')
             except Exception as e:
                 print("Action prep:", str(e))
 
