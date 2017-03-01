@@ -1,4 +1,4 @@
-"""
+Regards"""
 models.py
 ~~~~~~~~~
 
@@ -145,7 +145,7 @@ class Action(YAMLObject):
                 # t = threading.Thread(target=method, kwargs=config['config'])
                 t = Process(target=method, kwargs=config['config'])
 
-            yield t, config.get('delay')
+                yield t, config.get('delay')
             except Exception as e:
                 print("Action prep:", str(e))
 
@@ -153,7 +153,7 @@ class Action(YAMLObject):
         """
         Run the configured actions in multiple processes.
         """
-        for task, delay in self.prerun(self):
+        for task, delay in self.prerun():
             try:
                 if delay:
                     sleep(delay)
