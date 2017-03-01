@@ -20,9 +20,13 @@ from home.web.models import *
 from home.web.models import User, APIClient
 from home.web.utils import ws_login_required, generate_csrf_token, VERSION
 
+try:
+    from home.config import GOOGLE_API_KEY
+except ImportError:
+    GOOGLE_API_KEY = ""
+
 app = Flask(__name__)
-app.secret_key = '\xff\xe3\x84\xd0\xeb\x05\x1b\x89\x17\xce\xca\xaf\xdb\x8c\x13\xc0\xca\xe4'
-API_KEY = 'AIzaSyCa349yW3-oWMbYRHl21V1IgGRyM6O7PW4'
+app.secret_key = random_string()
 socketio = SocketIO(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -86,7 +90,7 @@ def command_api():
                 try:
                     WebPusher(subscriber.to_dict()).send(
                         json.dumps({'body': "New event alert!!!"}),
-                        gcm_key=API_KEY)
+                        gcm_key=GOOGLE_API_KEY)
                 except Exception as e:
                     print("Webpusher:", str(e))
         elif action == 'eventend':
@@ -154,7 +158,7 @@ def subscribe(subscriber):
     if created:
         WebPusher(subscriber).send(
             json.dumps({'body': "Subscribed to push notifications!"}),
-            gcm_key=API_KEY)
+            gcm_key=GOOGLE_API_KEY)
 
 
 @socketio.on('update', namespace='/ws')
@@ -224,7 +228,7 @@ def csrf_protect():
 
 @app.after_request
 def add_header(response):
-    #response.headers['Content-Security-Policy'] = "default-src 'self'"
+    # response.headers['Content-Security-Policy'] = "default-src 'self'"
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response
 
