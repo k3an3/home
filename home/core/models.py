@@ -1,4 +1,4 @@
-Regards"""
+"""
 models.py
 ~~~~~~~~~
 
