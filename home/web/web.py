@@ -15,18 +15,18 @@ from pywebpush import WebPusher
 
 import home.core.parser as parser
 import home.core.utils as utils
+from home.config import SECRET_KEY
 from home.core.models import devices, interfaces, get_action, get_device, actions
 from home.web.models import *
 from home.web.models import User, APIClient
 from home.web.utils import ws_login_required, generate_csrf_token, VERSION
-
 try:
     from home.config import GOOGLE_API_KEY
 except ImportError:
     GOOGLE_API_KEY = ""
 
 app = Flask(__name__)
-app.secret_key = random_string()
+app.secret_key = SECRET_KEY
 socketio = SocketIO(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
