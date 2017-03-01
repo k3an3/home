@@ -142,12 +142,11 @@ class Action(YAMLObject):
             method = method_from_name(device.dev, config['method'])
             print("Execute action", config['method'])
             try:
-                # t = threading.Thread(target=method, kwargs=config['config'])
-                t = Process(target=method, kwargs=config['config'])
-
+                # t = threading.Thread(target=method, kwargs=config.get('config'))
+                t = Process(target=method, kwargs=config.get('config', {}))
                 yield t, config.get('delay')
             except Exception as e:
-                print("Action prep:", str(e))
+                print("Error", e)
 
     def run(self) -> None:
         """
