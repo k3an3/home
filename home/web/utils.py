@@ -30,6 +30,16 @@ def ws_login_required(f):
     return wrapped
 
 
+def ws_optional_auth(f):
+    @functools.wraps(f)
+    def wrapped(*args, **kwargs):
+        if current_user.is_authenticated:
+            kwargs['auth'] = True
+        return f(*args, **kwargs)
+
+    return wrapped
+
+
 def generate_csrf_token():
     if '_csrf_token' not in session:
         session['_csrf_token'] = random_string()
