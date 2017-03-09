@@ -92,7 +92,8 @@ class Device(YAMLObject):
         self.config = config
         self.uuid = random_string()
         self.dev = None
-        self.last = ()
+        self.last_method = None
+        self.last_kwargs = {}
 
     def setup(self) -> None:
         """
@@ -145,11 +146,16 @@ class Action(YAMLObject):
 
     def prerun(self) -> (Iterator[Process], Iterator[int]):
         for device, config in self.devices:
-            method = method_from_name(device.dev, config['method'])
+            if config['method'] == 'last':
+                method = method_from_name(device.dev, device.last_method)
+                kwargs = device.last_kwargs
+            else:
+                method = method_from_name(device.dev, config['method'])
+                kwargs = config.get('config', {})
             print("Execute action", config['method'])
             try:
                 # t = threading.Thread(target=method, kwargs=config.get('config'))
-                t = Process(target=method, kwargs=config.get('config', {}))
+                t = Process(target=method, kwargs=kwargs)
                 yield t, config.get('delay')
             except Exception as e:
                 print("Error", e)

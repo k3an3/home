@@ -63,13 +63,20 @@ def command_api():
         key = APIClient.get(token=post.pop('key'))
     except DoesNotExist:
         abort(403)
+    # Send commands directly to device
     if request.form.get('device'):
         device = get_device(post.pop('device'))
-        method = utils.method_from_name(type(device.dev), post.pop('method'))
-        print("Execute command on", device.name, method, post)
-        method(device.dev, **post)
+        if post.get('method') == 'last':
+            method = device.last_method
+            kwargs = device.last_kwargs
+        else:
+            method = utils.method_from_name(type(device.dev), post.pop('method'))
+            kwargs = post
+        print("Execute command on", device.name, method, kwargs)
+        method(device.dev, **kwargs)
         return '', 204
     sec = SecurityController.get()
+    # Trigger an action
     action = request.form.get('action')
     try:
         action = get_action(action)
