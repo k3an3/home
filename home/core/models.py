@@ -152,6 +152,8 @@ class Action(YAMLObject):
             else:
                 method = method_from_name(device.dev, config['method'])
                 kwargs = config.get('config', {})
+                device.last_method = method
+                device.last_kwargs = kwargs
             print("Execute action", config['method'])
             try:
                 # t = threading.Thread(target=method, kwargs=config.get('config'))

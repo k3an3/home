@@ -72,6 +72,8 @@ def command_api():
         else:
             method = utils.method_from_name(type(device.dev), post.pop('method'))
             kwargs = post
+            device.last_method = method
+            device.last_kwargs = kwargs
         print("Execute command on", device.name, method, kwargs)
         method(device.dev, **kwargs)
         return '', 204
