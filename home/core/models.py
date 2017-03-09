@@ -63,6 +63,9 @@ class DeviceNotFoundError(YAMLConfigParseError):
     pass
 
 
+class DeviceSetupError(YAMLConfigParseError):
+    pass
+
 class YAMLObject(yaml.YAMLObject):
     """
     Base class for YAML objects, simply to print the correct name
@@ -100,7 +103,10 @@ class Device(YAMLObject):
             self.driver = get_driver(self.driver)
             dev = self.driver.klass
             config_d = self.config if self.config else {}
-            self.dev = dev(**config_d)
+            try:
+                self.dev = dev(**config_d)
+            except Exception as e:
+                raise DeviceSetupError("Failed to configure device '" + self.name + "'")
 
 
 class Driver(YAMLObject):
