@@ -71,9 +71,16 @@ def command_api():
             kwargs = device.last_kwargs
         else:
             method = utils.method_from_name(type(device.dev), post.pop('method'))
-            kwargs = post
-            device.last_method = method
-            device.last_kwargs = kwargs
+            if post.get('increment'):
+                kwargs = device.last_kwargs
+                kwargs[post['increment']] += post.get('count', 1)
+            elif post.get('decrement'):
+                kwargs = device.last_kwargs
+                kwargs[post['decrement']] += post.get('count', 1)
+            else:
+                kwargs = post
+                device.last_method = method
+                device.last_kwargs = kwargs
         print("Execute command on", device.name, method, kwargs)
         method(device.dev, **kwargs)
         return '', 204
