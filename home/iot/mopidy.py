@@ -7,8 +7,21 @@ Websocket JSONRPC client for the Mopidy media server
 import json
 
 import websocket
+from flask_socketio import disconnect, emit
 
+from home.core.models import get_device
+from home.core.utils import method_from_name
+from home.web.utils import ws_optional_auth
 from home.web.web import socketio
+
+UNAUTH_COMMANDS = (
+    'search',
+    'get_tracks',
+    'add_track',
+    'get_state',
+    'get_current_track',
+    'get_time_position',
+)
 
 
 class Mopidy:
@@ -76,4 +89,19 @@ class Mopidy:
     def get_tracks(self):
         return self.send('core.tracklist.get_tracks')
 
+    def search(self, query):
+        return self.send('core.library.search', any=[query])
 
+
+@socketio.on('mopidy', namespace='/mopidy')
+@ws_optional_auth
+def mopidy_ws(data, **kwargs):
+    import datetime
+    start = datetime.datetime.now()
+    mopidy = get_device(data.pop('device')).dev
+    auth = kwargs.pop('auth')
+    method = method_from_name(Mopidy, data.pop('action'))
+    if not auth and method not in UNAUTH_COMMANDS:
+        disconnect()
+    print(datetime.datetime.now() - start)
+    emit('search results', method(mopidy, **data))

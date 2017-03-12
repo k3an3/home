@@ -9,3 +9,4 @@ pip-selfcheck.json
 pyvenv.cfg
 app.db
 .idea/
+config_local.py

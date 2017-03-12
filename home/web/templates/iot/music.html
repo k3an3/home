@@ -1,0 +1,49 @@
+<div class="col-xs-6">
+    <h2>Now Playing:</h2>
+    <img id="album-art" width="200" src="https://upload.wikimedia.org/wikipedia/en/0/08/Ocean_Avenue_-_Yellowcard.jpg"
+         alt="No data"/>
+    <p id="song-info">Yellowcard - Ocean Avenue</p>
+</div>
+<div class="col-xs-6">
+    <div id="status_u"></div>
+    <div class="input-group">
+        <span class="input-group-addon" id="basic-addon1">Search:</span>
+        <input id="search" type="text" class="form-control" placeholder="Search" aria-describedby="basic-addon1">
+    </div>
+    <ul id="results" class="list-group">
+    </ul>
+</div>
+<script src="static/dist/js/socket.io-1.4.5.js"></script>
+<script>
+    var u_ws = io.connect('//' + document.domain + ':' + location.port + '/mopidy');
+
+    u_ws.on('song update', function (data) {
+        $('song-info').val(data);
+    });
+
+    $('#search').change(function () {
+        u_ws.emit('mopidy', {
+            action: 'search',
+            query: $('#search').val(),
+            device: '{{ device.name }}'
+        });
+    });
+
+    u_ws.on('search results', function (data) {
+        $('#results').empty();
+        var json = JSON.parse(data);
+        var songs = json.result[0].tracks;
+        console.log(songs);
+        songs.forEach(function (song) {
+            $('#results').append('<li class="list-group-item">' + song.name + ' - ' + song.artists[0].name + '</li>');
+        });
+    });
+
+    u_ws.on('disconnect', function () {
+        $('#status_u').html('Status: <span style="color:red">Disconnected</span>');
+    });
+
+    u_ws.on('connect', function () {
+        $('#status_u').html('Status: <span style="color:green">Connected</span>');
+    });
+</script>
