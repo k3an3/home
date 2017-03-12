@@ -6,11 +6,11 @@ Websocket JSONRPC client for the Mopidy media server
 """
 import json
 
+import requests
 import websocket
 from flask_socketio import disconnect, emit
 
 from home.core.models import get_device
-from home.core.utils import method_from_name
 from home.web.utils import ws_optional_auth
 from home.web.web import socketio
 
@@ -22,6 +22,12 @@ UNAUTH_COMMANDS = (
     'get_current_track',
     'get_time_position',
 )
+
+SPOTIFY_API = 'https://api.spotify.com/v1/{}/{}'
+
+
+def get_album_art(album_id, image=1):
+    return requests.get(SPOTIFY_API.format('albums', album_id)).json().get('images')[image]
 
 
 class Mopidy:
@@ -38,7 +44,7 @@ class Mopidy:
         msg = {"jsonrpc": "2.0", "id": 1, 'method': method, 'params': dict(kwargs)}
         self.id += 1
         self.ws.send(json.dumps(msg))
-        return self.ws.recv()
+        return json.loads(self.ws.recv())
 
     def on_message(self, ws, message):
         j = json.loads(message)
@@ -92,16 +98,21 @@ class Mopidy:
     def search(self, query):
         return self.send('core.library.search', any=[query])
 
+    def get_images(self, uris, index=0):
+        return self.send('core.library.get_images', uris=uris)['result'].popitem()[1][index]
+
 
 @socketio.on('mopidy', namespace='/mopidy')
 @ws_optional_auth
 def mopidy_ws(data, **kwargs):
-    import datetime
-    start = datetime.datetime.now()
     mopidy = get_device(data.pop('device')).dev
     auth = kwargs.pop('auth')
-    method = method_from_name(Mopidy, data.pop('action'))
-    if not auth and method not in UNAUTH_COMMANDS:
+    action = data.pop('action')
+    if not auth and action not in UNAUTH_COMMANDS:
         disconnect()
-    print(datetime.datetime.now() - start)
-    emit('search results', method(mopidy, **data))
+    if action == 'search':
+        results = mopidy.search(**data)
+        results = results['result'][0]['tracks']
+        emit('search results', json.dumps(results))
+    elif action == 'queue':
+        mopidy.add_track(**data)

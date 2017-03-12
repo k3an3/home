@@ -7,8 +7,10 @@
 <div class="col-xs-6">
     <div id="status_u"></div>
     <div class="input-group">
-        <span class="input-group-addon" id="basic-addon1">Search:</span>
         <input id="search" type="text" class="form-control" placeholder="Search" aria-describedby="basic-addon1">
+        <span class="input-group-btn">
+        <button id="search-btn" class="btn btn-default" type="button">Search</button>
+      </span>
     </div>
     <ul id="results" class="list-group">
     </ul>
@@ -21,7 +23,7 @@
         $('song-info').val(data);
     });
 
-    $('#search').change(function () {
+    $('#search-btn').click(function () {
         u_ws.emit('mopidy', {
             action: 'search',
             query: $('#search').val(),
@@ -29,10 +31,16 @@
         });
     });
 
+    $('#search').keypress(function (e) {
+        if (e.which == 13) {
+            $('#search-btn').click();
+            return false;
+        }
+    });
+
     u_ws.on('search results', function (data) {
         $('#results').empty();
-        var json = JSON.parse(data);
-        var songs = json.result[0].tracks;
+        var songs = JSON.parse(data);
         console.log(songs);
         songs.forEach(function (song) {
             $('#results').append('<li class="list-group-item">' + song.name + ' - ' + song.artists[0].name + '</li>');
