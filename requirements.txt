@@ -1,4 +1,5 @@
 amqp
+apscheduler
 astral
 billiard
 broadlink

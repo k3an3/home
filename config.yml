@@ -27,8 +27,8 @@ installed_drivers:
         module: chromecast
         klass: Chromecast
     - !driver
-        module: test
-        klass: Test
+        module: audio
+        klass: Audio
 
 devices:
     living_room:
@@ -75,8 +75,8 @@ devices:
              mac: 44:8a:5b:2c:38:d9
              manual_interface: eno1
         - !device
-            name: Test
-            driver: test
+            name: Audio
+            driver: audio
 
 actions:
     - !action
@@ -182,6 +182,17 @@ actions:
     - !action
       name: test
       devices:
-      - name: Test
-        method: exec
-        delay: 10
+      - name: Audio
+        method: test
+
+cron:
+    - name: lights on
+      hour: 17
+      action: living room on
+    - name: lights off
+      hour: 3
+      action: living room off
+    - name: test
+      hour: 16
+      minute: 11
+      action: test

@@ -5,6 +5,7 @@ async.py
 Handles running of tasks in an asynchronous fashion. Not explicitly tied to Celery. The `run` method simply must
 exist here and handle the execution of whatever task is passed to it, whether or not it is handled asynchronously.
 """
+from apscheduler.schedulers.background import BackgroundScheduler
 from celery import Celery
 from celery.security import setup_security
 
@@ -20,6 +21,8 @@ queue.conf.update(
     CELERY_TASK_SERIALIZER='pickle',
     CELERY_ACCEPT_CONTENT=['pickle'],
 )
+scheduler = BackgroundScheduler()
+scheduler.start()
 
 
 @queue.task
