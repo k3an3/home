@@ -184,3 +184,4 @@ actions:
       devices:
       - name: Test
         method: exec
+        delay: 10

@@ -16,9 +16,12 @@ queue.conf.update(
 
 
 @queue.task(serializer='pickle')
-def _run(**kwargs) -> None:
+def _run(method, **kwargs) -> None:
     """
     Run the configured actions in multiple processes.
     """
-    method = kwargs.pop('method')
     method(**kwargs)
+
+
+def run(method, delay=0, **kwargs):
+    _run.apply_async(args=[method], kwargs=kwargs, countdown=float(delay))

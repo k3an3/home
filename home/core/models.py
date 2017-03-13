@@ -9,7 +9,7 @@ from typing import Iterator
 
 import yaml
 
-from home.core.celery import _run
+from home.core.celery import run as queue_run
 from home.core.utils import class_from_name, method_from_name, random_string
 
 # Arrays to store object instances
@@ -163,8 +163,7 @@ class Action(YAMLObject):
 
     def run(self):
         for method, delay, kwargs in self.prerun():
-            kwargs['method'] = method
-            _run.apply_async(kwargs=kwargs, countdown=delay)
+            queue_run(method, delay=delay, **kwargs)
 
 
 class Interface(YAMLObject):
