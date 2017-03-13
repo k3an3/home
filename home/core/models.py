@@ -4,6 +4,7 @@ models.py
 
 Contains classes to represent objects created by the parser.
 """
+import sys
 from multiprocessing import Process
 from typing import Iterator
 
@@ -143,7 +144,11 @@ class Action(YAMLObject):
 
     def setup(self) -> None:
         for dev in self.devs:
-            self.devices.append((get_device(dev['name']), dev))
+            try:
+                self.devices.append((get_device(dev['name']), dev))
+            except StopIteration:
+                print("Action setup: Can't find device", dev['name'])
+                sys.exit()
 
     def prerun(self) -> (Iterator[Process], Iterator[int]):
         for device, config in self.devices:
