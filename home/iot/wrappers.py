@@ -8,6 +8,8 @@ class SSH:
         self.username = username
         self.password = password
         self.keyfile = keyfile
+        # the key can't be pickled with the CFFI proxy, so just store as plaintext
+        self.pkey = paramiko.RSAKey(data=open(keyfile).read())
         self.port = port
         self.host = host
         self.ssh = paramiko.SSHClient()
@@ -18,7 +20,7 @@ class SSH:
                          self.port,
                          self.username,
                          self.password,
-                         key_filename=self.keyfile)
+                         pkey=self.pkey)
         r = self.ssh.exec_command(escape(command))[2].readlines()
         self.ssh.close()
         return r
