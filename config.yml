@@ -26,6 +26,9 @@ installed_drivers:
     - !driver
         module: chromecast
         klass: Chromecast
+    - !driver
+        module: test
+        klass: Test
 
 devices:
     living_room:
@@ -52,11 +55,6 @@ devices:
              host: 172.24.0.1
              keyfile: /srv/www/home/.ssh/id_rsa
              path: /usr/sbin/iptables
-        - !device
-            name: Cast
-            driver: chromecast
-            config:
-             host: 172.16.42.248
 
     bedroom:
         - !device
@@ -76,6 +74,9 @@ devices:
             config:
              mac: 44:8a:5b:2c:38:d9
              manual_interface: eno1
+        - !device
+            name: Test
+            driver: test
 
 actions:
     - !action
@@ -178,3 +179,8 @@ actions:
       - name: cam1
         delay: 1
         method: start_detection
+    - !action
+      name: test
+      devices:
+      - name: Test
+        method: exec

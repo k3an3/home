@@ -5,11 +5,11 @@ models.py
 Contains classes to represent objects created by the parser.
 """
 from multiprocessing import Process
-from time import sleep
 from typing import Iterator
 
 import yaml
 
+from home.core.celery import _run
 from home.core.utils import class_from_name, method_from_name, random_string
 
 # Arrays to store object instances
@@ -65,6 +65,7 @@ class DeviceNotFoundError(YAMLConfigParseError):
 
 class DeviceSetupError(YAMLConfigParseError):
     pass
+
 
 class YAMLObject(yaml.YAMLObject):
     """
@@ -156,23 +157,14 @@ class Action(YAMLObject):
                 device.last_kwargs = kwargs
             print("Execute action", config['method'])
             try:
-                # t = threading.Thread(target=method, kwargs=config.get('config'))
-                t = Process(target=method, kwargs=kwargs)
-                yield t, config.get('delay')
+                yield method, config.get('delay', 0), kwargs
             except Exception as e:
                 print("Error", e)
 
-    def run(self) -> None:
-        """
-        Run the configured actions in multiple processes.
-        """
-        for task, delay in self.prerun():
-            try:
-                if delay:
-                    sleep(delay)
-                task.start()
-            except Exception as e:
-                print("Action:", str(e))
+    def run(self):
+        for method, delay, kwargs in self.prerun():
+            kwargs['method'] = method
+            _run.apply_async(kwargs=kwargs, countdown=delay)
 
 
 class Interface(YAMLObject):

@@ -37,6 +37,7 @@ python-socketio
 pytz
 pywebpush
 PyYAML
+redis
 requests
 six
 vine
