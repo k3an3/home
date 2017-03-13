@@ -16,6 +16,7 @@ from pywebpush import WebPusher
 import home.core.parser as parser
 import home.core.utils as utils
 from home.config import SECRET_KEY
+from home.core.async import run
 from home.core.models import devices, interfaces, get_action, get_device, actions
 from home.web.models import *
 from home.web.models import User, APIClient
@@ -70,7 +71,7 @@ def command_api():
             method = device.last_method
             kwargs = device.last_kwargs
         else:
-            method = utils.method_from_name(type(device.dev), post.pop('method'))
+            method = utils.method_from_name(device.dev, post.pop('method'))
             if post.get('increment'):
                 kwargs = device.last_kwargs
                 kwargs[post['increment']] += post.get('count', 1)
@@ -82,7 +83,7 @@ def command_api():
                 device.last_method = method
                 device.last_kwargs = kwargs
         print("Execute command on", device.name, method, kwargs)
-        method(device.dev, **kwargs)
+        run(method, **kwargs)
         return '', 204
     sec = SecurityController.get()
     # Trigger an action

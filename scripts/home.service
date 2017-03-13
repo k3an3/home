@@ -1,0 +1,13 @@
+[Unit]
+Description=A smart home
+After=network.target
+BindsTo=home-celery.service
+
+[Service]
+User=home
+Group=home
+WorkingDirectory=/srv/www/home
+ExecStart=/srv/www/home/env/bin/python3 /srv/www/home/run.py
+
+[Install]
+WantedBy=multi-user.target

@@ -1,4 +1,5 @@
 amqp
+apscheduler
 astral
 billiard
 broadlink
@@ -37,6 +38,7 @@ python-socketio
 pytz
 pywebpush
 PyYAML
+redis
 requests
 six
 vine
