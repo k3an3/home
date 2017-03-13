@@ -116,8 +116,8 @@ class Driver(YAMLObject):
     """
     yaml_tag = '!driver'
 
-    def __init__(self, name, module, klass, interface=None):
-        self.name = name
+    def __init__(self, module, klass, name=None, interface=None):
+        self.name = name or module
         self.interface = interface
         self.klass = class_from_name(module, klass)
 
