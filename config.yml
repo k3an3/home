@@ -192,7 +192,3 @@ cron:
     - name: lights off
       hour: 3
       action: living room off
-    - name: test
-      hour: 16
-      minute: 11
-      action: test
