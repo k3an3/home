@@ -53,10 +53,10 @@ devices:
              keyfile: /srv/www/home/.ssh/id_rsa
              path: /usr/sbin/iptables
         - !device
-            name: Drfcrn
+            name: Cast
             driver: chromecast
             config:
-             name: Drfcrn
+             host: 172.16.42.248
 
     bedroom:
         - !device
