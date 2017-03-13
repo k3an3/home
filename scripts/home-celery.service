@@ -2,9 +2,9 @@
 Description=A smart home
 After=network.target
 BindsTo=home.service
+Requires=redis.service
 
 [Service]
-Type=forking
 User=home
 Group=home
 WorkingDirectory=/srv/www/home
