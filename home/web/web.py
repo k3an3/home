@@ -16,7 +16,7 @@ from pywebpush import WebPusher
 import home.core.parser as parser
 import home.core.utils as utils
 from home.config import SECRET_KEY
-from home.core.celery import run
+from home.core.async import run
 from home.core.models import devices, interfaces, get_action, get_device, actions
 from home.web.models import *
 from home.web.models import User, APIClient

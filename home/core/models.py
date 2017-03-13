@@ -9,7 +9,7 @@ from typing import Iterator
 
 import yaml
 
-from home.core.celery import run as queue_run
+from home.core.async import run as queue_run
 from home.core.utils import class_from_name, method_from_name, random_string
 
 # Arrays to store object instances

@@ -1,3 +1,10 @@
+"""
+async.py
+~~~~~~~~
+
+Handles running of tasks in an asynchronous fashion. Not explicitly tied to Celery. The `run` method simply must
+exist here and handle the execution of whatever task is passed to it, whether or not it is handled asynchronously.
+"""
 from celery import Celery
 from celery.security import setup_security
 
@@ -15,7 +22,7 @@ queue.conf.update(
 )
 
 
-@queue.task(serializer='pickle')
+@queue.task
 def _run(method, **kwargs) -> None:
     """
     Run the configured actions in multiple processes.

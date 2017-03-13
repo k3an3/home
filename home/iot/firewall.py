@@ -1,7 +1,7 @@
 from flask import abort
 from flask import request
 
-from home.core.celery import run
+from home.core.async import run
 from home.core.models import get_device
 from home.iot.wrappers import SSH
 from home.web.utils import api_login_required
