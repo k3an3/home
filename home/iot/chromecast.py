@@ -25,5 +25,18 @@ class Chromecast:
             'video/mp4')
         self.cast.media_controller.block_until_active(20)
 
+    def cast_media(self, url, type='video/mp4'):
+        self.cast.media_controller.play_media(url, type)
+        self.cast.media_controller.block_until_active(20)
+
     def get_status(self):
         return self.cast.media_controller.status
+
+    def stop(self):
+        self.cast.media_controller.stop()
+
+    def pause(self):
+        self.cast.media_controller.pause()
+
+    def play(self):
+        self.cast.media_controller.play()
