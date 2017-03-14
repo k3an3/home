@@ -58,13 +58,13 @@ def unblock_this(*args, **kwargs):
 
 
 def queue_reblock(device, request):
-    run(device.dev.delete, delay=300, kwargs={
+    run(device.dev.delete, delay=300, **{
         'format': '-s {} -p {} --dport {} -j ACCEPT'.format(
             request.remote_addr, request.values.get('proto'),
             request.values.get('dport')
         )
     })
-    run(device.dev.delete, delay=86400, kwargs={
+    run(device.dev.delete, delay=86400, **{
         'format': '-s {} -p {} --dport {} -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT'.format(
             request.remote_addr, request.values.get('proto'),
             request.values.get('dport')
