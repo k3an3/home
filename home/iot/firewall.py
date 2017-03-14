@@ -52,7 +52,7 @@ def unblock_this(*args, **kwargs):
                        dport=request.values.get('dport'))
     device.dev.unblock(saddr=request.remote_addr,
                        proto=request.values.get('proto'),
-                       dport=request.values.get('dport') + '-m state --state RELATED,ESTABLISHED')
+                       dport=request.values.get('dport') + ' -m state --state RELATED,ESTABLISHED')
     queue_reblock(device, request)
     return '', 204
 
