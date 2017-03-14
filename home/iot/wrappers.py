@@ -10,18 +10,17 @@ class SSH:
         self.keyfile = keyfile
         self.port = port
         self.host = host
-        self.ssh = paramiko.SSHClient()
-        self.ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
     def send(self, command: str) -> str:
-        self.ssh.connect(self.host,
-                         self.port,
-                         self.username,
-                         self.password,
-                         # the key can't be pickled with the CFFI proxy, so just grab plaintext
-                         paramiko.RSAKey.from_private_key_file(self.keyfile))
-        r = self.ssh.exec_command(escape(command))[2].readlines()
-        self.ssh.close()
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh.connect(self.host,
+                    self.port,
+                    self.username,
+                    self.password,
+                    key_filename=self.keyfile)
+        r = ssh.exec_command(escape(command))[2].readlines()
+        ssh.close()
         return r
 
 
