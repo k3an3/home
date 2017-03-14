@@ -52,7 +52,7 @@ def unblock_this(*args, **kwargs):
                        dport=request.values.get('dport'))
     device.dev.unblock(saddr=request.remote_addr,
                        proto=request.values.get('proto'),
-                       dport=request.values.get('dport') + '-m conntrack --ctstate RELATED,ESTABLISHED')
+                       dport=request.values.get('dport') + '-m state --state RELATED,ESTABLISHED')
     queue_reblock(device, request)
     return '', 204
 
@@ -65,7 +65,7 @@ def queue_reblock(device, request):
         )
     })
     run(device.dev.delete, delay=86400, **{
-        'format': '-s {} -p {} --dport {} -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT'.format(
+        'format': '-s {} -p {} --dport {} -m state --state RELATED,ESTABLISHED -j ACCEPT'.format(
             request.remote_addr, request.values.get('proto'),
             request.values.get('dport')
         )
