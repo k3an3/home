@@ -45,7 +45,7 @@ def unblock_this(*args, **kwargs):
     except StopIteration:
         abort(404)
     # Eventually, inheritance on "Firewall" class
-    if not isinstance(device.driver.klass, SSHFirewall):
+    if not device.driver.klass == SSHFirewall:
         raise NotImplementedError
     device.dev.unblock(saddr=request.remote_addr,
                        proto=request.values.get('proto'),
