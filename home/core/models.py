@@ -10,7 +10,7 @@ from typing import Iterator
 
 import yaml
 
-from home.core.async import run as queue_run
+from home.core.async import run as queue_run, scheduler
 from home.core.utils import class_from_name, method_from_name, random_string
 
 # Arrays to store object instances
@@ -187,3 +187,14 @@ class Interface(YAMLObject):
 yaml.add_path_resolver('!device', ['Device'], dict)
 yaml.add_path_resolver('!action', ['ActionGroup'], dict)
 yaml.add_path_resolver('!interface', ['Interface'], dict)
+
+
+def add_scheduled_job(job):
+    if job.get('action'):
+        scheduler.add_job(get_action(job.pop('action')).run,
+                          trigger=job.pop('trigger', 'cron'),
+                          **job)
+    elif job.get('device'):
+        device = get_device(job.pop('device'))
+        method = method_from_name(device.dev, job.pop('method'))
+        scheduler.add_job(method, trigger=job.pop('trigger', 'cron'), kwargs=job.pop('config', {}), **job)

@@ -1,9 +1,12 @@
 import datetime
+import json
 
 from passlib.hash import sha256_crypt
 from peewee import SqliteDatabase, MySQLDatabase, CharField, BooleanField, ForeignKeyField, IntegerField, DateTimeField, \
     OperationalError, Model
+from pywebpush import WebPusher
 
+from home.config import GOOGLE_API_KEY
 from home.core.utils import random_string
 
 if True:
@@ -82,6 +85,12 @@ class Subscriber(BaseModel):
                      'p256dh': self.p256dh
                      }
             }
+
+    def push(self, message):
+        WebPusher(self.to_dict()).send(
+            json.dumps({'body': message,
+                        'icon': 'https://105ww.xyz/static/favicon.ico'}),
+            gcm_key=GOOGLE_API_KEY)
 
 
 class SecurityController(BaseModel):

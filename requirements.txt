@@ -15,7 +15,8 @@ Flask-SocketIO
 future
 gevent
 greenlet
-http-ece
+#git+git://github.com/keaneokelley/encrypted-content-encoding.git#egg=http_ece
+http_ece
 idna
 itsdangerous
 Jinja2
@@ -30,13 +31,14 @@ pychromecast
 pycodestyle
 pycparser
 pycrypto
-git+git://github.com/keaneokelley/pyelliptic.git#egg=pyelliptic
+#git+git://github.com/keaneokelley/pyelliptic.git#egg=pyelliptic
+git+git://github.com/jrconlin/pyelliptic.git#egg=pyelliptic
 pyflakes
 python-engineio
 python-jose
 python-socketio
 pytz
-pywebpush
+git+git://github.com/web-push-libs/pywebpush.git#egg=pywebpush
 PyYAML
 redis
 requests
