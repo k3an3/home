@@ -6,8 +6,8 @@ from peewee import SqliteDatabase, MySQLDatabase, CharField, BooleanField, Forei
     OperationalError, Model
 from pywebpush import WebPusher
 
-from home.config import GOOGLE_API_KEY
 from home.core.utils import random_string
+from settings import GOOGLE_API_KEY
 
 if True:
     db = SqliteDatabase('app.db')
