@@ -189,7 +189,7 @@ def ws_update_app():
 def api_update_app():
     # Restrict to certain clients
     try:
-        APIClient.get(key=request.form.get('secret'))
+        APIClient.get(token=request.json.get('secret'))
     except Exception:
         abort(403)
     utils.update()
