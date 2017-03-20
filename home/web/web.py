@@ -4,25 +4,24 @@ web.py
 
 Flask web application for Home.
 """
-import json
 
 from flask import Flask, render_template, request, redirect, abort, url_for, session, flash
 from flask_login import LoginManager, login_required, current_user
 from flask_login import login_user, fresh_login_required, logout_user
 from flask_socketio import SocketIO, emit, disconnect
 from peewee import DoesNotExist
-from pywebpush import WebPusher
 
 import home.core.parser as parser
 import home.core.utils as utils
-from home.config import SECRET_KEY
 from home.core.async import run
 from home.core.models import devices, interfaces, get_action, get_device, actions
 from home.web.models import *
 from home.web.models import User, APIClient
 from home.web.utils import ws_login_required, generate_csrf_token, VERSION
+from settings import SECRET_KEY
+
 try:
-    from home.config import GOOGLE_API_KEY
+    from settings import GOOGLE_API_KEY
 except ImportError:
     GOOGLE_API_KEY = ""
 

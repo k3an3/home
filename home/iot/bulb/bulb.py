@@ -49,7 +49,7 @@ from typing import Dict
 import pytz
 from astral import Astral
 
-from home import config
+import settings
 from home.core.utils import num
 
 SUPPORTED_MODES = ['31', '41', '61']
@@ -94,7 +94,7 @@ def calc_sunlight() -> int:
     """
     a = Astral()
     a.solar_depression = 'civil'
-    city = a[config.LOCATION]
+    city = a[settings.LOCATION]
     sun = city.sun(date=datetime.now(), local=True)
     dt = datetime.utcnow().replace(tzinfo=pytz.UTC)
     white = 255
