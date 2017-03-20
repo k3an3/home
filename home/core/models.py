@@ -4,12 +4,13 @@ models.py
 
 Contains classes to represent objects created by the parser.
 """
-import os
-import threading
-from time import sleep
+import sys
+from multiprocessing import Process
+from typing import Iterator
 
 import yaml
 
+from home.core.async import run as queue_run, scheduler
 from home.core.utils import class_from_name, method_from_name, random_string
 
 # Arrays to store object instances
@@ -63,10 +64,15 @@ class DeviceNotFoundError(YAMLConfigParseError):
     pass
 
 
+class DeviceSetupError(YAMLConfigParseError):
+    pass
+
+
 class YAMLObject(yaml.YAMLObject):
     """
     Base class for YAML objects, simply to print the correct name
     """
+
     def __setstate__(self, kwargs):
         self.__init__(**kwargs)
 
@@ -88,7 +94,8 @@ class Device(YAMLObject):
         self.config = config
         self.uuid = random_string()
         self.dev = None
-        self.last = ()
+        self.last_method = None
+        self.last_kwargs = {}
 
     def setup(self) -> None:
         """
@@ -99,7 +106,10 @@ class Device(YAMLObject):
             self.driver = get_driver(self.driver)
             dev = self.driver.klass
             config_d = self.config if self.config else {}
-            self.dev = dev(**config_d)
+            try:
+                self.dev = dev(**config_d)
+            except Exception as e:
+                raise DeviceSetupError("Failed to configure device '" + self.name + "'")
 
 
 class Driver(YAMLObject):
@@ -108,8 +118,8 @@ class Driver(YAMLObject):
     """
     yaml_tag = '!driver'
 
-    def __init__(self, name, module, klass, interface=None):
-        self.name = name
+    def __init__(self, module, klass, name=None, interface=None):
+        self.name = name or module
         self.interface = interface
         self.klass = class_from_name(module, klass)
 
@@ -134,22 +144,31 @@ class Action(YAMLObject):
 
     def setup(self) -> None:
         for dev in self.devs:
-            self.devices.append((get_device(dev['name']), dev))
+            try:
+                self.devices.append((get_device(dev['name']), dev))
+            except StopIteration:
+                print("Action setup: Can't find device", dev['name'])
+                sys.exit()
 
-    def run(self) -> None:
-        """
-        Run the configured actions in multiple threads.
-        """
+    def prerun(self) -> (Iterator[Process], Iterator[int]):
         for device, config in self.devices:
-            method = method_from_name(device.dev, config['method'])
+            if config['method'] == 'last':
+                method = method_from_name(device.dev, device.last_method)
+                kwargs = device.last_kwargs
+            else:
+                method = method_from_name(device.dev, config['method'])
+                kwargs = config.get('config', {})
+                device.last_method = method
+                device.last_kwargs = kwargs
             print("Execute action", config['method'])
             try:
-                t = threading.Thread(target=method, kwargs=config['config'])
-                if config.get('delay'):
-                    sleep(config['delay'])
-                t.start()
+                yield method, config.get('delay', 0), kwargs
             except Exception as e:
-                print("Action:", str(e))
+                print("Error", e)
+
+    def run(self):
+        for method, delay, kwargs in self.prerun():
+            queue_run(method, delay=delay, **kwargs)
 
 
 class Interface(YAMLObject):
@@ -168,3 +187,14 @@ class Interface(YAMLObject):
 yaml.add_path_resolver('!device', ['Device'], dict)
 yaml.add_path_resolver('!action', ['ActionGroup'], dict)
 yaml.add_path_resolver('!interface', ['Interface'], dict)
+
+
+def add_scheduled_job(job):
+    if job.get('action'):
+        scheduler.add_job(get_action(job.pop('action')).run,
+                          trigger=job.pop('trigger', 'cron'),
+                          **job)
+    elif job.get('device'):
+        device = get_device(job.pop('device'))
+        method = method_from_name(device.dev, job.pop('method'))
+        scheduler.add_job(method, trigger=job.pop('trigger', 'cron'), kwargs=job.pop('config', {}), **job)

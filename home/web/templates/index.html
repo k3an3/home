@@ -173,6 +173,7 @@
             </form>
 
         </div>
+        {% if current_user.is_authenticated %}
         {% if current_user.admin %}
             <div id="security" class="tab-pane fade in danger">
                 <div class="jumbotron"
@@ -306,6 +307,7 @@
                 </div>
             </div>
         </div>
+        {% endif %}
         <script src="static/js/index.js"></script>
         {% if current_user.is_authenticated %}
             <script src="static/dist/js/socket.io-1.4.5.js"></script>
@@ -313,8 +315,5 @@
             <script src="static/js/main.js"></script>
             <script src="static/js/color.js"></script>
         {% endif %}
-        <script>
-
-        </script>
 </body>
 </html>

@@ -1,3 +1,0 @@
--Browse .avi motion history, download/play videos
--Rearchitect to use yaml config, change models for this
--Multiple securitycontrolers

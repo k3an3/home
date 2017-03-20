@@ -10,3 +10,4 @@ pyvenv.cfg
 app.db
 .idea/
 config_local.py
+config.yml

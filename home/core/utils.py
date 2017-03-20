@@ -9,19 +9,23 @@ import importlib
 import os
 import re
 import subprocess
+from typing import Any, List
 
 
-def num(n: str) -> int:
+def num(*args: List[Any]) -> List[int]:
     """
     Given a string, attempt to convert to int. Otherwise, return 0.
     :param n: A string containing a number.
     :return: An integer representation of the provided value.
     """
-    try:
-        n = int(n)
-    except ValueError:
-        n = 0
-    return n
+    result = []
+    for n in args:
+        try:
+            n = int(n)
+        except ValueError:
+            n = 0
+        result.append(n)
+    return result if len(result) > 1 else result[0]
 
 
 def RGBfromhex(color_hex: str) -> (int, int, int):

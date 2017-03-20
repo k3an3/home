@@ -11,20 +11,16 @@ interfaces:
 
 installed_drivers:
     - !driver
-        name: bulb
         module: bulb
         klass: Bulb
         interface: colormap
     - !driver
-        name: motion
         module: motion
         klass: MotionController
     - !driver
-        name: plug
         module: plug
         klass: Plug
     - !driver
-        name: wol
         module: wol
         klass: WakeOnLAN
     - !driver
@@ -32,10 +28,15 @@ installed_drivers:
         module: firewall
         klass: SSHFirewall
     - !driver
-        name: mopidy
         module: mopidy
         klass: Mopidy
+    - !driver
         interface: music
+        module: chromecast
+        klass: Chromecast
+    - !driver
+        module: audio
+        klass: Audio
 
 devices:
     living_room:
@@ -86,6 +87,9 @@ devices:
             config:
              mac: 44:8a:5b:2c:38:d9
              manual_interface: eno1
+        - !device
+            name: Audio
+            driver: audio
 
 actions:
     - !action
@@ -189,7 +193,15 @@ actions:
         delay: 1
         method: start_detection
     - !action
-      name: unblock
+      name: test
       devices:
-      - name: r1
-        method: unblock
+      - name: Audio
+        method: test
+
+cron:
+    - name: lights on
+      hour: 17
+      action: living room on
+    - name: lights off
+      hour: 3
+      action: living room off

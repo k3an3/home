@@ -1,10 +1,10 @@
 from flask import abort
 from flask import request
-from peewee import DoesNotExist
 
+from home.core.async import run
 from home.core.models import get_device
 from home.iot.wrappers import SSH
-from home.web.models import APIClient
+from home.web.utils import api_login_required
 from home.web.web import app
 
 FIREWALL_TYPES = {
@@ -30,25 +30,44 @@ class SSHFirewall(SSH):
                 self.bin, saddr, proto, dport
             ))
 
-    def delete(self, table='filter', chain='INPUT', rulenum=''):
+    def delete(self, table='filter', chain='INPUT', rulenum='', format=''):
         if self.firewall == 'iptables':
             return self.send('{} -t {} -D {} {}'.format(
-                self.bin, table, chain, rulenum)
+                self.bin, table, chain, rulenum or format)
             )
 
 
 @app.route('/api/firewall/unblock', methods=['GET', 'POST'])
-def unblock_this():
-    # Todo: expire automatically
+@api_login_required
+def unblock_this(*args, **kwargs):
     try:
-        APIClient.get(token=request.values.get('key'))
         device = get_device(request.values.get('device'))
-    except (DoesNotExist, StopIteration):
-        abort(403)
+    except StopIteration:
+        abort(404)
     # Eventually, inheritance on "Firewall" class
-    if not isinstance(device.driver.klass, SSHFirewall.__class__):
+    if not device.driver.klass == SSHFirewall:
         raise NotImplementedError
-    device.dev.unblock(saddr=request.remote_addr,
+    remote_addr = request.environ['HTTP_X_REAL_IP'] or request.remote_addr
+    device.dev.unblock(saddr=remote_addr,
                        proto=request.values.get('proto'),
                        dport=request.values.get('dport'))
+    device.dev.unblock(saddr=remote_addr,
+                       proto=request.values.get('proto'),
+                       dport=request.values.get('dport') + ' -m state --state RELATED,ESTABLISHED')
+    queue_reblock(device, remote_addr, request)
     return '', 204
+
+
+def queue_reblock(device, remote_addr, request):
+    run(device.dev.delete, delay=300, **{
+        'format': '-s {} -p {} --dport {} -j ACCEPT'.format(
+            remote_addr, request.values.get('proto'),
+            request.values.get('dport')
+        )
+    })
+    run(device.dev.delete, delay=86400, **{
+        'format': '-s {} -p {} --dport {} -m state --state RELATED,ESTABLISHED -j ACCEPT'.format(
+            remote_addr, request.values.get('proto'),
+            request.values.get('dport')
+        )
+    })

@@ -15,14 +15,19 @@ from pywebpush import WebPusher
 
 import home.core.parser as parser
 import home.core.utils as utils
+from home.config import SECRET_KEY
+from home.core.async import run
 from home.core.models import devices, interfaces, get_action, get_device, actions
 from home.web.models import *
 from home.web.models import User, APIClient
 from home.web.utils import ws_login_required, generate_csrf_token, VERSION
+try:
+    from home.config import GOOGLE_API_KEY
+except ImportError:
+    GOOGLE_API_KEY = ""
 
 app = Flask(__name__)
-app.secret_key = '\xff\xe3\x84\xd0\xeb\x05\x1b\x89\x17\xce\xca\xaf\xdb\x8c\x13\xc0\xca\xe4'
-API_KEY = 'AIzaSyCa349yW3-oWMbYRHl21V1IgGRyM6O7PW4'
+app.secret_key = SECRET_KEY
 socketio = SocketIO(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -59,13 +64,29 @@ def command_api():
         key = APIClient.get(token=post.pop('key'))
     except DoesNotExist:
         abort(403)
+    # Send commands directly to device
     if request.form.get('device'):
         device = get_device(post.pop('device'))
-        method = utils.method_from_name(type(device.dev), post.pop('method'))
-        print("Execute command on", device.name, method, post)
-        method(device.dev, **post)
+        if post.get('method') == 'last':
+            method = device.last_method
+            kwargs = device.last_kwargs
+        else:
+            method = utils.method_from_name(device.dev, post.pop('method'))
+            if post.get('increment'):
+                kwargs = device.last_kwargs
+                kwargs[post['increment']] += post.get('count', 1)
+            elif post.get('decrement'):
+                kwargs = device.last_kwargs
+                kwargs[post['decrement']] += post.get('count', 1)
+            else:
+                kwargs = post
+                device.last_method = method
+                device.last_kwargs = kwargs
+        print("Execute command on", device.name, method, kwargs)
+        run(method, **kwargs)
         return '', 204
     sec = SecurityController.get()
+    # Trigger an action
     action = request.form.get('action')
     try:
         action = get_action(action)
@@ -86,7 +107,7 @@ def command_api():
                 try:
                     WebPusher(subscriber.to_dict()).send(
                         json.dumps({'body': "New event alert!!!"}),
-                        gcm_key=API_KEY)
+                        gcm_key=GOOGLE_API_KEY)
                 except Exception as e:
                     print("Webpusher:", str(e))
         elif action == 'eventend':
@@ -154,7 +175,7 @@ def subscribe(subscriber):
     if created:
         WebPusher(subscriber).send(
             json.dumps({'body': "Subscribed to push notifications!"}),
-            gcm_key=API_KEY)
+            gcm_key=GOOGLE_API_KEY)
 
 
 @socketio.on('update', namespace='/ws')
@@ -224,7 +245,7 @@ def csrf_protect():
 
 @app.after_request
 def add_header(response):
-    #response.headers['Content-Security-Policy'] = "default-src 'self'"
+    # response.headers['Content-Security-Policy'] = "default-src 'self'"
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response
 

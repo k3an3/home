@@ -7,7 +7,7 @@ Parses YAML configuration files.
 """
 import yaml
 
-from home.core.models import drivers, devices, actions, interfaces
+from home.core.models import drivers, devices, actions, interfaces, add_scheduled_job
 
 
 def parse(file='config.yml', data=None):
@@ -41,3 +41,5 @@ def parse(file='config.yml', data=None):
             actions.append(action)
             action.setup()
             print(action.devices)
+        for job in y['cron']:
+            add_scheduled_job(job)

@@ -44,6 +44,7 @@ tail:
 import socket
 import sys
 from datetime import datetime
+from typing import Dict
 
 import pytz
 from astral import Astral
@@ -117,7 +118,8 @@ class Bulb:
         s.sendto(HF_COMMAND, (self.host, HF_COMMAND_PORT))
         s.sendto(HF_COMMAND_OK, (self.host, HF_COMMAND_PORT))
 
-    def change_color(self, red=0, green=0, blue=0, white=0, brightness=255, mode='31', function=None, speed='1f') -> None:
+    def change_color(self, red: int = 0, green: int = 0, blue: int = 0, white: int = 0, brightness: int = 255,
+                     mode: str = '31', function: str = None, speed: str = '1f') -> None:
         """
         Provided RGB values and a brightness, change the color of the
         bulb with a TCP socket.
@@ -130,6 +132,7 @@ class Bulb:
                 raise NotImplementedError
             data = bytearray.fromhex(mode + function + speed + TAIL)
         else:
+            red, green, blue, white, brightness = num(red, green, blue, white, brightness)
             red = num(red * brightness / 255)
             green = num(green * brightness / 255)
             blue = num(blue * brightness / 255)
@@ -156,7 +159,7 @@ class Bulb:
     def sunlight(self) -> None:
         self.change_color(white=calc_sunlight())
 
-    def fade(self, start=None, stop=None, bright=None, speed=1) -> None:
+    def fade(self, start: Dict = None, stop: Dict = None, bright: int = None, speed: int = 1) -> None:
         speed = abs(speed)
         if start:
             bright = bright or 255
@@ -169,7 +172,7 @@ class Bulb:
                 self.change_color(**stop, brightness=bright, mode='41')
                 bright += speed
 
-    def fade_sunlight(self, speed=1):
+    def fade_sunlight(self, speed: int = 1) -> None:
         self.fade(stop={'white': calc_sunlight()}, speed=speed)
 
 

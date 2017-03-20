@@ -2,6 +2,7 @@
 import os
 import sys
 
+from home import config
 from home.core.parser import parse
 from home.web.models import db_init
 from home.web.web import socketio, app
@@ -31,5 +32,6 @@ except ImportError:
         print('Using threading')
         create_thread_func = lambda f: threading.Thread(target=f)
         start_thread_func = lambda t: t.start()
+
 parse(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'config.yml'))
-socketio.run(app, debug=True)
+socketio.run(app, debug=config.DEBUG)

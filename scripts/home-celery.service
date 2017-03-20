@@ -1,0 +1,14 @@
+[Unit]
+Description=A smart home
+After=network.target
+BindsTo=home.service
+Requires=redis.service
+
+[Service]
+User=home
+Group=home
+WorkingDirectory=/srv/www/home
+ExecStart=/srv/www/home/env/bin/celery -A home.core.async.queue worker --loglevel=info
+
+[Install]
+WantedBy=multi-user.target

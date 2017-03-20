@@ -10,16 +10,18 @@ class SSH:
         self.keyfile = keyfile
         self.port = port
         self.host = host
-        self.ssh = paramiko.SSHClient()
-        self.ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-    def send(self, command):
-        self.ssh.connect(self.host,
-                         self.port,
-                         self.username,
-                         self.password,
-                         key_filename=self.keyfile)
-        return self.ssh.exec_command(escape(command))[2].readlines()
+    def send(self, command: str) -> str:
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh.connect(self.host,
+                    self.port,
+                    self.username,
+                    self.password,
+                    key_filename=self.keyfile)
+        r = ssh.exec_command(escape(command))[2].readlines()
+        ssh.close()
+        return r
 
 
 def escape(command):
