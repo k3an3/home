@@ -2,7 +2,7 @@
 import os
 import sys
 
-import settings
+from home import settings
 from home.core.parser import parse
 from home.web.models import db_init
 from home.web.web import socketio, app

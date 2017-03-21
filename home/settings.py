@@ -5,6 +5,6 @@ DEBUG = False
 GOOGLE_API_KEY = 'your_key_here'
 
 try:
-    from settings_local import *
+    from home.settings_local import *
 except ImportError:
     pass

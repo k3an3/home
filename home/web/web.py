@@ -15,13 +15,13 @@ import home.core.parser as parser
 import home.core.utils as utils
 from home.core.async import run
 from home.core.models import devices, interfaces, get_action, get_device, actions
+from home.settings import SECRET_KEY
 from home.web.models import *
 from home.web.models import User, APIClient
 from home.web.utils import ws_login_required, generate_csrf_token, VERSION
-from settings import SECRET_KEY
 
 try:
-    from settings import GOOGLE_API_KEY
+    from home.settings import GOOGLE_API_KEY
 except ImportError:
     GOOGLE_API_KEY = ""
 
