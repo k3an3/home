@@ -13,7 +13,7 @@ self.addEventListener('push', function(event) {
     event.waitUntil(
         self.registration.showNotification(title, data, {
             body: data.body,
-            icon: '/static/img/home.png'
+            icon: data.icon,
         }));
 });
 self.addEventListener('notificationclick', function(event) {

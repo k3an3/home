@@ -86,10 +86,10 @@ class Subscriber(BaseModel):
                      }
             }
 
-    def push(self, message):
+    def push(self, message, icon='/static/favicon.ico'):
         WebPusher(self.to_dict()).send(
             json.dumps({'body': message,
-                        'icon': 'https://105ww.xyz/static/favicon.ico'}),
+                        'icon': icon}),
             gcm_key=GOOGLE_API_KEY)
 
 
