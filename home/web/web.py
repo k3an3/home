@@ -298,8 +298,8 @@ def revoke(message):
     client.delete_instance()
 
 
-@app.route("/push")
+@app.route("/push", methods=['GET', 'POST'])
 @api_auth_required
-def test_push():
+def test_push(**kwargs):
     send_to_subscribers("This is only a test.")
-    return 204, ''
+    return '', 204
