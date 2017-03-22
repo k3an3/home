@@ -257,6 +257,12 @@
                         <div class="panel-heading">
                             <h3 class="panel-title">Interface Visibility</h3>
                         </div>
+                            {% for interface, blah in interfaces %}
+                                <div class="panel-body">
+                                    <strong>{{ interface }}</strong>
+                                    <input class="visibility" type="checkbox" id="{{ interface }}" {% if interface.public %}checked{% endif %}>
+                                </div>
+                            {% endfor %}
                     </div>
                 {% endif %}
             </div>
