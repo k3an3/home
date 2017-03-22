@@ -18,7 +18,7 @@ from home.core.models import devices, interfaces, get_action, get_device, action
 from home.settings import SECRET_KEY
 from home.web.models import *
 from home.web.models import User, APIClient
-from home.web.utils import ws_login_required, generate_csrf_token, VERSION, api_auth_required
+from home.web.utils import ws_login_required, generate_csrf_token, VERSION, api_auth_required, send_to_subscribers
 
 try:
     from home.settings import GOOGLE_API_KEY
@@ -101,14 +101,7 @@ def command_api():
             get_action('alert').run()
             # SecurityEvent.create(controller=sec, device=key)
             socketio.emit('state change', {'state': sec.state}, namespace='/ws')
-            for subscriber in Subscriber.select():
-                pass
-                try:
-                    WebPusher(subscriber.to_dict()).send(
-                        json.dumps({'body': "New event alert!!!"}),
-                        gcm_key=GOOGLE_API_KEY)
-                except Exception as e:
-                    print("Webpusher:", str(e))
+            send_to_subscribers("New event alert")
         elif action == 'eventend':
             print("EVENT END")
             try:
@@ -308,6 +301,5 @@ def revoke(message):
 @app.route("/push")
 @api_auth_required
 def test_push():
-    for subscriber in Subscriber.select():
-        subscriber.push("This is only a test!")
+    send_to_subscribers("This is only a test.")
     return 204, ''
