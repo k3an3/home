@@ -2,7 +2,7 @@
 {% include 'include/colormap.html' %}
 <br><br>
 <input onchange="changewhite(this.value)" type="range" id="slidewhite" name="slidewhite" min="0" max="255">
-<input type="text" id="hex{{ device.name }}" oninput="updateColor();">
+<input type="text" id="hex" oninput="updateColor();">
 <br><br>
 <button class="btn btn-secondary" onclick="clickColor('#000000');">Off</button>
 <br><br>
