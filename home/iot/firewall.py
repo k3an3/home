@@ -4,7 +4,7 @@ from flask import request
 from home.core.async import run
 from home.core.models import get_device
 from home.iot.wrappers import SSH
-from home.web.utils import api_login_required
+from home.web.utils import api_auth_required
 from home.web.web import app
 
 FIREWALL_TYPES = {
@@ -38,7 +38,7 @@ class SSHFirewall(SSH):
 
 
 @app.route('/api/firewall/unblock', methods=['GET', 'POST'])
-@api_login_required
+@api_auth_required
 def unblock_this(*args, **kwargs):
     try:
         device = get_device(request.values.get('device'))
