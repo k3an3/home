@@ -44,7 +44,7 @@ def ws_optional_auth(f):
     return wrapped
 
 
-def api_login_required(f):
+def api_auth_required(f):
     @functools.wraps(f)
     def wrapped(*args, **kwargs):
         try:

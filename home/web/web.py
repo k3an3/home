@@ -4,26 +4,24 @@ web.py
 
 Flask web application for Home.
 """
-import json
 
 from flask import Flask, render_template, request, redirect, abort, url_for, session, flash
 from flask_login import LoginManager, login_required, current_user
 from flask_login import login_user, fresh_login_required, logout_user
 from flask_socketio import SocketIO, emit, disconnect
 from peewee import DoesNotExist
-from pywebpush import WebPusher
 
 import home.core.parser as parser
 import home.core.utils as utils
-from home.config import SECRET_KEY
 from home.core.async import run
 from home.core.models import devices, interfaces, get_action, get_device, actions, get_interface
+from home.settings import SECRET_KEY
 from home.web.models import *
 from home.web.models import User, APIClient
-from home.web.utils import ws_login_required, generate_csrf_token, VERSION
+from home.web.utils import ws_login_required, generate_csrf_token, VERSION, api_auth_required, send_to_subscribers
 
 try:
-    from home.config import GOOGLE_API_KEY
+    from home.settings import GOOGLE_API_KEY
 except ImportError:
     GOOGLE_API_KEY = ""
 
@@ -103,14 +101,7 @@ def command_api():
             get_action('alert').run()
             # SecurityEvent.create(controller=sec, device=key)
             socketio.emit('state change', {'state': sec.state}, namespace='/ws')
-            for subscriber in Subscriber.select():
-                pass
-                try:
-                    WebPusher(subscriber.to_dict()).send(
-                        json.dumps({'body': "New event alert!!!"}),
-                        gcm_key=GOOGLE_API_KEY)
-                except Exception as e:
-                    print("Webpusher:", str(e))
+            send_to_subscribers("New event alert")
         elif action == 'eventend':
             print("EVENT END")
             try:
@@ -182,18 +173,12 @@ def subscribe(subscriber):
         p256dh=subscriber.get('keys')['p256dh'],
         user=current_user.id)
     if created:
-        WebPusher(subscriber).send(
-            json.dumps({'body': "Subscribed to push notifications!"}),
-            gcm_key=GOOGLE_API_KEY)
+        s.push("Subscribed to push notifications!")
 
 
 @app.route('/api/update', methods=['POST'])
+@api_auth_required
 def api_update_app():
-    # Restrict to certain clients
-    try:
-        APIClient.get(key=request.form.get('secret'))
-    except Exception:
-        abort(403)
     utils.update()
     emit('update', {}, broadcast=True)
 
@@ -285,3 +270,17 @@ def create_user():
 def logout():
     logout_user()
     return redirect(url_for('index'))
+
+
+@socketio.on('revoke', namespace='/ws')
+@ws_login_required
+def revoke(message):
+    client = APIClient.get(name=message.get('name'))
+    client.delete_instance()
+
+
+@app.route("/push", methods=['GET', 'POST'])
+@api_auth_required
+def test_push(**kwargs):
+    send_to_subscribers("This is only a test.")
+    return '', 204

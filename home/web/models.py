@@ -6,8 +6,8 @@ from peewee import SqliteDatabase, MySQLDatabase, CharField, BooleanField, Forei
     OperationalError, Model
 from pywebpush import WebPusher
 
-from home.config import GOOGLE_API_KEY
 from home.core.utils import random_string
+from home.settings import GOOGLE_API_KEY
 
 if True:
     db = SqliteDatabase('app.db')
@@ -86,10 +86,10 @@ class Subscriber(BaseModel):
                      }
             }
 
-    def push(self, message):
+    def push(self, message, icon='/static/favicon.ico'):
         WebPusher(self.to_dict()).send(
             json.dumps({'body': message,
-                        'icon': 'https://105ww.xyz/static/favicon.ico'}),
+                        'icon': icon}),
             gcm_key=GOOGLE_API_KEY)
 
 

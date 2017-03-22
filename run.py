@@ -2,7 +2,7 @@
 import os
 import sys
 
-from home import config
+from home import settings
 from home.core.parser import parse
 from home.web.models import db_init
 from home.web.web import socketio, app
@@ -34,4 +34,4 @@ except ImportError:
         start_thread_func = lambda t: t.start()
 
 parse(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'config.yml'))
-socketio.run(app, debug=config.DEBUG)
+socketio.run(app, debug=settings.DEBUG)
