@@ -178,10 +178,11 @@ class Interface(YAMLObject):
     """
     yaml_tag = '!interface'
 
-    def __init__(self, name, friendly_name, template):
+    def __init__(self, name, friendly_name, template, public=False):
         self.name = name
         self.friendly_name = friendly_name
         self.template = os.path.join('iot', template)
+        self.public = public
 
 
 # Set up YAML object instantiation

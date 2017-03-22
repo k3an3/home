@@ -8,6 +8,7 @@ interfaces:
         name: music
         friendly_name: Music
         template: music.html
+        public: True
 
 installed_drivers:
     - !driver
@@ -31,7 +32,6 @@ installed_drivers:
         module: mopidy
         klass: Mopidy
     - !driver
-        interface: music
         module: chromecast
         klass: Chromecast
     - !driver
