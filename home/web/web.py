@@ -18,7 +18,7 @@ from home.core.models import devices, interfaces, get_action, get_device, action
 from home.settings import SECRET_KEY
 from home.web.models import *
 from home.web.models import User, APIClient
-from home.web.utils import ws_login_required, generate_csrf_token, VERSION
+from home.web.utils import ws_login_required, generate_csrf_token, VERSION, api_auth_required
 
 try:
     from home.settings import GOOGLE_API_KEY
@@ -184,12 +184,8 @@ def ws_update_app():
 
 
 @app.route('/api/update', methods=['POST'])
+@api_auth_required
 def api_update_app():
-    # Restrict to certain clients
-    try:
-        APIClient.get(token=request.json.get('secret'))
-    except Exception:
-        abort(403)
     utils.update()
     emit('update', {}, broadcast=True)
 
@@ -310,6 +306,7 @@ def revoke(message):
 
 
 @app.route("/push")
+@api_auth_required
 def test_push():
     for subscriber in Subscriber.select():
         subscriber.push("This is only a test!")
