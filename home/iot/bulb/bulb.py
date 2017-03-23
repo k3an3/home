@@ -49,7 +49,7 @@ from typing import Dict
 import pytz
 from astral import Astral
 
-import settings
+from home import settings
 from home.core.utils import num
 
 SUPPORTED_MODES = ['31', '41', '61']

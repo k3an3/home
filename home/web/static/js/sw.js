@@ -8,12 +8,12 @@ self.addEventListener('activate', function(event) {
 
 });
 self.addEventListener('push', function(event) {
-    var title = 'Security Notification';
+    var title = '105ww Home';
 	data = event.data.json();
     event.waitUntil(
         self.registration.showNotification(title, data, {
             body: data.body,
-			icon: 'http://localhost:5000/static/img/logo.png'
+            icon: data.icon,
         }));
 });
 self.addEventListener('notificationclick', function(event) {
