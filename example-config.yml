@@ -21,6 +21,7 @@ installed_drivers:
     - !driver
         module: plug
         klass: Plug
+        noserialize: True
     - !driver
         module: wol
         klass: WakeOnLAN

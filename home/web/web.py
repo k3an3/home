@@ -54,15 +54,13 @@ def index():
 
 
 @app.route('/api/command', methods=['POST'])
-def command_api():
+@api_auth_required
+def command_api(**kwargs):
     """
     Command API used by devices.
     """
     post = request.form.to_dict()
-    try:
-        key = APIClient.get(token=post.pop('key'))
-    except DoesNotExist:
-        abort(403)
+    post.pop('key')
     # Send commands directly to device
     if request.form.get('device'):
         device = get_device(post.pop('device'))
@@ -82,7 +80,10 @@ def command_api():
                 device.last_method = method
                 device.last_kwargs = kwargs
         print("Execute command on", device.name, method, kwargs)
-        run(method, **kwargs)
+        if device.driver.noserialize:
+            method(**kwargs)
+        else:
+            run(method, **kwargs)
         return '', 204
     sec = SecurityController.get()
     # Trigger an action

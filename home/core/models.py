@@ -125,10 +125,11 @@ class Driver(YAMLObject):
     """
     yaml_tag = '!driver'
 
-    def __init__(self, module, klass, name=None, interface=None):
+    def __init__(self, module, klass, name=None, interface=None, noserialize=False):
         self.name = name or module
         self.interface = interface
         self.klass = class_from_name(module, klass)
+        self.noserialize = noserialize
 
     def setup(self) -> None:
         """
@@ -168,6 +169,9 @@ class Action(YAMLObject):
                 device.last_method = method
                 device.last_kwargs = kwargs
             print("Execute action", config['method'])
+            if device.driver.noserialize:
+                method(**kwargs)
+                continue
             try:
                 yield method, config.get('delay', 0), kwargs
             except Exception as e:
