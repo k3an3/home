@@ -5,6 +5,8 @@ mopidy.py
 Websocket JSONRPC client for the Mopidy media server
 """
 import json
+from threading import Thread
+from time import sleep
 
 import requests
 import websocket
@@ -33,28 +35,56 @@ def get_album_art(album_id, image=1):
 class Mopidy:
     def __init__(self, host):
         self.host = host
-        self.ws = websocket.WebSocket()
-        self.ws.connect("ws://{}:6680/mopidy/ws".format(host),
-                        on_message=self.on_message,
-                        on_error=self.on_error,
-                        on_close=self.on_close)
+        self.ws = websocket.WebSocketApp("ws://{}:6680/mopidy/ws".format(host),
+                                         on_open=self.on_open,
+                                         on_message=self.on_message,
+                                         on_error=self.on_error,
+                                         on_close=self.on_close)
+        self.t = Thread(target=self.ws.run_forever)
+        self.t.start()
         self.id = 1
+        self.track = None
 
     def send(self, method, **kwargs):
         msg = {"jsonrpc": "2.0", "id": 1, 'method': method, 'params': dict(kwargs)}
         self.id += 1
         self.ws.send(json.dumps(msg))
-        return json.loads(self.ws.recv())
+
+    def on_open(self, ws):
+        pass
 
     def on_message(self, ws, message):
         j = json.loads(message)
+        event = j.get('event')
+        state = j.get('new_state')
+        track = j.get('tl_track')
+        result = j.get('result')
+        if result:
+            if result.get('track'):
+                self.track = result.get('track')
+        if event == 'tracklist_changed':
+            socketio.emit('tracklist changed', broadcast=True, namespace='/mopidy')
+        if state == 'playing':
+            socketio.emit('playback state', json.dumps({'state': 'playing'}), broadcast=True, namespace='/mopidy')
+        elif state == 'paused':
+            socketio.emit('playback state', json.dumps({'state': 'paused'}), broadcast=True, namespace='/mopidy')
+        if track:
+            track = track.get('track')
+            self.track = track
+            socketio.emit('track', json.dumps({
+                'title': track['name'],
+                'artists': ', '.join(artist['name'] for artist in track['artists']),
+                'album': track['album']['name'],
+                'art': get_album_art(track['album']['uri'].split(':')[2])
+            }), broadcast=True, namespace='/mopidy')
+
         print(j)
 
     def on_error(self, ws, error):
-        pass
+        print("Mopidy websocket error!", error)
 
     def on_close(self, ws):
-        pass
+        print("Mopidy websocket closed")
 
     def get_current_track(self):
         return self.send('core.playback.get_current_tl_track')
@@ -106,13 +136,28 @@ class Mopidy:
 @ws_optional_auth
 def mopidy_ws(data, **kwargs):
     mopidy = get_device(data.pop('device')).dev
-    auth = kwargs.pop('auth')
+    auth = kwargs.pop('auth', False)
     action = data.pop('action')
     if not auth and action not in UNAUTH_COMMANDS:
+        print("Disconnected client from Mopidy endpoint, not authorized/invalid command")
         disconnect()
     if action == 'search':
         results = mopidy.search(**data)
-        results = results['result'][0]['tracks']
-        emit('search results', json.dumps(results))
-    elif action == 'queue':
+        try:
+            results = results['result'][0]['tracks']
+            emit('search results', json.dumps(results))
+        except Exception as e:
+            pass
+    elif action == 'add_track':
         mopidy.add_track(**data)
+        print("Queued track!")
+    elif action == 'get_current_track':
+        while not mopidy.track:
+            mopidy.get_current_track()
+            sleep(1)
+        emit('track', json.dumps({
+            'title': mopidy.track['name'],
+            'artists': ', '.join(artist['name'] for artist in mopidy.track['artists']),
+            'album': mopidy.track['album']['name'],
+            'art': get_album_art(mopidy.track['album']['uri'].split(':')[2])
+        }))

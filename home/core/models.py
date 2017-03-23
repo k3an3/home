@@ -69,6 +69,10 @@ class DeviceSetupError(YAMLConfigParseError):
     pass
 
 
+class DuplicateDeviceNameError(YAMLConfigParseError):
+    pass
+
+
 class YAMLObject(yaml.YAMLObject):
     """
     Base class for YAML objects, simply to print the correct name
@@ -102,6 +106,8 @@ class Device(YAMLObject):
         """
         Set up the driver that this device will use
         """
+        if len([device for device in devices if device.name == self.name]) > 1:
+            raise DuplicateDeviceNameError(self.name)
         # retrieve the class for driver
         if self.driver:
             self.driver = get_driver(self.driver)

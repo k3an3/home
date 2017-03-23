@@ -272,13 +272,6 @@ def logout():
     return redirect(url_for('index'))
 
 
-@socketio.on('revoke', namespace='/ws')
-@ws_login_required
-def revoke(message):
-    client = APIClient.get(name=message.get('name'))
-    client.delete_instance()
-
-
 @app.route("/push", methods=['GET', 'POST'])
 @api_auth_required
 def test_push(**kwargs):
