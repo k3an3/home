@@ -118,10 +118,11 @@ class Driver(YAMLObject):
     """
     yaml_tag = '!driver'
 
-    def __init__(self, module, klass, name=None, interface=None):
+    def __init__(self, module, klass, name=None, interface=None, noserialize=False):
         self.name = name or module
         self.interface = interface
         self.klass = class_from_name(module, klass)
+        self.noserialize = noserialize
 
     def setup(self) -> None:
         """
