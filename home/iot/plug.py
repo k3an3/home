@@ -29,6 +29,8 @@ class Plug:
         try:
             self.device.set_power(state)
         except Exception as e:
+            self.auth()
+            self.device.set_power(state)
             print("Plug: " + str(e))
 
     def on(self):
