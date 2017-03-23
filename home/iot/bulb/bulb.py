@@ -113,12 +113,14 @@ class Bulb:
     def __init__(self, host):
         self.host = host
         self.socket = None
+        self.auth()
 
     def auth(self) -> None:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.sendto(HF_COMMAND, (self.host, HF_COMMAND_PORT))
         s.sendto(HF_COMMAND_OK, (self.host, HF_COMMAND_PORT))
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.setblocking(False)
         self.socket.connect((self.host, CONTROL_PORT))
 
     def change_color(self, red: int = 0, green: int = 0, blue: int = 0, white: int = 0, brightness: int = 255,
