@@ -162,6 +162,9 @@ class Action(YAMLObject):
                 device.last_method = method
                 device.last_kwargs = kwargs
             print("Execute action", config['method'])
+            if device.driver.noserialize:
+                method(**kwargs)
+                continue
             try:
                 yield method, config.get('delay', 0), kwargs
             except Exception as e:
