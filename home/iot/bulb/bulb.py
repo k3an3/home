@@ -44,10 +44,10 @@ tail:
 import socket
 import sys
 from datetime import datetime
-from typing import Dict
 
 import pytz
 from astral import Astral
+from typing import Dict
 
 from home import settings
 from home.core.utils import num
@@ -120,8 +120,8 @@ class Bulb:
         s.sendto(HF_COMMAND, (self.host, HF_COMMAND_PORT))
         s.sendto(HF_COMMAND_OK, (self.host, HF_COMMAND_PORT))
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.setblocking(False)
         self.socket.connect((self.host, CONTROL_PORT))
+        self.socket.setblocking(False)
 
     def change_color(self, red: int = 0, green: int = 0, blue: int = 0, white: int = 0, brightness: int = 255,
                      mode: str = '31', function: str = None, speed: str = '1f') -> None:
