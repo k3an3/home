@@ -4,11 +4,10 @@ models.py
 
 Contains classes to represent objects created by the parser.
 """
-import sys
 from multiprocessing import Process
-from typing import Iterator
 
 import yaml
+from typing import Iterator
 
 from home.core.async import run as queue_run, scheduler
 from home.core.utils import class_from_name, method_from_name, random_string
@@ -148,8 +147,8 @@ class Action(YAMLObject):
             try:
                 self.devices.append((get_device(dev['name']), dev))
             except StopIteration:
-                print("Action setup: Can't find device", dev['name'])
-                sys.exit()
+                raise DeviceNotFoundError(
+                    "Failed to configure action " + self.name + ": Can't find device " + dev['name'])
 
     def prerun(self) -> (Iterator[Process], Iterator[int]):
         for device, config in self.devices:
