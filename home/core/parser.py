@@ -8,6 +8,7 @@ Parses YAML configuration files.
 import yaml
 
 from home.core.models import drivers, devices, actions, interfaces, add_scheduled_job
+from home.core.utils import clear_scheduled_jobs
 
 
 def parse(file='config.yml', data=None):
@@ -21,6 +22,7 @@ def parse(file='config.yml', data=None):
         devices.clear()
         actions.clear()
         interfaces.clear()
+        clear_scheduled_jobs()
         y = yaml.load(f)
         for interface in y['interfaces']:
             interfaces.append(interface)

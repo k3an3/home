@@ -67,7 +67,8 @@ def command_api(client):
     if request.form.get('device'):
         device = get_device(post.pop('device'))
         if device.last_task:
-            app.logger.info(device.last_task.state)
+            pass
+            # app.logger.info(device.last_task.state)
             #device.last_task.revoke()
         if post.get('method') == 'last':
             method = device.last_method
@@ -131,6 +132,7 @@ def ws_admin(data):
         disconnect()
     command = data.get('command')
     if command == 'action':
+        app.logger.info("({}) Execute action {}".format(current_user.username, data.get('action')))
         get_action(data.get('action')).run()
     elif command == 'visible':
         interface = get_interface(data.get('iface'))
