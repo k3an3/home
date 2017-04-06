@@ -11,6 +11,8 @@ import re
 import subprocess
 from typing import Any, List
 
+from home.core.async import scheduler
+
 
 def num(*args: List[Any]) -> List[int]:
     """
@@ -96,3 +98,8 @@ def update():
     subprocess.call(['git', 'stash', 'apply'])
     subprocess.call(['/srv/www/home/env/bin/pip', 'install', '-r', 'requirements.txt', '--upgrade', '--no-deps'])
     reload()
+
+
+def clear_scheduled_jobs():
+    for job in scheduler.get_jobs():
+        job.remove()
