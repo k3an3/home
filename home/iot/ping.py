@@ -8,8 +8,8 @@ class Ping:
         self.host = host
         self.port = port
 
-    def ping(self, hosts=None, port=None):
-        host = hosts or self.host
+    def ping(self, host=None, port=None):
+        host = host or self.host
         port = port or self.port
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
