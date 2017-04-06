@@ -95,6 +95,7 @@ class Device(YAMLObject):
         self.dev = None
         self.last_method = None
         self.last_kwargs = {}
+        self.last_task = None
 
     def setup(self) -> None:
         """
@@ -165,13 +166,13 @@ class Action(YAMLObject):
                 method(**kwargs)
                 continue
             try:
-                yield method, config.get('delay', 0), kwargs
+                yield device, method, config.get('delay', 0), kwargs
             except Exception as e:
                 print("Error", e)
 
     def run(self):
-        for method, delay, kwargs in self.prerun():
-            queue_run(method, delay=delay, **kwargs)
+        for device, method, delay, kwargs in self.prerun():
+            device.last_task = queue_run(method, delay=delay, **kwargs)
 
 
 class Interface(YAMLObject):

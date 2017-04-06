@@ -44,6 +44,7 @@ tail:
 import socket
 import sys
 from datetime import datetime
+from time import sleep
 
 import pytz
 from astral import Astral
@@ -157,7 +158,9 @@ class Bulb:
             print(e)
 
     def sunlight(self) -> None:
-        self.change_color(white=calc_sunlight())
+        while True:
+            self.change_color(white=calc_sunlight())
+            sleep(60)
 
     def fade(self, start: Dict = None, stop: Dict = None, bright: int = None, speed: int = 1) -> None:
         speed = abs(speed)

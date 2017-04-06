@@ -19,7 +19,7 @@ queue = Celery('home',
 
 queue.conf.update(
     CELERY_TASK_SERIALIZER='pickle',
-    CELERY_ACCEPT_CONTENT=['pickle'],
+    CELERY_ACCEPT_CONTENT=['pickle', 'json'],
 )
 scheduler = BackgroundScheduler()
 scheduler.start()
@@ -34,4 +34,4 @@ def _run(method, **kwargs) -> None:
 
 
 def run(method, delay=0, **kwargs):
-    _run.apply_async(args=[method], kwargs=kwargs, countdown=float(delay))
+    return _run.apply_async(args=[method], kwargs=kwargs, countdown=float(delay))

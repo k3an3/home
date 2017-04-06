@@ -64,6 +64,9 @@ def command_api(**kwargs):
     # Send commands directly to device
     if request.form.get('device'):
         device = get_device(post.pop('device'))
+        if device.last_task:
+            print(device.last_task.state)
+            #device.last_task.revoke()
         if post.get('method') == 'last':
             method = device.last_method
             kwargs = device.last_kwargs
@@ -83,7 +86,7 @@ def command_api(**kwargs):
         if device.driver.noserialize:
             method(**kwargs)
         else:
-            run(method, **kwargs)
+            device.last_task = run(method, **kwargs)
         return '', 204
     sec = SecurityController.get()
     # Trigger an action
