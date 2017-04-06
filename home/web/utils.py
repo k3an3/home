@@ -34,6 +34,16 @@ def ws_login_required(f):
     return wrapped
 
 
+def ws_optional_auth(f):
+    @functools.wraps(f)
+    def wrapped(*args, **kwargs):
+        if current_user.is_authenticated:
+            kwargs['auth'] = True
+        return f(*args, **kwargs)
+
+    return wrapped
+
+
 def api_auth_required(f):
     @functools.wraps(f)
     def wrapped(*args, **kwargs):

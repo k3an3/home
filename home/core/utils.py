@@ -65,7 +65,7 @@ def class_from_name(module_name: str, class_name: str):
         raise NotImplementedError()
 
 
-def method_from_name(klass: str, method_name: str):
+def method_from_name(klass, method_name: str):
     """
     Given an imported class, return the given method pointer.
     :param klass: An imported class containing the method.

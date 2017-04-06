@@ -17,8 +17,15 @@ function editDevice() {
     });
 }
 
+$('.visibility ').click(function(e) {
+    ws.emit('admin', {
+        command: 'visible',
+        iface: $(this).attr('id'),
+    })
+})
+
 function revoke(name) {
-    ws.emit('revoke', {name: name});
+    ws.emit('admin', {command: 'revoke', name: name});
 }
 
 ws.on('disconnect', function () {

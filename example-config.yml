@@ -4,6 +4,11 @@ interfaces:
         name: colormap
         friendly_name: Lights
         template: bulb.html
+    - !interface
+        name: music
+        friendly_name: Music
+        template: music.html
+        public: True
 
 installed_drivers:
     - !driver
@@ -24,6 +29,9 @@ installed_drivers:
         name: sshfirewall
         module: firewall
         klass: SSHFirewall
+    - !driver
+        module: mopidy
+        klass: Mopidy
     - !driver
         module: chromecast
         klass: Chromecast
@@ -56,6 +64,11 @@ devices:
              host: 172.24.0.1
              keyfile: /srv/www/home/.ssh/id_rsa
              path: /usr/sbin/iptables
+        - !device
+            name: media
+            driver: mopidy
+            config:
+             host: localhost
 
     bedroom:
         - !device

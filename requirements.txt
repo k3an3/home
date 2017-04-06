@@ -51,5 +51,6 @@ tzlocal
 vine
 wakeonlan
 Wave
+websocket-client
 Werkzeug
 zeroconf
