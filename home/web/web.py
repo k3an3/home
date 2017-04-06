@@ -9,7 +9,6 @@ from flask import Flask, render_template, request, redirect, abort, url_for, ses
 from flask_login import LoginManager, login_required, current_user
 from flask_login import login_user, fresh_login_required, logout_user
 from flask_socketio import SocketIO, emit, disconnect
-from peewee import DoesNotExist
 
 import home.core.parser as parser
 import home.core.utils as utils
@@ -43,7 +42,7 @@ def index():
     for i in interfaces:
         interface_list.append((i, [d for d in devices if d.driver and d.driver.interface == i]))
     if current_user:
-        logs = open('home.log').read() if current_user.admin else None
+        logs = open('home.log').read()
         return render_template('index.html',
                                interfaces=interface_list,
                                devices=devices,
@@ -54,8 +53,6 @@ def index():
                                version=VERSION,
                                logs=logs,
                                )
-    else:
-        return render_template('index.html')
 
 
 @app.route('/api/command', methods=['POST'])
