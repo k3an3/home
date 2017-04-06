@@ -216,111 +216,114 @@
                 </div>
             {% endif %}
             <div id="settings" class="tab-pane fade in">
-                <div class="col-md-6">
-                    <div class="panel panel-primary">
-                        <div class="panel-heading">
-                            <h3 class="panel-title">Devices</h3>
-                        </div>
-                        {% for device in devices %}
-                            <div class="panel-body">
-                                <strong>name=</strong>{{ device.name }}
-                                <strong>driver=</strong>{{ device.driver }}
-                                <strong>config=</strong>{{ device.config }}
-                            </div>
-                        {% endfor %}
+            <div class="col-md-6">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Devices</h3>
                     </div>
-                    <div class="panel panel-primary">
-                        <div class="panel-heading">
-                            <h3 class="panel-title">Actions</h3>
+                    {% for device in devices %}
+                        <div class="panel-body">
+                            <strong>name=</strong>{{ device.name }}
+                            <strong>driver=</strong>{{ device.driver }}
+                            <strong>config=</strong>{{ device.config }}
                         </div>
-                        {% for action in actions %}
-                            <div class="panel-body">
-                                <strong>name=</strong><a href="javascript:void(0)"
-                                                         onclick="ws.emit('action', {action: '{{ action.name }}'});">{{ action.name }}</a>
-                                <strong>config=</strong>{{ action.devices }}
-                            </div>
-                        {% endfor %}
-                    </div>
-                    {% if current_user.admin %}
-                        <div class="panel panel-primary">
-                            <div class="panel-heading">
-                                <h3 class="panel-title">API Clients</h3>
-                            </div>
-                            {% for client in clients %}
-                                <div class="panel-body">
-                                    <strong>name=</strong>{{ client.name }}
-                                    <strong>token=</strong>{{ client.token }}
-                                    <button onclick="revoke('{{ client.name }}');this.parentNode.style.display = 'none';"
-                                            class="btn btn-danger">Revoke
-                                    </button>
-                                </div>
-                            {% endfor %}
-                        </div>
-                        <div class="panel panel-primary">
-                            <div class="panel-heading">
-                                <h3 class="panel-title">Interface Visibility</h3>
-                            </div>
-                            {% for interface, blah in interfaces %}
-                                <div class="panel-body">
-                                    <strong>{{ interface }}</strong>
-                                    <input class="visibility" type="checkbox" id="{{ interface }}" {% if interface.public %}checked{% endif %}>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
+                    {% endfor %}
                 </div>
-                <div class="col-md-6">
-                    <div class="panel">
-                        <form id="password_form" method="POST" action="/user/password">
-                            <h3>Reset Password</h3>
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Actions</h3>
+                    </div>
+                    {% for action in actions %}
+                        <div class="panel-body">
+                            <strong>name=</strong><a href="javascript:void(0)"
+                                                     onclick="ws.emit('action', {action: '{{ action.name }}'});">{{ action.name }}</a>
+                            <strong>config=</strong>{{ action.devices }}
+                        </div>
+                    {% endfor %}
+                </div>
+                {% if current_user.admin %}
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">API Clients</h3>
+                        </div>
+                        {% for client in clients %}
+                            <div class="panel-body">
+                                <strong>name=</strong>{{ client.name }}
+                                <strong>token=</strong>{{ client.token }}
+                                <button onclick="revoke('{{ client.name }}');this.parentNode.style.display = 'none';"
+                                        class="btn btn-danger">Revoke
+                                </button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Interface Visibility</h3>
+                        </div>
+                        {% for interface, blah in interfaces %}
+                            <div class="panel-body">
+                                <strong>{{ interface }}</strong>
+                                <input class="visibility" type="checkbox" id="{{ interface }}" {% if interface.public %}checked{% endif %}>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                <div class="panel">
+                    <form id="password_form" method="POST" action="/user/password">
+                        <h3>Reset Password</h3>
+                        <input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
+                        {% if current_user.admin %}
+                            User:
+                            <input class="form-control" name="username">
+                        {% else %}
+                            Old Password:
+                            <input class="form-control" type="password" name="password">
+                        {% endif %}
+                        New Password:
+                        <input class="form-control" type="password" name="new_password">
+                        Confirm New Password:
+                        <input class="form-control" type="password" name="new_password_confirm">
+                        <br>
+                        <input type="submit" class="btn btn-primary" value="Submit">
+                    </form>
+                    {% if current_user.admin %}
+                        <form id="user_form" method="POST" action="/user/create">
+                            <h3>Create User</h3>
                             <input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
-                            {% if current_user.admin %}
-                                User:
-                                <input class="form-control" name="username">
-                            {% else %}
-                                Old Password:
-                                <input class="form-control" type="password" name="password">
-                            {% endif %}
-                            New Password:
-                            <input class="form-control" type="password" name="new_password">
-                            Confirm New Password:
-                            <input class="form-control" type="password" name="new_password_confirm">
+                            Username:
+                            <input class="form-control" name="username" autocomplete="off">
+                            Password:
+                            <input class="form-control" id="password1" type="password" name="password"
+                                   autocomplete="off">
+                            <br>
+                            <div class="btn-group" data-toggle="buttons">
+                                <label class="btn btn-warning" onclick="$('#password1').toggle()">
+                                    <input type="radio" name="api" data-toggle="button" aria-pressed="false"
+                                           id="api"
+                                           autocomplete="off">API</input>
+                                </label>
+                                <label class="btn btn-danger">
+                                    <input type="radio" name="admin" data-toggle="button" aria-pressed="false"
+                                           autocomplete="off">Admin</input>
+                                </label>
+                            </div>
+                            <br>
                             <br>
                             <input type="submit" class="btn btn-primary" value="Submit">
                         </form>
-                        {% if current_user.admin %}
-                            <form id="user_form" method="POST" action="/user/create">
-                                <h3>Create User</h3>
-                                <input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
-                                Username:
-                                <input class="form-control" name="username" autocomplete="off">
-                                Password:
-                                <input class="form-control" id="password1" type="password" name="password"
-                                       autocomplete="off">
-                                <br>
-                                <div class="btn-group" data-toggle="buttons">
-                                    <label class="btn btn-warning" onclick="$('#password1').toggle()">
-                                        <input type="radio" name="api" data-toggle="button" aria-pressed="false"
-                                               id="api"
-                                               autocomplete="off">API</input>
-                                    </label>
-                                    <label class="btn btn-danger">
-                                        <input type="radio" name="admin" data-toggle="button" aria-pressed="false"
-                                               autocomplete="off">Admin</input>
-                                    </label>
-                                </div>
-                                <br>
-                                <br>
-                                <input type="submit" class="btn btn-primary" value="Submit">
-                            </form>
-                        {% endif %}
-                        <br>
-                        {% if current_user.admin %}
-                            <a href="javascript:void(0)" onclick="ws.emit('update')">Update</a>
-                            <a href="/reload">Reload</a>
-                        {% endif %}
-                    </div>
+                    {% endif %}
+                    <br>
+                    {% if current_user.admin %}
+                        <a href="javascript:void(0)" onclick="ws.emit('update')">Update</a>
+                        <a href="/reload">Reload</a>
+                    {% endif %}
                 </div>
+                {% if current_user.admin %}
+                    <h3>Logs</h3>
+                    <pre class="pre-scrollable"><code>{{ logs }}</code></pre>
+                {% endif %}
             </div>
         {% endif %}
         <script src="static/js/index.js"></script>

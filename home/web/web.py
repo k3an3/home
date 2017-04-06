@@ -42,47 +42,52 @@ def index():
     interface_list = []
     for i in interfaces:
         interface_list.append((i, [d for d in devices if d.driver and d.driver.interface == i]))
-    return render_template('index.html',
-                           interfaces=interface_list,
-                           devices=devices,
-                           sec=sec,
-                           events=events,
-                           clients=APIClient.select(),
-                           actions=actions,
-                           version=VERSION,
-                           )
+    if current_user:
+        logs = open('home.log').read() if current_user.admin else None
+        return render_template('index.html',
+                               interfaces=interface_list,
+                               devices=devices,
+                               sec=sec,
+                               events=events,
+                               clients=APIClient.select(),
+                               actions=actions,
+                               version=VERSION,
+                               logs=logs,
+                               )
+    else:
+        return render_template('index.html')
 
 
 @app.route('/api/command', methods=['POST'])
 @api_auth_required
-def command_api(**kwargs):
+def command_api(client):
     """
     Command API used by devices.
     """
     post = request.form.to_dict()
-    post.pop('key')
+    key = post.pop('key')
     # Send commands directly to device
     if request.form.get('device'):
         device = get_device(post.pop('device'))
         if device.last_task:
-            print(device.last_task.state)
+            app.logger.info(device.last_task.state)
             #device.last_task.revoke()
         if post.get('method') == 'last':
             method = device.last_method
-            kwargs = device.last_kwargs
+            kwargs = device.lastkwargs
         else:
             method = utils.method_from_name(device.dev, post.pop('method'))
             if post.get('increment'):
-                kwargs = device.last_kwargs
+                kwargs = device.lastkwargs
                 kwargs[post['increment']] += post.get('count', 1)
             elif post.get('decrement'):
-                kwargs = device.last_kwargs
+                kwargs = device.lastkwargs
                 kwargs[post['decrement']] += post.get('count', 1)
             else:
                 kwargs = post
                 device.last_method = method
-                device.last_kwargs = kwargs
-        print("Execute command on", device.name, method, kwargs)
+                device.lastkwargs = kwargs
+        app.logger.info("({}) Execute {} on {} with config {}".format(client.name, method.__name__, device.name, kwargs))
         if device.driver.noserialize:
             method(**kwargs)
         else:
@@ -93,27 +98,27 @@ def command_api(**kwargs):
     action = request.form.get('action')
     try:
         action = get_action(action)
-        print("Run action", action)
+        app.logger.info("({}) Execute action {}".format(client.name, action))
         action.run()
         return '', 204
     except StopIteration:
-        print("No action found for", action)
+        app.logger.warning("({}) Action '{}' not found".format(client.name, request.form.get('action')))
     if sec.is_armed() or sec.is_alert():
         if action == 'eventstart':
-            print("EVENT START")
+            app.logger.info("EVENT START")
             sec.alert()
             get_action('alert').run()
             # SecurityEvent.create(controller=sec, device=key)
             socketio.emit('state change', {'state': sec.state}, namespace='/ws')
             send_to_subscribers("New event alert")
         elif action == 'eventend':
-            print("EVENT END")
+            app.logger.info("EVENT END")
             try:
                 event = SecurityEvent.filter(controller=sec,
                                              device=key.name).order_by(
                     SecurityEvent.id.desc()).get()
                 event.duration = (datetime.datetime.now() - event.datetime).total_seconds()
-                print(event.duration)
+                app.logger.info(event.duration)
                 event.in_progress = False
                 event.save()
                 # emit something here

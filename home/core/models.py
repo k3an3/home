@@ -5,7 +5,6 @@ models.py
 Contains classes to represent objects created by the parser.
 """
 import os
-import sys
 from multiprocessing import Process
 
 import yaml

@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
+import logging
 import os
 import sys
+from logging.handlers import RotatingFileHandler
 
 from home import settings
 from home.core.parser import parse
@@ -34,4 +36,8 @@ except ImportError:
         start_thread_func = lambda t: t.start()
 
 parse(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'config.yml'))
+handler = RotatingFileHandler('home.log', maxBytes=10000, backupCount=1)
+handler.setLevel(logging.INFO)
+handler.setFormatter(logging.Formatter("%(asctime)s: %(message)s"))
+app.logger.addHandler(handler)
 socketio.run(app, debug=settings.DEBUG)

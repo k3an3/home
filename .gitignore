@@ -11,3 +11,4 @@ app.db
 .idea/
 settings_local.py
 config.yml
+*.log
