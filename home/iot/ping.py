@@ -13,6 +13,7 @@ class Ping:
         port = port or self.port
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(10)
             s.connect((host, port))
             s.shutdown(2)
             s.close()
