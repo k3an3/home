@@ -18,7 +18,6 @@ from home.settings import SECRET_KEY
 from home.web.models import *
 from home.web.models import User, APIClient
 from home.web.utils import ws_login_required, generate_csrf_token, VERSION, api_auth_required, send_to_subscribers
-from main import app
 
 try:
     from home.settings import GOOGLE_API_KEY
