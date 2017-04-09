@@ -198,6 +198,7 @@ def api_update_app():
 def update_app():
     if current_user.admin:
         utils.update()
+    socketio.emit('update', {}, broadcast=True)
     return redirect(url_for('index'))
 
 

@@ -48,7 +48,10 @@ def api_auth_required(f):
     @functools.wraps(f)
     def wrapped(*args, **kwargs):
         try:
-            client = APIClient.get(token=request.values.get('key'))
+            if request.is_json:
+                client = APIClient.get(token=request.get_json()['secret'])
+            else:
+                client = APIClient.get(token=request.values.get('key'))
             kwargs['client'] = client
         except DoesNotExist:
             abort(403)
