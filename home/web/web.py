@@ -18,6 +18,7 @@ from home.settings import SECRET_KEY
 from home.web.models import *
 from home.web.models import User, APIClient
 from home.web.utils import ws_login_required, generate_csrf_token, VERSION, api_auth_required, send_to_subscribers
+from main import app
 
 try:
     from home.settings import GOOGLE_API_KEY
@@ -69,7 +70,7 @@ def command_api(client):
         if device.last_task:
             pass
             # app.logger.info(device.last_task.state)
-            #device.last_task.revoke()
+            # device.last_task.revoke()
         if post.get('method') == 'last':
             method = device.last_method
             kwargs = device.lastkwargs
@@ -85,7 +86,8 @@ def command_api(client):
                 kwargs = post
                 device.last_method = method
                 device.lastkwargs = kwargs
-        app.logger.info("({}) Execute {} on {} with config {}".format(client.name, method.__name__, device.name, kwargs))
+        app.logger.info(
+            "({}) Execute {} on {} with config {}".format(client.name, method.__name__, device.name, kwargs))
         if device.driver.noserialize:
             method(**kwargs)
         else:
