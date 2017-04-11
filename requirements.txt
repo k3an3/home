@@ -42,6 +42,7 @@ python-engineio
 python-jose
 python-socketio
 pytz
+py_vapid
 pywebpush
 PyYAML
 redis
