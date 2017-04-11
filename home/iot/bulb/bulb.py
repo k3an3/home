@@ -159,9 +159,7 @@ class Bulb:
             print(e)
 
     def sunlight(self) -> None:
-        while True:
-            self.change_color(white=calc_sunlight())
-            sleep(60)
+        self.change_color(white=calc_sunlight())
 
     def fade(self, start: Dict = None, stop: Dict = None, bright: int = None, speed: int = 1) -> None:
         speed = abs(speed)
