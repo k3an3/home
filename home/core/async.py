@@ -33,7 +33,10 @@ def _run(method, **kwargs) -> None:
     """
     Run the configured actions in multiple processes.
     """
-    logger.info('Running {} with config: {}'.format(method.__name__, kwargs))
+    logger.info('Running {} on {} with config: {}'.format(method.__name__,
+                                                          method.__self__,
+                                                          kwargs
+                                                          ))
     method(**kwargs)
 
 
