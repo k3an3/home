@@ -104,6 +104,8 @@ def calc_sunlight() -> int:
         return {'white': 255 - (sun['sunrise'] - dt).total_seconds() / 3600 * 200 / 6}
     elif dt > sun['sunset']:
         return {'white': 255 - (dt - sun['sunset']).total_seconds() / 3600 * 200 / 6}
+    else:
+        return {'white': 255}
 
 
 class Bulb:
