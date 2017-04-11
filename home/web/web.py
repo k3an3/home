@@ -164,8 +164,16 @@ def subscribe(subscriber):
 @app.route('/api/update', methods=['POST'])
 @api_auth_required
 def api_update_app(client):
-    emit('update', {}, broadcast=True)
+    socketio.emit('update', {}, broadcast=True)
     utils.update()
+
+
+@socketio.on('update')
+@ws_login_required
+def ws_update():
+    if current_user.admin:
+        utils.update()
+        emit('update', {}, broadcast=True)
 
 
 @app.route("/update")
