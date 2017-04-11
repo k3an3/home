@@ -8,6 +8,7 @@ exist here and handle the execution of whatever task is passed to it, whether or
 from apscheduler.schedulers.background import BackgroundScheduler
 from celery import Celery
 from celery.security import setup_security
+from celery.utils.log import get_task_logger
 
 setup_security(allowed_serializers=['pickle', 'json'],
                serializer='pickle')
@@ -24,12 +25,15 @@ queue.conf.update(
 scheduler = BackgroundScheduler()
 scheduler.start()
 
+logger = get_task_logger(__name__)
+
 
 @queue.task
 def _run(method, **kwargs) -> None:
     """
     Run the configured actions in multiple processes.
     """
+    logger.info('Running {} with config: {}'.format(method.__name__, kwargs))
     method(**kwargs)
 
 
