@@ -84,7 +84,7 @@ def command_api(client):
             sec.alert()
             get_action('alert').run()
             # SecurityEvent.create(controller=sec, device=key)
-            socketio.emit('state change', {'state': sec.state}, namespace='/ws')
+            socketio.emit('state change', {'state': sec.state})
             send_to_subscribers("New event alert")
         elif action == 'eventend':
             app.logger.info("EVENT END")
@@ -102,7 +102,7 @@ def command_api(client):
     return '', 204
 
 
-@socketio.on('admin', namespace='/ws')
+@socketio.on('admin')
 @ws_login_required
 def ws_admin(data):
     if not current_user.admin:
@@ -122,7 +122,7 @@ def ws_admin(data):
         client.delete_instance()
 
 
-@socketio.on('change state', namespace='/ws')
+@socketio.on('change state')
 @ws_login_required
 def change_state():
     """
@@ -146,7 +146,7 @@ def change_state():
     emit('state change', {'state': sec.state, 'message': message}, broadcast=True)
 
 
-@socketio.on('subscribe', namespace='/ws')
+@socketio.on('subscribe')
 @ws_login_required
 def subscribe(subscriber):
     """
@@ -164,8 +164,8 @@ def subscribe(subscriber):
 @app.route('/api/update', methods=['POST'])
 @api_auth_required
 def api_update_app(client):
-    utils.update()
     emit('update', {}, broadcast=True)
+    utils.update()
 
 
 @app.route("/update")
@@ -173,7 +173,7 @@ def api_update_app(client):
 def update_app():
     if current_user.admin:
         utils.update()
-    socketio.emit('update', {}, broadcast=True)
+        socketio.emit('update', {}, broadcast=True)
     return redirect(url_for('index'))
 
 

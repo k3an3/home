@@ -2,7 +2,7 @@
  * Created by keane on 2/26/17.
  */
 
-var ws = io.connect('//' + document.domain + ':' + location.port + '/ws');
+var ws = io.connect('//' + document.domain + ':' + location.port);
 var last = "#FFFFFF";
 var bright = 100;
 var target = "0";
@@ -28,12 +28,18 @@ function revoke(name) {
     ws.emit('admin', {command: 'revoke', name: name});
 }
 
+var update = false;
+
 ws.on('disconnect', function () {
     $('#status').html('Status: <span style="color:red">Disconnected</span>');
 });
 
 ws.on('connect', function () {
     $('#status').html('Status: <span style="color:green">Connected</span>');
+    $("#loadingScreen").dialog('close');
+    if (update) {
+        location.reload(true);
+    }
 });
 
 ws.on('preview reset', function (msg) {
@@ -56,9 +62,36 @@ ws.on('event', function (data) {
     var table = $('#events');
 });
 
+$("#loadingScreen").dialog({
+    autoOpen: false,    // set this to false so we can manually open it
+    dialogClass: "loadingScreenWindow",
+    closeOnEscape: false,
+    draggable: false,
+    width: 460,
+    minHeight: 50,
+    modal: true,
+    buttons: {},
+    resizable: false,
+    open: function() {
+        // scrollbar fix for IE
+        $('body').css('overflow','hidden');
+    },
+    close: function() {
+        // reset overflow
+        $('body').css('overflow','auto');
+    }
+}); // end of dialog
+
 ws.on('update', function (data) {
-    document.location = "/";
+    update = true;
+    waitingDialog({title: 'Updating...'})
 });
+
+function waitingDialog(waiting) {
+    $("#loadingScreen").html(waiting.message && '' != waiting.message ? waiting.message : 'Please wait...');
+    $("#loadingScreen").dialog('option', 'title', waiting.title && '' != waiting.title ? waiting.title : 'Loading');
+    $("#loadingScreen").dialog('open');
+}
 
 ws.on('state change', function (data) {
     var bg;
