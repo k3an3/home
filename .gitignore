@@ -12,3 +12,5 @@ app.db
 settings_local.py
 config.yml
 *.log
+*.pid
+*.sock
