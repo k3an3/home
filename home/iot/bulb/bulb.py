@@ -44,7 +44,6 @@ tail:
 import socket
 import sys
 from datetime import datetime
-from time import sleep
 
 import pytz
 from astral import Astral
@@ -99,12 +98,12 @@ def calc_sunlight() -> int:
     city = a[settings.LOCATION]
     sun = city.sun(date=datetime.now(), local=True)
     dt = datetime.utcnow().replace(tzinfo=pytz.UTC)
-    white = 255
-    if dt < sun['sunrise']:
-        white = 255 - (sun['sunrise'] - dt).total_seconds() / 3600 * 200 / 6
+    if dt.hour < 4 or dt.hour > 23:
+        return {'red': 255}
+    elif dt < sun['sunrise']:
+        return {'white': 255 - (sun['sunrise'] - dt).total_seconds() / 3600 * 200 / 6}
     elif dt > sun['sunset']:
-        white = 255 - (dt - sun['sunset']).total_seconds() / 3600 * 200 / 6
-    return white
+        return {'white': 255 - (dt - sun['sunset']).total_seconds() / 3600 * 200 / 6}
 
 
 class Bulb:
@@ -159,7 +158,7 @@ class Bulb:
             print(e)
 
     def sunlight(self) -> None:
-        self.change_color(white=calc_sunlight())
+        self.change_color(**calc_sunlight())
 
     def fade(self, start: Dict = None, stop: Dict = None, bright: int = None, speed: int = 1) -> None:
         speed = abs(speed)

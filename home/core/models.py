@@ -170,7 +170,7 @@ class Action(YAMLObject):
                 device.last_kwargs = kwargs
             print("Execute action", config['method'])
             if device.driver.noserialize:
-                method(**kwargs)
+                Process(target=method, kwargs=kwargs).start()
                 continue
             try:
                 yield device, method, config.get('delay', 0), kwargs

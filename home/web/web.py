@@ -12,12 +12,12 @@ from flask_socketio import SocketIO, emit, disconnect
 
 import home.core.parser as parser
 import home.core.utils as utils
-from home.core.async import run
-from home.core.models import devices, interfaces, get_action, get_device, actions, get_interface
-from home.settings import SECRET_KEY
+from home.core.models import devices, interfaces, get_action, actions, get_interface
+from home.settings import SECRET_KEY, DEBUG
 from home.web.models import *
 from home.web.models import User, APIClient
-from home.web.utils import ws_login_required, generate_csrf_token, VERSION, api_auth_required, send_to_subscribers
+from home.web.utils import ws_login_required, generate_csrf_token, VERSION, api_auth_required, send_to_subscribers, \
+    handle_task
 
 try:
     from home.settings import GOOGLE_API_KEY
@@ -52,6 +52,7 @@ def index():
                                actions=actions,
                                version=VERSION,
                                logs=logs,
+                               debug=DEBUG
                                )
 
 
@@ -65,32 +66,7 @@ def command_api(client):
     key = post.pop('key')
     # Send commands directly to device
     if request.form.get('device'):
-        device = get_device(post.pop('device'))
-        if device.last_task:
-            pass
-            # app.logger.info(device.last_task.state)
-            # device.last_task.revoke()
-        if post.get('method') == 'last':
-            method = device.last_method
-            kwargs = device.lastkwargs
-        else:
-            method = utils.method_from_name(device.dev, post.pop('method'))
-            if post.get('increment'):
-                kwargs = device.lastkwargs
-                kwargs[post['increment']] += post.get('count', 1)
-            elif post.get('decrement'):
-                kwargs = device.lastkwargs
-                kwargs[post['decrement']] += post.get('count', 1)
-            else:
-                kwargs = post
-                device.last_method = method
-                device.lastkwargs = kwargs
-        app.logger.info(
-            "({}) Execute {} on {} with config {}".format(client.name, method.__name__, device.name, kwargs))
-        if device.driver.noserialize:
-            method(**kwargs)
-        else:
-            device.last_task = run(method, **kwargs)
+        handle_task(post, client)
         return '', 204
     sec = SecurityController.get()
     # Trigger an action

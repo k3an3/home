@@ -8,7 +8,9 @@ from flask_login import current_user
 from flask_socketio import disconnect
 from peewee import DoesNotExist
 
-from home.core.utils import random_string
+from home.core.async import run
+from home.core.models import get_device
+from home.core.utils import random_string, method_from_name
 from home.web.models import APIClient, Subscriber
 
 try:
@@ -16,6 +18,7 @@ try:
 except:
     VERSION = 'unknown'
 
+logger = None
 
 def ws_login_required(f):
     """
@@ -72,3 +75,33 @@ def send_to_subscribers(message):
             subscriber.push(message)
         except Exception as e:
             print("Webpusher:", str(e))
+
+
+def handle_task(post, client):
+    device = get_device(post.pop('device'))
+    if device.last_task:
+        pass
+        # app.logger.info(device.last_task.state)
+        # device.last_task.revoke()
+    if post.get('method') == 'last':
+        method = device.last_method
+        kwargs = device.lastkwargs
+    else:
+        method = method_from_name(device.dev, post.pop('method'))
+        if post.get('increment'):
+            kwargs = device.lastkwargs
+            kwargs[post['increment']] += post.get('count', 1)
+        elif post.get('decrement'):
+            kwargs = device.lastkwargs
+            kwargs[post['decrement']] += post.get('count', 1)
+        else:
+            kwargs = post
+            device.last_method = method
+            device.lastkwargs = kwargs
+    from home.web.web import app
+    app.logger.info(
+        "({}) Execute {} on {} with config {}".format(client.name, method.__name__, device.name, kwargs))
+    if device.driver.noserialize:
+        method(**kwargs)
+    else:
+        device.last_task = run(method, **kwargs)
