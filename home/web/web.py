@@ -163,7 +163,7 @@ def subscribe(subscriber):
 
 @app.route('/api/update', methods=['POST'])
 @api_auth_required
-def api_update_app():
+def api_update_app(client):
     utils.update()
     emit('update', {}, broadcast=True)
 
