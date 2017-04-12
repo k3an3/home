@@ -10,10 +10,8 @@ TIMEOUT = 10
 
 
 class Http:
-    @staticmethod
-    def get(url, data=None, headers=None):
+    def get(self, url, data=None, headers=None):
         requests.get(url, params=data, headers=headers, timeout=TIMEOUT)
 
-    @staticmethod
-    def post(url, data=None, headers=None):
+    def post(self, url, data=None, headers=None):
         requests.post(url, data=data, headers=headers, timeout=TIMEOUT)
