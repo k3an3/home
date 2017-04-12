@@ -38,6 +38,10 @@ installed_drivers:
     - !driver
         module: audio
         klass: Audio
+    - !driver
+        module: http
+        klass: Http
+        static: True
 
 devices:
     living_room:

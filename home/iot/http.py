@@ -9,7 +9,7 @@ import requests
 TIMEOUT = 10
 
 
-class HTTP:
+class Http:
     def get(self, url, data, headers):
         requests.get(url, params=data, headers=headers, timeout=TIMEOUT)
 

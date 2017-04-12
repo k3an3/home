@@ -20,6 +20,7 @@ except:
 
 logger = None
 
+
 def ws_login_required(f):
     """
     Authenticate Websocket requests
@@ -87,6 +88,7 @@ def handle_task(post, client):
         method = device.last_method
         kwargs = device.lastkwargs
     else:
+        print(device, device.dev, post.get('method'))
         method = method_from_name(device.dev, post.pop('method'))
         if post.get('increment'):
             kwargs = device.lastkwargs

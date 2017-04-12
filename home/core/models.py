@@ -110,7 +110,11 @@ class Device(YAMLObject):
             raise DuplicateDeviceNameError(self.name)
         # retrieve the class for driver
         if self.driver:
-            self.driver = get_driver(self.driver)
+            try:
+                self.driver = get_driver(self.driver)
+            except StopIteration:
+                raise DriverNotInstalledError("Can't find driver " + str(self.driver)
+                                              + " for device " + self.name)
             dev = self.driver.klass
             config_d = self.config if self.config else {}
             try:
@@ -125,11 +129,12 @@ class Driver(YAMLObject):
     """
     yaml_tag = '!driver'
 
-    def __init__(self, module, klass, name=None, interface=None, noserialize=False):
+    def __init__(self, module, klass, name=None, interface=None, noserialize=False, static=False):
         self.name = name or module
         self.interface = interface
         self.klass = class_from_name(module, klass)
         self.noserialize = noserialize
+        self.static = static
 
     def setup(self) -> None:
         """
@@ -137,6 +142,10 @@ class Driver(YAMLObject):
         """
         if self.interface:
             self.interface = get_interface(self.interface)
+        if self.static:
+            dev = Device(self.name, self.name)
+            dev.setup()
+            devices.append(dev)
 
 
 class Action(YAMLObject):
