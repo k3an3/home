@@ -5,7 +5,7 @@ import requests
 from flask import request, abort
 
 from home.core.models import get_device
-from home.iot.speech import Speech, message
+from home.iot.speech import Speech, message, part_of_day
 from home.web.utils import api_auth_required
 from home.web.web import app
 
@@ -30,7 +30,45 @@ class Weather:
         r = requests.get(BASE_URL + mode + self.uri)
         if not r.status_code == 200 or not 'json' in r.headers['content-type']:
             raise Exception("Invalid response from OpenWeatherMap")
-        return r.json()
+        return Forecast(r.json())
+
+
+class Forecast:
+    def __init__(self, data):
+        if data.get('list'):
+            data = data['list'][1]
+        self.temp = data['main']['temp']
+        self.description = data['weather'][0]['description']
+        self.wind = data['wind']['speed']
+
+    def windy(self):
+        return self.wind > 20
+
+    def rainy(self):
+        return 'rain' in self.description.lower()
+
+
+def format_weather(speech):
+    weather = speech.weather.get()
+    forecast = speech.weather.get('forecast')
+    dt = datetime.datetime.now()
+    extra = []
+    if weather.windy() or forecast.windy():
+        extra.append("Hold on to your hat! It's going to be a breezy one.")
+    if weather.rainy() or forecast.rainy():
+        extra.append("Don't forget to bring an umbrella!")
+    if weather.temp > 90 or forecast.temp > 90:
+        extra.append("It's gonna get toasty!")
+    if weather.temp < 28 or forecast.temp < 28:
+        extra.append("It's a hat and glove kind of day.")
+    return message.format(part_of_day(dt), speech.name,
+                          calendar.day_name[dt.weekday()],
+                          calendar.month_name[dt.month],
+                          dt.day, round(weather.temp),
+                          weather.description,
+                          round(forecast.temp),
+                          forecast.description,
+                          ' '.join(extra))
 
 
 @app.route('/api/motd', methods=['GET', 'POST'])
@@ -39,16 +77,7 @@ def motd(**kwargs):
     try:
         speech = get_device(request.values.get('device'))
     except StopIteration:
-        print('hi')
         abort(404)
     if not speech.driver.klass == Speech:
         raise NotImplementedError
-    speech = speech.dev
-    weather = speech.weather.get()
-    forecast = speech.weather.get('forecast')
-    dt = datetime.datetime.now()
-    return message.format(speech.name, calendar.day_name[dt.weekday()], calendar.month_name[dt.month], dt.day,
-                          round(weather['main']['temp']),
-                          weather['weather'][0]['description'],
-                          round(forecast['list'][1]['main']['temp']),
-                          forecast['list'][1]['weather'][0]['description'])
+    return format_weather(speech.dev)
