@@ -176,7 +176,7 @@ class Bulb:
                 bright += speed
 
     def fade_sunlight(self, speed: int = 1) -> None:
-        self.fade(stop={'white': calc_sunlight()}, speed=speed)
+        self.fade(stop=calc_sunlight(), speed=speed)
 
 
 if __name__ == '__main__':
