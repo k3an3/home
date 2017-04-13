@@ -44,10 +44,9 @@ tail:
 import socket
 import sys
 from datetime import datetime
-
-import pytz
-from astral import Astral
 from typing import Dict
+
+from astral import Astral
 
 from home import settings
 from home.core.utils import num
@@ -97,7 +96,8 @@ def calc_sunlight() -> int:
     a.solar_depression = 'civil'
     city = a[settings.LOCATION]
     sun = city.sun(date=datetime.now(), local=True)
-    dt = datetime.utcnow().replace(tzinfo=pytz.UTC)
+    dt = datetime.now(sun['sunrise'].tzinfo)
+    print(sun, dt)
     if dt.hour < 4 or dt.hour > 23:
         return {'red': 255}
     elif dt < sun['sunrise']:
