@@ -98,7 +98,7 @@ def calc_sunlight() -> int:
     sun = city.sun(date=datetime.now(), local=True)
     dt = datetime.now(sun['sunrise'].tzinfo)
     print(sun, dt)
-    if dt.hour < 4 or dt.hour > 23:
+    if dt.hour < 4 or dt.hour >= 22:
         return {'red': 255}
     elif dt < sun['sunrise']:
         return {'white': 255 - (sun['sunrise'] - dt).total_seconds() / 3600 * 200 / 6}
