@@ -86,20 +86,20 @@ def handle_task(post, client):
         # device.last_task.revoke()
     if post.get('method') == 'last':
         method = device.last_method
-        kwargs = device.lastkwargs
+        kwargs = device.last_kwargs
     else:
         print(device, device.dev, post.get('method'))
         method = method_from_name(device.dev, post.pop('method'))
         if post.get('increment'):
-            kwargs = device.lastkwargs
+            kwargs = device.last_kwargs
             kwargs[post['increment']] += post.get('count', 1)
         elif post.get('decrement'):
-            kwargs = device.lastkwargs
+            kwargs = device.last_kwargs
             kwargs[post['decrement']] += post.get('count', 1)
         else:
             kwargs = post
             device.last_method = method
-            device.lastkwargs = kwargs
+            device.last_kwargs = kwargs
     from home.web.web import app
     app.logger.info(
         "({}) Execute {} on {} with config {}".format(client.name, method.__name__, device.name, kwargs))
