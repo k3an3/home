@@ -83,6 +83,9 @@ class Mopidy:
     def search(self, query):
         return self.send('core.library.search', any=[query])
 
+    def custom(self, target, value):
+        return self.send(target, value)
+
     def get_images(self, uris, index=0):
         return self.send('core.library.get_images', uris=uris)['result'].popitem()[1][index]
 
