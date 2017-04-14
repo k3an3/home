@@ -56,11 +56,14 @@ class Mopidy:
     def pause(self):
         return self.send('core.playback.pause')
 
-    def play(self):
-        return self.send('core.playback.play')
+    def play(self, track=None):
+        return self.send('core.playback.play', tl_track=track)
 
     def previous(self):
         return self.send('core.playback.previous')
+
+    def clear(self):
+        return self.send('core.tracklist.clear')
 
     def resume(self):
         return self.send('core.playback.resume')
