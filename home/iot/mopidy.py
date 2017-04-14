@@ -5,11 +5,8 @@ mopidy.py
 Websocket JSONRPC client for the Mopidy media server
 """
 import json
-from threading import Thread
-from time import sleep
 
 import requests
-import websocket
 from flask_socketio import disconnect, emit
 
 from home.core.models import get_device
@@ -34,60 +31,15 @@ def get_album_art(album_id, image=1):
 
 class Mopidy:
     def __init__(self, host):
-        self.host = host
-        self.ws = websocket.WebSocketApp("ws://{}:6680/mopidy/ws".format(host),
-                                         on_open=self.on_open,
-                                         on_message=self.on_message,
-                                         on_error=self.on_error,
-                                         on_close=self.on_close)
-        self.t = Thread(target=self.ws.run_forever)
-        self.t.start()
+        self.host = "http://" + host + ":6680/mopidy/rpc"
         self.id = 1
-        self.track = None
 
     def send(self, method, **kwargs):
-        msg = {"jsonrpc": "2.0", "id": 1, 'method': method, 'params': dict(kwargs)}
-        self.id += 1
-        self.ws.send(json.dumps(msg))
-
-    def on_open(self, ws):
-        pass
-
-    def on_message(self, ws, message):
-        j = json.loads(message)
-        event = j.get('event')
-        state = j.get('new_state')
-        track = j.get('tl_track')
-        result = j.get('result')
-        if result:
-            if result.get('track'):
-                self.track = result.get('track')
-        if event == 'tracklist_changed':
-            socketio.emit('tracklist changed', broadcast=True, namespace='/mopidy')
-        if state == 'playing':
-            socketio.emit('playback state', json.dumps({'state': 'playing'}), broadcast=True, namespace='/mopidy')
-        elif state == 'paused':
-            socketio.emit('playback state', json.dumps({'state': 'paused'}), broadcast=True, namespace='/mopidy')
-        if track:
-            track = track.get('track')
-            self.track = track
-            socketio.emit('track', json.dumps({
-                'title': track['name'],
-                'artists': ', '.join(artist['name'] for artist in track['artists']),
-                'album': track['album']['name'],
-                'art': get_album_art(track['album']['uri'].split(':')[2])
-            }), broadcast=True, namespace='/mopidy')
-
-        print(j)
-
-    def on_error(self, ws, error):
-        print("Mopidy websocket error!", error)
-
-    def on_close(self, ws):
-        print("Mopidy websocket closed")
+        msg = {"jsonrpc": "2.0", "id": self.id, 'method': method, 'params': dict(kwargs)}
+        return requests.post(self.host, data=json.dumps(msg)).json()
 
     def get_current_track(self):
-        return self.send('core.playback.get_current_tl_track')
+        return self.send('core.playback.get_current_tl_track')['result']['track']
 
     def get_state(self):
         return self.send('core.playback.get_state')
@@ -149,15 +101,12 @@ def mopidy_ws(data, **kwargs):
         except Exception as e:
             pass
     elif action == 'add_track':
-        mopidy.add_track(**data)
-        print("Queued track!")
+        r = mopidy.add_track(**data)
     elif action == 'get_current_track':
-        while not mopidy.track:
-            mopidy.get_current_track()
-            sleep(1)
+        track = mopidy.get_current_track()
         emit('track', json.dumps({
-            'title': mopidy.track['name'],
-            'artists': ', '.join(artist['name'] for artist in mopidy.track['artists']),
-            'album': mopidy.track['album']['name'],
-            'art': get_album_art(mopidy.track['album']['uri'].split(':')[2])
+            'title': track['name'],
+            'artists': ', '.join(artist['name'] for artist in track['artists']),
+            'album': track['album']['name'],
+            'art': get_album_art(track['album']['uri'].split(':')[2])
         }))

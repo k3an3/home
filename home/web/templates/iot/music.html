@@ -23,7 +23,6 @@
 
     u_ws.on('track', function (data) {
         var song = JSON.parse(data);
-        console.log(song);
         $('#song-title').html(song.title);
         $('#song-artist').html(song.artists);
         $('#album-art').attr('src', song.art.url);
@@ -47,7 +46,6 @@
     u_ws.on('search results', function (data) {
         $('#results').empty();
         var songs = JSON.parse(data);
-        console.log(songs);
         songs.forEach(function (song) {
             $('#results').append('<button class="btn btn-default btn-block song-result" id="' + song.uri + '">' + song.name + ' - ' + song.artists[0].name + '</button>');
         });
@@ -66,11 +64,17 @@
     });
 
     $('#results').on('click', '.song-result', function () {
-        console.log($(this).attr('id'));
         u_ws.emit('mopidy', {
             action: 'add_track',
             uri: $(this).attr('id'),
             device: '{{ device.name }}'
         });
     });
+
+    setInterval(function () {
+        u_ws.emit('mopidy', {
+            action: 'get_current_track',
+            device: '{{ device.name }}'
+        });
+    }, 5000);
 </script>
