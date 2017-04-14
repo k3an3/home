@@ -204,6 +204,11 @@ def csrf_protect():
             abort(403)
 
 
+@app.before_request
+def session_permanent():
+    session.permanent = True
+
+
 @app.after_request
 def add_header(response):
     # response.headers['Content-Security-Policy'] = "default-src 'self'"
