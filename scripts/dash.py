@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 dash.py
 ~~~~~~~
@@ -28,6 +29,7 @@ machine in order to allow the traffic to reach us:
 ```
 iptables -t nat -A PREROUTING -p udp --dport 53 -j REDIRECT --to-port 5354
 ```
+However, this method is currently unsupported because we'd need to only count the first of many DNS requests.
 """
 
 import sys
@@ -46,8 +48,10 @@ def report(button):
 
 def capture_arp(pkt):
     if pkt[ARP].op == 1 and pkt[ARP].psrc == '0.0.0.0':
-        if pkt[ARP].hwsrc in TARGET_HWADDRS:
-            report(TARGET_HWADDRS[pkt[ARP].hwsrc])
+        target = TARGET_HWADDRS.get(pkt[ARP].hwsrc)
+        if target:
+            print("Received ARP from", target)
+            report(target)
 
 
 def listen_dns():
@@ -60,7 +64,7 @@ def listen_dns():
             print("Received valid packet from", TARGET_IPADDRS[addr[0]])
             report(TARGET_IPADDRS[addr[0]])
         else:
-            print("Received invalid packet from", addr[0])
+            print("Received unexpected packet from", addr[0])
 
 
 if len(sys.argv) == 2:
