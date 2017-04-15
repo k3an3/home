@@ -47,8 +47,8 @@ def report(button):
 
 
 def capture_arp(pkt):
-    if pkt[ARP].op == 1 and pkt[ARP].psrc == '0.0.0.0':
-        target = TARGET_HWADDRS.get(pkt[ARP].hwsrc)
+    if pkt[ARP].op == 1 and pkt[ARP].psrc in TARGET_IPADDRS:
+        target = TARGET_HWADDRS.get(pkt[ARP].hwsrc.upper())
         if target:
             print("Received ARP from", target)
             report(target)
