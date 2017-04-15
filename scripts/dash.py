@@ -72,7 +72,9 @@ if len(sys.argv) == 2:
         from scapy.sendrecv import sniff
         from scapy.layers.l2 import ARP
 
-        sniff(prn=capture_arp, filter="arp", store=0, count=10)
+        sniff(prn=capture_arp, filter="arp", store=0)
+        sys.exit()
     elif sys.argv[1] == 'dns':
         listen_dns()
+        sys.exit()
 print("Error: Must specify one of 'arp' or 'dns'")
