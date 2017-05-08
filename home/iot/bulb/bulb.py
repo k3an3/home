@@ -178,6 +178,12 @@ class Bulb:
     def fade_sunlight(self, speed: int = 1) -> None:
         self.fade(stop=calc_sunlight(), speed=speed)
 
+    def off(self):
+        self.change_color(white=0)
+
+    def on(self):
+        self.change_color(white=255)
+
 
 if __name__ == '__main__':
     if len(sys.argv) < 4:
