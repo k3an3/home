@@ -113,9 +113,6 @@
                                 #}
                         {% endif %}
                     {% endfor %}
-                    {% if current_user.admin %}
-                        <li><a href="#security">Security</a></li>
-                    {% endif %}
                     {% if current_user.is_authenticated %}
                         <li><a href="#settings">Settings</a></li>
                     {% endif %}
@@ -183,45 +180,6 @@
 
         </div>
         {% if current_user.is_authenticated %}
-            {% if current_user.admin %}
-                <div id="security" class="tab-pane fade in danger">
-                    <div class="jumbotron"
-                         style="background-color:{% if sec.state == 'armed' %}green{% elif sec.state == 'alert' %}red{% else %}{% endif %}; color: {% if sec.state == 'armed' %}white{% elif sec.state == 'alert' %}white{% else %}{% endif %};">
-                        <h1>Status: <span id="state">{{ sec.state }}</span></h1>
-                        <button id="statusbutton" onclick="changeState()"
-                                class="btn btn-{% if sec.state == 'disabled' %}success">
-                                    Enable{% elif sec.state == 'armed' %}danger">Disarm{% elif sec.state == 'alert' %}
-                                    warning">Clear{% endif %}</button>
-                    </div>
-                    <span class="label label-warning" id="warning"></span>
-                    <div class="col-md-8">
-                        <table class="table" id="events">
-                            <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Sensor</th>
-                                <th>Start Time</th>
-                                <th>Duration (seconds)</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {% if events %}
-                                {% for event in events|reverse %}
-                                    <tr>
-                                        <td>{{ event.id }}</td>
-                                        <td>{{ event.device }}</td>
-                                        <td>{{ event.datetime }}</td>
-                                        <td>{{ event.duration }}</td>
-                                    </tr>
-                                {% endfor %}
-                            {% else %}
-                                No events yet. Yay!
-                            {% endif %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            {% endif %}
             <div id="settings" class="tab-pane fade in">
             <div class="col-md-6">
                 <div class="panel panel-primary">

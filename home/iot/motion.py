@@ -6,16 +6,18 @@ Module to interact with Motion's HTTP API.
 """
 import requests
 
-
-BASE_URL = 'http://{}/{}/'
+BASE_URL = 'http://{}:{}/{}/'
 
 
 class MotionController:
     """
     Driver for interfacing with the Motion API.
     """
-    def __init__(self, thread=0, host="localhost:8080"):
-        self.base_url = BASE_URL.format(host, thread)
+
+    def __init__(self, thread=0, host="localhost", control_port=8080, feed_port=8081):
+        self.base_url = BASE_URL.format(host, control_port, thread)
+        self.host = host
+        self.port = feed_port
 
     def get(self, url):
         return requests.get(self.base_url + url)
@@ -34,3 +36,6 @@ class MotionController:
 
     def stop_detection(self):
         return self.get('detection/pause')
+
+    def get_feed(self):
+        return "http://{}:{}".format(self.host, self.port)

@@ -47,9 +47,14 @@ from datetime import datetime
 from typing import Dict
 
 from astral import Astral
+from flask_socketio import emit
 
 from home import settings
+from home.core import utils as utils
+from home.core.models import get_device
 from home.core.utils import num
+from home.web.utils import ws_login_required
+from home.web.web import socketio
 
 SUPPORTED_MODES = ['31', '41', '61']
 SUPPORTED_FUNCTIONS = list(range(25, 39))
@@ -192,3 +197,26 @@ if __name__ == '__main__':
     print(colors)
     b = Bulb(sys.argv[1])
     b.change_color(*colors)
+
+
+@socketio.on('change color', namespace='/ws')
+@ws_login_required
+def request_change_color(message):
+    """
+    Change the bulb's color.
+    """
+    emit('push color', {"device": message['device'], "color": message['color']},
+         broadcast=True)
+    device = get_device(message['device'])
+    device.dev.change_color(*utils.RGBfromhex(message['color']),
+                            utils.num(message.get('white', 0)), message.get('bright', 100), '41'
+                            )
+
+
+@socketio.on('outmap', namespace="/ws")
+@ws_login_required
+def reset_color_preview(message):
+    """
+    Reset the color preview
+    """
+    emit('preview reset', message['color'], broadcast=True)

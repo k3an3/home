@@ -12,8 +12,8 @@ from flask_socketio import SocketIO, emit, disconnect
 
 import home.core.parser as parser
 import home.core.utils as utils
-from home.core.models import devices, interfaces, get_action, actions, get_interface
-from home.settings import SECRET_KEY, DEBUG
+from home.core.models import devices, interfaces, get_action, actions, get_interface, get_driver
+from home.settings import SECRET_KEY, DEBUG, LOG_FILE
 from home.web.models import *
 from home.web.models import User, APIClient
 from home.web.utils import ws_login_required, generate_csrf_token, VERSION, api_auth_required, send_to_subscribers, \
@@ -42,7 +42,10 @@ def index():
     for i in interfaces:
         interface_list.append((i, [d for d in devices if d.driver and d.driver.interface == i]))
     if current_user:
-        logs = open('home.log').read()
+        with open(LOG_FILE) as f:
+            logs = f.read()
+        # Todo: cleanup/fix
+        feeds = [(d.dev.get_feed(), d.name) for d in devices if d.driver.name == 'motion']
         return render_template('index.html',
                                interfaces=interface_list,
                                devices=devices,
@@ -52,7 +55,8 @@ def index():
                                actions=actions,
                                version=VERSION,
                                logs=logs,
-                               debug=DEBUG
+                               debug=DEBUG,
+                               feeds=feeds,
                                )
 
 
@@ -78,27 +82,10 @@ def command_api(client):
         return '', 204
     except StopIteration:
         app.logger.warning("({}) Action '{}' not found".format(client.name, request.form.get('action')))
-    if sec.is_armed() or sec.is_alert():
-        if action == 'eventstart':
-            app.logger.info("EVENT START")
-            sec.alert()
-            get_action('alert').run()
-            # SecurityEvent.create(controller=sec, device=key)
-            socketio.emit('state change', {'state': sec.state})
-            send_to_subscribers("New event alert")
-        elif action == 'eventend':
-            app.logger.info("EVENT END")
-            try:
-                event = SecurityEvent.filter(controller=sec,
-                                             device=key.name).order_by(
-                    SecurityEvent.id.desc()).get()
-                event.duration = (datetime.datetime.now() - event.datetime).total_seconds()
-                app.logger.info(event.duration)
-                event.in_progress = False
-                event.save()
-                # emit something here
-            except SecurityEvent.DoesNotExist:
-                abort(412)
+    if sec.is_armed() or sec.is_alert() and 'event' in action:
+        # TODO: This thing is really a mess
+        sec_ = get_driver('security').klass
+        sec_.handle_event(sec, action, app, key)
     return '', 204
 
 
@@ -120,30 +107,6 @@ def ws_admin(data):
     elif command == 'revoke':
         client = APIClient.get(name=data.get('name'))
         client.delete_instance()
-
-
-@socketio.on('change state')
-@ws_login_required
-def change_state():
-    """
-    Toggle the state of the security controller depending on its current state.
-    """
-    if not current_user.admin:
-        disconnect()
-    sec = SecurityController.get()
-    message = ""
-    if sec.state == 'disabled':
-        # Set to armed
-        sec.arm()
-        message = get_action('arm').run()
-    elif sec.state == 'armed':
-        # Set to disabled
-        sec.disable()
-        message = get_action('disable').run()
-    elif sec.state == 'alert':
-        # Restore to armed
-        sec.arm()
-    emit('state change', {'state': sec.state, 'message': message}, broadcast=True)
 
 
 @socketio.on('subscribe')
