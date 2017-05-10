@@ -29,6 +29,7 @@ app.secret_key = SECRET_KEY
 socketio = SocketIO(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
+app.jinja_env.globals['csrf_token'] = generate_csrf_token
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -152,11 +153,13 @@ def update_app():
 @login_required
 def reload():
     if current_user.admin:
-        parser.parse("config.yml")
+        try:
+            parser.parse("config.yml")
+        except Exception:
+            flash('Error in device config file. Please fix and reload.')
+        else:
+            flash('Device config reload successful.')
     return redirect(url_for('index'))
-
-
-app.jinja_env.globals['csrf_token'] = generate_csrf_token
 
 
 @app.before_request
