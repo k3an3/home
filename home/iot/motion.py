@@ -5,6 +5,11 @@ motion.py
 Module to interact with Motion's HTTP API.
 """
 import requests
+from flask import abort, make_response
+from flask_login import login_required
+
+from home.core.models import get_device
+from home.web.web import app
 
 BASE_URL = 'http://{}:{}/{}/'
 
@@ -37,5 +42,19 @@ class MotionController:
     def stop_detection(self):
         return self.get('detection/pause')
 
-    def get_feed(self):
+    def get_feed_url(self):
         return "http://{}:{}".format(self.host, self.port)
+
+
+@app.route("/security/stream/<camera>/")
+@login_required
+def stream(camera):
+    try:
+        camera = get_device(camera)
+    except StopIteration:
+        abort(404)
+    if not camera.driver.klass == MotionController:
+        raise NotImplementedError
+    response = make_response()
+    response.headers['X-Accel-Redirect'] = '/stream/' + camera.name
+    return response

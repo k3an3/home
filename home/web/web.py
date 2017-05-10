@@ -45,7 +45,7 @@ def index():
         with open(LOG_FILE) as f:
             logs = f.read()
         # Todo: cleanup/fix
-        feeds = [(d.dev.get_feed(), d.name) for d in devices if d.driver.name == 'motion']
+        feeds = [(d.dev.get_feed_url(), d.name) for d in devices if d.driver.name == 'motion']
         return render_template('index.html',
                                interfaces=interface_list,
                                devices=devices,
