@@ -1,4 +1,6 @@
 import functools
+import hashlib
+import hmac
 import subprocess
 
 from flask import abort
@@ -52,8 +54,12 @@ def api_auth_required(f):
     @functools.wraps(f)
     def wrapped(*args, **kwargs):
         try:
-            if request.is_json:
-                client = APIClient.get(token=request.get_json()['secret'])
+            if request.headers.get('X-Gogs-Signature'):
+                client = APIClient.get(name='gogs-update')
+                secret = bytes(client.token.encode())
+                mac = hmac.new(secret, msg=request.body, digestmod=hashlib.sha256)
+                if not hmac.compare_digest(mac.hexdigest(), request.headers['X-Gogs-Signature']):
+                    abort(403)
             else:
                 client = APIClient.get(token=request.values.get('key'))
             kwargs['client'] = client
