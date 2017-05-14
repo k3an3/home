@@ -49,6 +49,11 @@ class MotionController:
 @app.route("/security/stream/<camera>/")
 @login_required
 def stream(camera):
+    """
+    Requires nginx to be configured properly
+    :param camera: 
+    :return: 
+    """
     try:
         camera = get_device(camera)
     except StopIteration:
@@ -57,4 +62,17 @@ def stream(camera):
         raise NotImplementedError
     response = make_response()
     response.headers['X-Accel-Redirect'] = '/stream/' + camera.name
+    return response
+
+
+@app.route("/security/recordings/<video>")
+@login_required
+def recordings(video):
+    """
+    Requires nginx to be configured properly
+    :param camera: 
+    :return: 
+    """
+    response = make_response()
+    response.headers['X-Accel-Redirect'] = '/videos/cam1' + video
     return response

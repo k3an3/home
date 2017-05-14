@@ -7,15 +7,10 @@
                 warning">Clear{% endif %}</button>
 </div>
 <span class="label label-warning" id="warning"></span>
-<button class="btn btn-default" id="showimages">Show Feeds</button>
-<button class="btn btn-default" id="hideimages">Hide Feeds</button>
-<div class="col-md-8" id="monitor" hidden>
-    <br>
-    <br>
-    {% for feed, name in feeds %}
-        <img class="feed img-responsive" style="float:left;" data-src="/security/stream/{{ name }}/" title="{{ name }}">
-    {% endfor %}
-</div>
+<button class="btn btn-default" id="showimages">Toggle Feeds</button>
+<button class="btn btn-default" id="showrecs">Toggle Recordings</button>
+<div class="col" id="monitor" hidden></div>
+<div class="col" id="recordings" hidden></div>
 <div class="col-md-8">
     <table class="table" id="events">
         <thead>
@@ -43,21 +38,3 @@
     </table>
 </div>
 
-<script>
-    $('#showimages').click(reveal);
-    $('#hideimages').click(hide);
-
-    function reveal() {
-        $('.feed').each(function () {
-            $(this).attr("src", $(this).attr("data-src"));
-            $("#monitor").show();
-        });
-    }
-
-    function hide() {
-        $('.feed').each(function () {
-            $(this).attr("src", "");
-            $("#monitor").hide();
-        });
-    }
-</script>

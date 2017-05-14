@@ -45,8 +45,6 @@ def index():
     if current_user:
         with open(LOG_FILE) as f:
             logs = f.read()
-        # Todo: cleanup/fix
-        feeds = [(d.dev.get_feed_url(), d.name) for d in devices if d.driver.name == 'motion']
         return render_template('index.html',
                                interfaces=interface_list,
                                devices=devices,
@@ -57,7 +55,6 @@ def index():
                                version=VERSION,
                                logs=logs,
                                debug=DEBUG,
-                               feeds=feeds,
                                )
 
 
@@ -68,7 +65,6 @@ def command_api(client):
     Command API used by devices.
     """
     post = request.form.to_dict()
-    key = post.pop('key')
     # Send commands directly to device
     if request.form.get('device'):
         handle_task(post, client)
@@ -76,6 +72,11 @@ def command_api(client):
     sec = SecurityController.get()
     # Trigger an action
     action = request.form.get('action')
+    if sec.is_armed() or sec.is_alert() and 'event' in action:
+        # TODO: This thing is really a mess
+        sec_ = get_driver('security').klass
+        sec_.handle_event(sec, action, app, client)
+        return '', 204
     try:
         action = get_action(action)
         app.logger.info("({}) Execute action {}".format(client.name, action))
@@ -83,10 +84,6 @@ def command_api(client):
         return '', 204
     except StopIteration:
         app.logger.warning("({}) Action '{}' not found".format(client.name, request.form.get('action')))
-    if sec.is_armed() or sec.is_alert() and 'event' in action:
-        # TODO: This thing is really a mess
-        sec_ = get_driver('security').klass
-        sec_.handle_event(sec, action, app, key)
     return '', 204
 
 

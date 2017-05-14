@@ -10,6 +10,7 @@ from flask_login import current_user
 from flask_socketio import disconnect
 from peewee import DoesNotExist
 
+from home import settings
 from home.core.async import run
 from home.core.models import get_device
 from home.core.utils import random_string, method_from_name
@@ -64,7 +65,10 @@ def api_auth_required(f):
                 client = APIClient.get(token=request.values.get('key'))
             kwargs['client'] = client
         except DoesNotExist:
-            abort(403)
+            if settings.DEBUG:
+                kwargs['client'] = APIClient.get()
+            else:
+                abort(403)
         return f(*args, **kwargs)
 
     return wrapped

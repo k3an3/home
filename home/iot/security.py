@@ -1,10 +1,12 @@
 import datetime
+import os
 
 from flask import abort
 from flask_login import current_user
 from flask_socketio import disconnect, emit
 
-from home.core.models import get_action
+from home import settings
+from home.core.models import get_action, devices
 from home.web.models import SecurityEvent, SecurityController
 from home.web.utils import send_to_subscribers, ws_login_required
 from home.web.web import socketio
@@ -25,7 +27,7 @@ class Security:
             app.logger.info("EVENT START")
             sec.alert()
             get_action('alert').run()
-            # SecurityEvent.create(controller=sec, device=key)
+            SecurityEvent.create(controller=sec, device=device.name)
             socketio.emit('state change', {'state': sec.state})
             send_to_subscribers("New event alert")
         elif action == 'eventend':
@@ -65,3 +67,11 @@ def change_state():
         # Restore to armed
         sec.arm()
     emit('state change', {'state': sec.state, 'message': message}, broadcast=True)
+
+
+@socketio.on('get video')
+@ws_login_required
+def get_video(page=20):
+    feeds = [d.name for d in devices if d.driver.name == 'motion']
+    recordings = os.listdir(settings.SECURITY_FOOTAGE)[-page:]
+    emit('push video', {'feeds': feeds, 'recordings': recordings})

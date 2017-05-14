@@ -104,7 +104,8 @@ ws.on('state change', function (data) {
         color = 'white';
         state.html('alert');
         button.html('Clear');
-        button.removeAttr('class').addClass('btn btn-warning');
+        button.removeAttr('class')
+        button.addClass('btn btn-warning');
     } else if (data.state == 'armed') {
         bg = 'green';
         color = 'white';

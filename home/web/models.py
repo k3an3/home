@@ -125,3 +125,4 @@ class SecurityEvent(BaseModel):
     in_progress = BooleanField(default=True)
     datetime = DateTimeField(default=datetime.datetime.now)
     duration = IntegerField(null=True)
+    #new = BooleanField(default=True)
