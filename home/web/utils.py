@@ -58,7 +58,7 @@ def api_auth_required(f):
             if request.headers.get('X-Gogs-Signature'):
                 client = APIClient.get(name='gogs-update')
                 secret = bytes(client.token.encode())
-                mac = hmac.new(secret, msg=request.body, digestmod=hashlib.sha256)
+                mac = hmac.new(secret, msg=request.get_data(), digestmod=hashlib.sha256)
                 if not hmac.compare_digest(mac.hexdigest(), request.headers['X-Gogs-Signature']):
                     abort(403)
             else:

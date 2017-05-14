@@ -46,9 +46,6 @@ function hide_recs() {
 }
 
 function reveal_stream() {
-    $('.feed').each(function () {
-        $(this).attr("src", $(this).attr("data-src"));
-    });
     $("#monitor").show();
     streams_visible = true;
 }
