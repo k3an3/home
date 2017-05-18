@@ -4,7 +4,7 @@ APScheduler
 asn1crypto
 astral
 billiard
-broadlink
+broadlink==0.3
 celery
 cffi
 click
