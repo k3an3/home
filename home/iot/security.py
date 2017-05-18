@@ -71,7 +71,10 @@ def change_state():
 
 @socketio.on('get video')
 @ws_login_required
-def get_video(page=20):
+def get_video(page=6):
     feeds = [d.name for d in devices if d.driver.name == 'motion']
-    recordings = os.listdir(settings.SECURITY_FOOTAGE)[-page:]
+    recordings = {}
+    for dir in settings.SECURITY_FOOTAGE_DIRS:
+        recordings[os.path.basename(dir)] = sorted(os.listdir(dir),
+                                                   key=lambda x: os.path.getmtime(os.path.join(dir, x)))[-page - 1:-page + 5]
     emit('push video', {'feeds': feeds, 'recordings': recordings})

@@ -4,7 +4,7 @@ SECRET_KEY = 'changetosomethinglongandcomplex'
 DEBUG = False
 GOOGLE_API_KEY = 'your_key_here'
 LOG_FILE = 'home.log'
-SECURITY_FOOTAGE = '/media/external'
+SECURITY_FOOTAGE_DIRS = ('/media/external/cam1', '/media/external/cam2')
 
 try:
     from home.settings_local import *

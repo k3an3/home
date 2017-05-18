@@ -65,7 +65,7 @@ def stream(camera):
     return response
 
 
-@app.route("/security/recordings/<video>")
+@app.route("/security/recordings/<path:video>")
 @login_required
 def recordings(video):
     """
@@ -74,5 +74,5 @@ def recordings(video):
     :return: 
     """
     response = make_response()
-    response.headers['X-Accel-Redirect'] = '/videos/cam1' + video
+    response.headers['X-Accel-Redirect'] = '/videos/' + video
     return response
