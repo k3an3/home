@@ -1,0 +1,35 @@
+<div class="jumbotron" id="results" hidden></div>
+<div class="col-md-4">
+    <div class="input-group">
+        <span class="input-group-addon" id="basic-addon2">$</span>
+        <input type="text" id="cmd" class="form-control" placeholder="e.g. ls /" aria-describedby="basic-addon2">
+    </div>
+    <br>
+    <input type="checkbox" id="force-root" value="">
+    <label for="force-root">Force Root</label>
+    <input type="checkbox" id="force-noroot" value="">
+    <label for="force-noroot">Force No Root</label>
+    <button class="btn btn-danger" id="exec">Execute</button>
+</div>
+<div class="col-md-4" style="height:100%; width:100%;">
+    <button class="btn btn-warning" id="locate">Get location</button>
+    <div id="map-cvs" style="width: 100%; height: 100%; position: absolute;">
+                 <div id="map"></div>
+     </div>
+</div>
+<script>
+ function initMap() {
+        var uluru = {lat: -25.363, lng: 131.044};
+        var map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 4,
+          center: uluru
+        });
+        var marker = new google.maps.Marker({
+          position: uluru,
+          map: map
+        });
+      }
+</script>
+<script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAhWXMZ-vIR7fpNKDWAymC9uR6dhd7eKb8&callback=initMap">
+</script>
