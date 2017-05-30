@@ -20,13 +20,17 @@ common_js = Bundle(
     'dist/js/jquery-ui.min.js',
     'dist/js/bootstrap.min.js',
     'dist/js/bootstrap-slider.min.js',
+    Bundle(
+        'js/index.js',
+        filters='jsmin',
+        output='public/js/index.js'
+    ),
 )
 
 auth_js = Bundle(
     'dist/js/socketio.min.js',
     Bundle(
         'js/check.js',
-        'js/index.js',
         'js/main.js',
         'js/sw.js',
         [os.path.join(IOT_JS_DIR, f) for f in os.listdir('home/web/static/js/iot')],

@@ -14,3 +14,4 @@ config.yml
 *.log
 *.pid
 *.sock
+.webassets-cache/
