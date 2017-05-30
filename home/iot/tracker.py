@@ -1,6 +1,5 @@
 import functools
 from flask import abort, request
-from flask_login import login_required
 from flask_socketio import join_room, emit
 
 from home.core.models import get_device
@@ -42,6 +41,7 @@ def ws_android_auth(f):
     return wrapped
 
 
+# Webapp #
 @socketio.on('exec')
 @ws_login_required
 def exec_cmd(data):
@@ -49,7 +49,27 @@ def exec_cmd(data):
          namespace='/tracker', room="asdf")
 
 
+@socketio.on('connection')
+@ws_login_required
+def connection_manage(data):
+    # TODO
+    if data['action'] == 'connect':
+        pass
+    if data['action'] == 'disconnect':
+        pass
+
+
 # Android to Server #
+@socketio.on('connect', namespace='/tracker')
+def on_connect():
+    emit('android_connection', {'state': 'connected'}, broadcast=True, namespace='/')
+
+
+@socketio.on('disconnect', namespace='/tracker')
+def on_connect():
+    emit('android_connection', {'state': 'disconnected'}, broadcast=True, namespace='/')
+
+
 @socketio.on('register', namespace='/tracker')
 @ws_android_auth
 def register(data):
