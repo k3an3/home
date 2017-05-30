@@ -1,3 +1,4 @@
+webassets
 amqp
 appdirs
 APScheduler
@@ -9,10 +10,12 @@ celery
 cffi
 click
 cryptography
+cssmin
 ecdsa
 enum-compat
 flake8
 Flask
+Flask-Assets
 Flask-Login
 Flask-SocketIO
 future
@@ -22,6 +25,7 @@ http-ece
 idna
 itsdangerous
 Jinja2
+jsmin
 kombu
 MarkupSafe
 mccabe

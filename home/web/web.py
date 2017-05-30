@@ -4,7 +4,8 @@ web.py
 
 Flask web application for Home.
 """
-
+import flask_assets
+from webassets.loaders import PythonLoader as PythonAssetsLoader
 from flask import Flask, render_template, request, redirect, abort, url_for, session, flash
 from flask_login import LoginManager, login_required, current_user
 from flask_login import login_user, fresh_login_required, logout_user
@@ -30,6 +31,11 @@ socketio = SocketIO(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 app.jinja_env.globals['csrf_token'] = generate_csrf_token
+assets = flask_assets.Environment()
+assets.init_app(app)
+assets_loader = PythonAssetsLoader('home.web.assets')
+for name, bundle in assets_loader.load_bundles().items():
+    assets.register(name, bundle)
 
 
 @app.route('/', methods=['GET', 'POST'])

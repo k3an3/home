@@ -1,13 +1,11 @@
-/*
 function initMap() {
-    var usa = {lat: 39.828, lng: 98.579};
+    var usa = {lat: 39.828, lng: -98.579};
     var map = new google.maps.Map(document.getElementById('map'), {
         zoom: 4,
         center: usa
     });
 }
 
- */
 function updateLocation(lat, lon) {
     map.setCenter({lat: lat, nlg: lon});
     var marker = new google.maps.Marker({
