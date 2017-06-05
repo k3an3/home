@@ -94,10 +94,6 @@ def result(data):
     data['date'] = datetime.datetime.now().strftime("%c")
     emit('location', data, namespace="/", broadcast=True)
 
-
 @socketio.on('video frame', namespace='/tracker')
-@ws_android_auth
-def vidframe(data):
-    print("hit")
-    with open("test.jpg", "wb") as f:
-        f.write(data)
+def video(data):
+    print(data)
