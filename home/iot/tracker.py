@@ -90,3 +90,7 @@ def result(data):
 def result(data):
     print('Got location', data)
     emit('location', data, namespace="/", broadcast=True)
+
+@socketio.on('video frame', namespace='/tracker')
+def video(data):
+    print(data)

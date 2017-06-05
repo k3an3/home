@@ -25,7 +25,7 @@ try:
 except ImportError:
     GOOGLE_API_KEY = ""
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='templates')
 app.secret_key = SECRET_KEY
 socketio = SocketIO(app)
 login_manager = LoginManager()

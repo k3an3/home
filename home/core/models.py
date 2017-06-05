@@ -14,6 +14,8 @@ from home.core.async import run as queue_run, scheduler
 from home.core.utils import class_from_name, method_from_name, random_string
 
 # Arrays to store object instances
+from home.settings import TEMPLATE_DIR
+
 drivers = []
 devices = []
 interfaces = []
@@ -200,7 +202,7 @@ class Interface(YAMLObject):
     def __init__(self, name, friendly_name, template, public=False):
         self.name = name
         self.friendly_name = friendly_name
-        self.template = os.path.join('iot', template)
+        self.template = os.path.join(TEMPLATE_DIR, template)
         self.public = public
 
 

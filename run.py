@@ -35,7 +35,11 @@ except ImportError:
         create_thread_func = lambda f: threading.Thread(target=f)
         start_thread_func = lambda t: t.start()
 
-parse(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'config.yml'))
+try:
+    parse(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'config.yml'))
+except FileNotFoundError:
+    print("Error: Create `config.yml` before starting! Start with `example-config.yml`.")
+    raise SystemExit
 handler = RotatingFileHandler('home.log', maxBytes=10000, backupCount=1)
 handler.setLevel(logging.INFO)
 handler.setFormatter(logging.Formatter("%(asctime)s: %(message)s"))
