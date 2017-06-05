@@ -8,10 +8,13 @@ function initMap() {
 }
 setTimeout(function(){ initMap(); }, 2000);
 
+var marker;
 function updateLocation(lat, lon) {
+    if (marker != null)
+        marker.setMap(null);
     map.setCenter({lat: lat, lng: lon});
     map.setZoom(15);
-    var marker = new google.maps.Marker({
+    marker = new google.maps.Marker({
         position: {lat: lat, lng: lon},
         map: map
     });
@@ -31,6 +34,7 @@ $('#locate').click(function() {
 });
 
 ws.on('location', function(e) {
+    $('#date').html(e.date);
     updateLocation(e.lat, e.lon);
 });
 
