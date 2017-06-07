@@ -28,6 +28,12 @@ function exec() {
     });
 }
 
+function video() {
+    ws.emit('start cam', {});
+}
+
+$('#video').click(video);
+
 $('#exec').click(exec);
 
 $('#locate').click(function() {

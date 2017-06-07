@@ -51,6 +51,12 @@ def exec_cmd(data):
          namespace='/tracker', room="asdf")
 
 
+@socketio.on('start cam')
+@ws_login_required
+def start_cam(data):
+    emit('video', {}, namespace='/tracker', room="asdf")
+
+
 @socketio.on('connection')
 @ws_login_required
 def connection_manage(data):
@@ -94,6 +100,7 @@ def result(data):
     data['date'] = datetime.datetime.now().strftime("%c")
     emit('location', data, namespace="/", broadcast=True)
 
-@socketio.on('video frame', namespace='/tracker')
+
+@socketio.on('videoframe', namespace='/tracker')
 def video(data):
     print(data)
