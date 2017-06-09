@@ -28,8 +28,17 @@ function exec() {
     });
 }
 
+var vid_visible = false;
 function video() {
-    ws.emit('start cam', {});
+    if (!vid_visible) {
+        ws.emit('start cam', {});
+        $('#vidstream').attr('src', '/test/video');
+        vid_visible = true;
+    } else {
+        ws.emit('stop cam', {});
+        $('#vidstream').attr('src', '');
+        vid_visible = false;
+    }
 }
 
 $('#video').click(video);

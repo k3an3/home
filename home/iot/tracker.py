@@ -1,7 +1,8 @@
-import functools
-
 import datetime
-from flask import abort, request
+import functools
+import socket
+
+from flask import abort, request, Response
 from flask_socketio import join_room, emit
 
 from home.core.models import get_device
@@ -43,6 +44,25 @@ def ws_android_auth(f):
     return wrapped
 
 
+@app.route('/test/video')
+def video_feed():
+    return Response(gen(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
+def gen():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.bind(('0.0.0.0', 8081))
+    while True:
+        image = bytes()
+        while True:
+            data = s.recv(1458)
+            image += data
+            if len(data) < 1458:
+                break
+        yield (b'--frame\n'
+               b'Content-Type: image/jpeg\n\n' + image + b'\n')
+
+
 # Webapp #
 @socketio.on('exec')
 @ws_login_required
@@ -54,7 +74,13 @@ def exec_cmd(data):
 @socketio.on('start cam')
 @ws_login_required
 def start_cam(data):
-    emit('video', {}, namespace='/tracker', room="asdf")
+    emit('video start', {}, namespace='/tracker', room="asdf")
+
+
+@socketio.on('stop cam')
+@ws_login_required
+def start_cam(data):
+    emit('video stop', {}, namespace='/tracker', room="asdf")
 
 
 @socketio.on('connection')
