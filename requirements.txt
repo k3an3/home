@@ -7,7 +7,9 @@ astral
 billiard
 broadlink==0.3
 celery
+certifi
 cffi
+chardet
 click
 cryptography
 cssmin
@@ -53,6 +55,7 @@ redis
 requests
 six
 tzlocal
+urllib3
 vine
 wakeonlan
 Wave
