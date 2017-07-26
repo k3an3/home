@@ -54,3 +54,12 @@ body {
     height:200px;
     width:100%
 }
+
+.mouse_over {
+    opacity: 0;
+    border: 1px solid black;
+}
+
+.mouse_over:hover {
+    opacity: 1;
+}

@@ -1,9 +1,9 @@
-webassets
 amqp
 appdirs
 APScheduler
 asn1crypto
 astral
+bcrypt
 billiard
 broadlink==0.3
 celery
@@ -44,6 +44,7 @@ pycparser
 pycryptodome
 git+git://github.com/keaneokelley/pyelliptic.git#egg=pyelliptic
 pyflakes
+pynacl
 python-engineio
 python-jose
 python-socketio
@@ -59,6 +60,7 @@ urllib3
 vine
 wakeonlan
 Wave
+webassets
 websocket-client
 Werkzeug
 zeroconf

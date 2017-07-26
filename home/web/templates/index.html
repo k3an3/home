@@ -159,7 +159,7 @@
                         {% for client in clients %}
                             <div class="panel-body">
                                 <strong>name=</strong>{{ client.name }}
-                                <strong>token=</strong>{{ client.token }}
+                                <strong>token=</strong><span class="mouse_over">{{ client.token }}</span>
                                 <button onclick="revoke('{{ client.name }}');this.parentNode.style.display = 'none';"
                                         class="btn btn-danger">Revoke
                                 </button>
