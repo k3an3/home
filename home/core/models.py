@@ -8,6 +8,7 @@ import os
 from collections import deque
 from multiprocessing import Process
 from queue import Queue
+from time import sleep
 
 import yaml
 from typing import Iterator, Dict, List
@@ -161,12 +162,13 @@ class Action(YAMLObject):
     """
     yaml_tag = '!action'
 
-    def __init__(self, name, devices: List = [], actions: List = []):
+    def __init__(self, name, devices: List = [], actions: List = [], jitter: int = 0):
         self.name = name
         self.devices = []
         self.actions = []
         self.devs = devices
         self.acts = actions
+        self.jitter = jitter
 
     def setup(self) -> None:
         for dev in self.devs:
@@ -207,7 +209,9 @@ class Action(YAMLObject):
             except Exception as e:
                 print("Error", e)
 
-    def run(self):
+    def run(self, jitter: bool = False):
+        if self.jitter and jitter:
+            sleep(self.jitter)
         for device, method, delay, kwargs in self.prerun():
             device.last_task = queue_run(method, delay=delay, **kwargs)
 
@@ -235,7 +239,7 @@ def add_scheduled_job(job):
     if job.get('action'):
         scheduler.add_job(get_action(job.pop('action')).run,
                           trigger=job.pop('trigger', 'cron'),
-                          **job)
+                          kwargs=dict(jitter=True), **job)
     elif job.get('device'):
         device = get_device(job.pop('device'))
         method = method_from_name(device.dev, job.pop('method'))
