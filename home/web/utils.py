@@ -90,26 +90,27 @@ def send_to_subscribers(message):
 
 def handle_task(post, client):
     device = get_device(post.pop('device'))
-    if device.last_task:
-        pass
-        # app.logger.info(device.last_task.state)
-        # device.last_task.revoke()
+    c_method, c_kwargs = device.last.pop()
+    l_method, l_kwargs = device.last.pop()
+    device.last.append((l_method, l_kwargs))
+    device.last.append((c_method, c_kwargs))
     if post.get('method') == 'last':
-        method = device.last_method
-        kwargs = device.last_kwargs
+        # The most recent action
+        # The previous action
+        method = l_method
+        kwargs = l_kwargs
     else:
         print(device, device.dev, post.get('method'))
         method = method_from_name(device.dev, post.pop('method'))
         if post.get('increment'):
-            kwargs = device.last_kwargs
+            kwargs = c_kwargs
             kwargs[post['increment']] += post.get('count', 1)
         elif post.get('decrement'):
-            kwargs = device.last_kwargs
+            kwargs = c_kwargs
             kwargs[post['decrement']] += post.get('count', 1)
         else:
             kwargs = post
-            device.last_method = method
-            device.last_kwargs = kwargs
+    device.last.append((method, kwargs))
     from home.web.web import app
     app.logger.info(
         "({}) Execute {} on {} with config {}".format(client.name, method.__name__, device.name, kwargs))

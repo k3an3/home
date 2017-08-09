@@ -5,7 +5,9 @@ models.py
 Contains classes to represent objects created by the parser.
 """
 import os
+from collections import deque
 from multiprocessing import Process
+from queue import Queue
 
 import yaml
 from typing import Iterator, Dict, List
@@ -13,9 +15,9 @@ from typing import Iterator, Dict, List
 from home.core.async import run as queue_run, scheduler
 from home.core.utils import class_from_name, method_from_name, random_string
 
-# Arrays to store object instances
-from home.settings import TEMPLATE_DIR
+from home.settings import TEMPLATE_DIR, DEVICE_HISTORY
 
+# Arrays to store object instances
 drivers = []
 devices = []
 interfaces = []
@@ -104,8 +106,7 @@ class Device(YAMLObject):
         self.config = config
         self.uuid = random_string()
         self.dev = None
-        self.last_method = None
-        self.last_kwargs = {}
+        self.last = deque(maxlen=DEVICE_HISTORY)
         self.last_task = None
 
     def setup(self) -> None:
