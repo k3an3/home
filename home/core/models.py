@@ -8,7 +8,7 @@ import os
 from multiprocessing import Process
 
 import yaml
-from typing import Iterator
+from typing import Iterator, Dict, List
 
 from home.core.async import run as queue_run, scheduler
 from home.core.utils import class_from_name, method_from_name, random_string
@@ -96,7 +96,7 @@ class Device(YAMLObject):
     """
     yaml_tag = '!device'
 
-    def __init__(self, name, driver=None, config=None, key=None, group=None):
+    def __init__(self, name: str, driver: str = None, config: Dict = None, key: str = None, group: str = None):
         self.name = name
         self.key = key  # deprecated?
         self.driver = driver
@@ -135,7 +135,7 @@ class Driver(YAMLObject):
     """
     yaml_tag = '!driver'
 
-    def __init__(self, module, klass, name=None, interface=None, noserialize=False, static=False):
+    def __init__(self, module: str, klass: str, name: str = None, interface: str = None, noserialize: bool = False, static: bool = False):
         self.name = name or module
         self.interface = interface
         self.klass = class_from_name(module, klass)
@@ -160,7 +160,7 @@ class Action(YAMLObject):
     """
     yaml_tag = '!action'
 
-    def __init__(self, name, devices=[], actions=[]):
+    def __init__(self, name, devices: List = [], actions: List = []):
         self.name = name
         self.devices = []
         self.actions = []
@@ -217,7 +217,7 @@ class Interface(YAMLObject):
     """
     yaml_tag = '!interface'
 
-    def __init__(self, name, friendly_name, template, public=False):
+    def __init__(self, name: str, friendly_name: str, template: str, public: bool = False):
         self.name = name
         self.friendly_name = friendly_name
         self.template = os.path.join(TEMPLATE_DIR, template)
