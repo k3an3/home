@@ -74,6 +74,10 @@ class DuplicateDeviceNameError(YAMLConfigParseError):
     pass
 
 
+class ActionSetupError(YAMLConfigParseError):
+    pass
+
+
 class YAMLObject(yaml.YAMLObject):
     """
     Base class for YAML objects, simply to print the correct name
@@ -156,10 +160,12 @@ class Action(YAMLObject):
     """
     yaml_tag = '!action'
 
-    def __init__(self, name, devices=[]):
+    def __init__(self, name, devices=[], actions=[]):
         self.name = name
         self.devices = []
+        self.actions = []
         self.devs = devices
+        self.acts = actions
 
     def setup(self) -> None:
         for dev in self.devs:
@@ -168,8 +174,20 @@ class Action(YAMLObject):
             except StopIteration:
                 raise DeviceNotFoundError(
                     "Failed to configure action " + self.name + ": Can't find device " + dev['name'])
+        for act in self.acts:
+            if act['name'] == self.name:
+                raise ActionSetupError(
+                    "Failed to configure action " + self.name + ": Action can't call itself"
+                )
+            try:
+                self.actions.append((get_action(act['name']), act))
+            except StopIteration:
+                raise ActionSetupError(
+                    "Failed to configure action " + self.name + ": Can't find action " + act['name'])
 
     def prerun(self) -> (Iterator[Process], Iterator[int]):
+        for action in self.actions:
+            action.run()
         for device, config in self.devices:
             if config['method'] == 'last':
                 method = method_from_name(device.dev, device.last_method)
