@@ -63,4 +63,5 @@ Wave
 webassets
 websocket-client
 Werkzeug
+wheel
 zeroconf
