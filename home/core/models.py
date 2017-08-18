@@ -5,13 +5,18 @@ models.py
 Contains classes to represent objects created by the parser.
 """
 import os
+from collections import deque
 from multiprocessing import Process
+from queue import Queue
+from time import sleep
 
 import yaml
-from typing import Iterator
+from typing import Iterator, Dict, List
 
 from home.core.async import run as queue_run, scheduler
 from home.core.utils import class_from_name, method_from_name, random_string
+
+from home.settings import TEMPLATE_DIR, DEVICE_HISTORY
 
 # Arrays to store object instances
 drivers = []
@@ -72,6 +77,10 @@ class DuplicateDeviceNameError(YAMLConfigParseError):
     pass
 
 
+class ActionSetupError(YAMLConfigParseError):
+    pass
+
+
 class YAMLObject(yaml.YAMLObject):
     """
     Base class for YAML objects, simply to print the correct name
@@ -90,7 +99,7 @@ class Device(YAMLObject):
     """
     yaml_tag = '!device'
 
-    def __init__(self, name, driver=None, config=None, key=None, group=None):
+    def __init__(self, name: str, driver: str = None, config: Dict = None, key: str = None, group: str = None):
         self.name = name
         self.key = key  # deprecated?
         self.driver = driver
@@ -98,8 +107,7 @@ class Device(YAMLObject):
         self.config = config
         self.uuid = random_string()
         self.dev = None
-        self.last_method = None
-        self.last_kwargs = {}
+        self.last = deque(maxlen=DEVICE_HISTORY)
         self.last_task = None
 
     def setup(self) -> None:
@@ -129,7 +137,7 @@ class Driver(YAMLObject):
     """
     yaml_tag = '!driver'
 
-    def __init__(self, module, klass, name=None, interface=None, noserialize=False, static=False):
+    def __init__(self, module: str, klass: str, name: str = None, interface: str = None, noserialize: bool = False, static: bool = False):
         self.name = name or module
         self.interface = interface
         self.klass = class_from_name(module, klass)
@@ -154,10 +162,13 @@ class Action(YAMLObject):
     """
     yaml_tag = '!action'
 
-    def __init__(self, name, devices=[]):
+    def __init__(self, name, devices: List = [], actions: List = [], jitter: int = 0):
         self.name = name
         self.devices = []
+        self.actions = []
         self.devs = devices
+        self.acts = actions
+        self.jitter = jitter
 
     def setup(self) -> None:
         for dev in self.devs:
@@ -166,8 +177,20 @@ class Action(YAMLObject):
             except StopIteration:
                 raise DeviceNotFoundError(
                     "Failed to configure action " + self.name + ": Can't find device " + dev['name'])
+        for act in self.acts:
+            if act['name'] == self.name:
+                raise ActionSetupError(
+                    "Failed to configure action " + self.name + ": Action can't call itself"
+                )
+            try:
+                self.actions.append((get_action(act['name']), act))
+            except StopIteration:
+                raise ActionSetupError(
+                    "Failed to configure action " + self.name + ": Can't find action " + act['name'])
 
     def prerun(self) -> (Iterator[Process], Iterator[int]):
+        for action in self.actions:
+            action.run()
         for device, config in self.devices:
             if config['method'] == 'last':
                 method = method_from_name(device.dev, device.last_method)
@@ -186,7 +209,9 @@ class Action(YAMLObject):
             except Exception as e:
                 print("Error", e)
 
-    def run(self):
+    def run(self, jitter: bool = False):
+        if self.jitter and jitter:
+            sleep(self.jitter)
         for device, method, delay, kwargs in self.prerun():
             device.last_task = queue_run(method, delay=delay, **kwargs)
 
@@ -197,10 +222,10 @@ class Interface(YAMLObject):
     """
     yaml_tag = '!interface'
 
-    def __init__(self, name, friendly_name, template, public=False):
+    def __init__(self, name: str, friendly_name: str, template: str, public: bool = False):
         self.name = name
         self.friendly_name = friendly_name
-        self.template = os.path.join('iot', template)
+        self.template = os.path.join(TEMPLATE_DIR, template)
         self.public = public
 
 
@@ -214,7 +239,7 @@ def add_scheduled_job(job):
     if job.get('action'):
         scheduler.add_job(get_action(job.pop('action')).run,
                           trigger=job.pop('trigger', 'cron'),
-                          **job)
+                          kwargs=dict(jitter=True), **job)
     elif job.get('device'):
         device = get_device(job.pop('device'))
         method = method_from_name(device.dev, job.pop('method'))

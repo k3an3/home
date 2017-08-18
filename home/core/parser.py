@@ -39,9 +39,11 @@ def parse(file='config.yml', data=None):
                 device.setup()
                 print(device)
         print("Configured actions:")
-        for action in y['actions']:
-            actions.append(action)
-            action.setup()
-            print(action.devices)
-        for job in y['cron']:
-            add_scheduled_job(job)
+        if y.get('actions'):
+            for action in y['actions']:
+                actions.append(action)
+                action.setup()
+                print(action.devices)
+        if y.get('cron'):
+            for job in y['cron']:
+                add_scheduled_job(job)

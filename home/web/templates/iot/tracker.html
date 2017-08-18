@@ -1,0 +1,28 @@
+<div class="jumbotron" id="results" hidden><pre id="result-body"></pre></div>
+<div class="col-md-4">
+    <button class="btn btn-success" id="connect">Connect</button>
+    <button class="btn btn-danger" id="disconnect">Disconnect</button>
+    <p>Status: <span id="android-status" style="color: red;">Disconnected</span></p>
+</div>
+<div class="col-md-4">
+    <label for="cmd">Shell Command</label>
+    <div class="input-group">
+        <span class="input-group-addon" id="basic-addon2">$</span>
+        <input type="text" id="cmd" class="form-control" placeholder="e.g. ls /" aria-describedby="basic-addon2">
+    </div>
+    <br>
+    <input type="checkbox" id="force-root" value="">
+    <label for="force-root">Force Root</label>
+    <input type="checkbox" id="force-noroot" value="">
+    <label for="force-noroot">Force No Root</label>
+    <button class="btn btn-danger" id="exec">Execute</button>
+</div>
+<div class="col-md-4" style="height:100%; width:100%;">
+    <button class="btn btn-warning" id="locate">Get location</button>
+    <span id="date"></span>
+    <button class="btn btn-warning" id="video">Video</button>
+    <img src="" height="480" id="vidstream"/>
+    <div class="col-lg-1 mapContainer" id="mapc">
+        <div id="map"></div>
+    </div>
+</div>
