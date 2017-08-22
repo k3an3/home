@@ -90,10 +90,17 @@ def send_to_subscribers(message):
 
 def handle_task(post, client):
     device = get_device(post.pop('device'))
-    c_method, c_kwargs = device.last.pop()
-    l_method, l_kwargs = device.last.pop()
-    device.last.append((l_method, l_kwargs))
-    device.last.append((c_method, c_kwargs))
+    try:
+        c_method, c_kwargs = device.last.pop()
+    except IndexError:
+        c_method, c_kwargs = None, None
+    try:
+        l_method, l_kwargs = device.last.pop()
+    except IndexError:
+        l_method, l_kwargs = None, None
+    else:
+        device.last.append((l_method, l_kwargs))
+        device.last.append((c_method, c_kwargs))
     if post.get('method') == 'last':
         # The most recent action
         # The previous action
