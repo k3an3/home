@@ -7,7 +7,6 @@ Contains classes to represent objects created by the parser.
 import os
 from collections import deque
 from multiprocessing import Process
-from queue import Queue
 from time import sleep
 
 import yaml
@@ -15,7 +14,6 @@ from typing import Iterator, Dict, List
 
 from home.core.async import run as queue_run, scheduler
 from home.core.utils import class_from_name, method_from_name, random_string
-
 from home.settings import TEMPLATE_DIR, DEVICE_HISTORY
 
 # Arrays to store object instances
@@ -178,15 +176,15 @@ class Action(YAMLObject):
                 raise DeviceNotFoundError(
                     "Failed to configure action " + self.name + ": Can't find device " + dev['name'])
         for act in self.acts:
-            if act['name'] == self.name:
+            if act == self.name:
                 raise ActionSetupError(
                     "Failed to configure action " + self.name + ": Action can't call itself"
                 )
             try:
-                self.actions.append((get_action(act['name']), act))
+                self.actions.append(get_action(act))
             except StopIteration:
                 raise ActionSetupError(
-                    "Failed to configure action " + self.name + ": Can't find action " + act['name'])
+                    "Failed to configure action " + self.name + ": Can't find action " + act)
 
     def prerun(self) -> (Iterator[Process], Iterator[int]):
         for action in self.actions:
