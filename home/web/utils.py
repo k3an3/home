@@ -62,7 +62,7 @@ def api_auth_required(f):
                 if not hmac.compare_digest(mac.hexdigest(), request.headers['X-Gogs-Signature']):
                     abort(403)
             else:
-                client = APIClient.get(token=request.values.get('key'))
+                client = APIClient.get(token=request.values.pop('key'))
             kwargs['client'] = client
         except DoesNotExist:
             if settings.DEBUG:
@@ -121,7 +121,6 @@ def handle_task(post, client):
     from home.web.web import app
     app.logger.info(
         "({}) Execute {} on {} with config {}".format(client.name, method.__name__, device.name, kwargs))
-    kwargs.pop('key')
     if device.driver.noserialize:
         method(**kwargs)
     else:
