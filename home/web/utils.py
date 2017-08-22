@@ -62,7 +62,7 @@ def api_auth_required(f):
                 if not hmac.compare_digest(mac.hexdigest(), request.headers['X-Gogs-Signature']):
                     abort(403)
             else:
-                client = APIClient.get(token=request.values.pop('key'))
+                client = APIClient.get(token=request.values.get('key'))
             kwargs['client'] = client
         except DoesNotExist:
             if settings.DEBUG:

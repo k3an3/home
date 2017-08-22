@@ -5,11 +5,11 @@ web.py
 Flask web application for Home.
 """
 import flask_assets
-from webassets.loaders import PythonLoader as PythonAssetsLoader
 from flask import Flask, render_template, request, redirect, abort, url_for, session, flash
 from flask_login import LoginManager, login_required, current_user
 from flask_login import login_user, fresh_login_required, logout_user
 from flask_socketio import SocketIO, emit, disconnect
+from webassets.loaders import PythonLoader as PythonAssetsLoader
 
 import home.core.parser as parser
 import home.core.utils as utils
@@ -71,6 +71,7 @@ def command_api(client):
     Command API used by devices.
     """
     post = request.form.to_dict()
+    post.pop('key')
     # Send commands directly to device
     if request.form.get('device'):
         handle_task(post, client)
