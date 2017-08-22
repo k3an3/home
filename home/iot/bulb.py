@@ -199,7 +199,7 @@ if __name__ == '__main__':
     b.change_color(*colors)
 
 
-@socketio.on('change color', namespace='/ws')
+@socketio.on('change color')
 @ws_login_required
 def request_change_color(message):
     """
@@ -213,7 +213,7 @@ def request_change_color(message):
                             )
 
 
-@socketio.on('outmap', namespace="/ws")
+@socketio.on('outmap')
 @ws_login_required
 def reset_color_preview(message):
     """
