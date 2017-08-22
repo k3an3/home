@@ -121,6 +121,7 @@ def handle_task(post, client):
     from home.web.web import app
     app.logger.info(
         "({}) Execute {} on {} with config {}".format(client.name, method.__name__, device.name, kwargs))
+    kwargs.pop('key')
     if device.driver.noserialize:
         method(**kwargs)
     else:
