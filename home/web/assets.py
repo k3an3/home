@@ -7,7 +7,7 @@ IOT_JS_DIR = 'home/web/static/js/iot'
 common_css = Bundle(
     'dist/css/bootstrap.min.css',
     'dist/css/bootstrap-slider.min.css',
-    'dist/css/jquery-ui.css',
+    'dist/css/jquery-ui.min.css',
     Bundle(
         'css/main.css',
         filters='cssmin',
