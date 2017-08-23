@@ -15,8 +15,7 @@ mail_handler = None
 
 BODY = """Hello {},
 
-The latest payment for your apartment has been finalized. The amount in full is ${}. Please pay this amount to {} 
-before {}. For more details on the payment breakdown and other dues, see {}. 
+The latest payment for your apartment has been finalized. The amount in full is ${}. Please pay this amount to {} before {}. For more details on the payment breakdown and other dues, see {}. 
 
 Thank you for doing business with us.
 """
@@ -36,10 +35,16 @@ def db_init():
 def dues(due):
     if float(due['amount']) > 0:
         d = Due.create(amount=due['amount'], date=due['date'])
-        for user in User.select():
-            mail_handler.send_email("105 Westwood Payment " + d.date, user.email, settings.MAIL_FROM,
-                                    BODY.format(user.name, d.amount, settings.PAY_TO, d.date,
-                                                settings.PAYMENT_SPREADSHEET))
+        try:
+            for user in User.select():
+                mail_handler.send_email("105 Westwood Payment " + d.date, user.email, settings.MAIL_FROM,
+                                        BODY.format(user.name, d.amount, settings.PAY_TO, d.date,
+                                                    settings.PAYMENT_SPREADSHEET))
+        except Exception:
+            emit("payment sent", "There was an error sending the email(s).")
+        else:
+            emit("payment sent", "Success")
+
 
 
 @socketio.on('add payment user')

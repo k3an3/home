@@ -9,3 +9,7 @@ ws.on('payment data', function (data) {
     $('#users').html(data.users);
     $('#dues').html(data.dues);
 });
+
+ws.on('payment sent', function(msg) {
+    alert(msg);
+});
