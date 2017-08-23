@@ -220,10 +220,10 @@ class Interface(YAMLObject):
     """
     yaml_tag = '!interface'
 
-    def __init__(self, name: str, friendly_name: str, template: str, public: bool = False):
+    def __init__(self, name: str, friendly_name: str = None, template: str = None, public: bool = False):
         self.name = name
-        self.friendly_name = friendly_name
-        self.template = os.path.join(TEMPLATE_DIR, template)
+        self.friendly_name = friendly_name or name.title()
+        self.template = os.path.join(TEMPLATE_DIR, template or name + ".html")
         self.public = public
 
 

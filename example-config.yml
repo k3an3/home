@@ -6,8 +6,6 @@ interfaces:
         template: bulb.html
     - !interface
         name: music
-        friendly_name: Music
-        template: music.html
         public: True
 
 installed_drivers:

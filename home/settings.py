@@ -1,3 +1,4 @@
+# General
 LOCATION = "Des Moines"
 SOLAR_DEPRESSION = 'civil'
 SECRET_KEY = 'changetosomethinglongandcomplex'
