@@ -1,8 +1,9 @@
-import datetime
 import json
 
+import datetime
 from passlib.hash import sha256_crypt
-from peewee import SqliteDatabase, MySQLDatabase, CharField, BooleanField, ForeignKeyField, IntegerField, DateTimeField, \
+from peewee import SqliteDatabase, MySQLDatabase, CharField, BooleanField, ForeignKeyField, IntegerField, \
+    DateTimeField, \
     OperationalError, Model
 from pywebpush import WebPusher
 
@@ -28,6 +29,7 @@ def db_init():
         # TODO: fix to use app.debug
         if True:
             u = User.create(username='keane', password="")
+            User.create(username='guest', password="")
             u.set_password('root')
             u.admin = True
             u.save()

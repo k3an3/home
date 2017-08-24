@@ -18,7 +18,7 @@ from home.settings import SECRET_KEY, DEBUG, LOG_FILE
 from home.web.models import *
 from home.web.models import User, APIClient
 from home.web.utils import ws_login_required, generate_csrf_token, VERSION, api_auth_required, send_to_subscribers, \
-    handle_task, guest_path_qr, guest_path, gen_guest_login, get_qr
+    handle_task, gen_guest_login, get_qr
 
 try:
     from home.settings import GOOGLE_API_KEY
@@ -195,9 +195,10 @@ def user_loader(user_id):
 @app.route('/login', methods=['POST'])
 def login():
     user = User.get(username=request.form.get('username'))
-    if user.check_password(request.form.get('password')):
-        login_user(user)
-        flash('Logged in successfully.')
+    if not user.username == 'guest':
+        if user.check_password(request.form.get('password')):
+            login_user(user)
+            flash('Logged in successfully.')
     return redirect(url_for('index'))
 
 
@@ -254,9 +255,10 @@ def test_push(**kwargs):
 def display():
     return render_template('display.html', **locals())
 
+
 @app.route("/display/<path:path>")
 def guest_auth(path):
-    if path == guest_path:
-        login_user('guest')
+    if path == get_qr()[1].split('/')[-1]:
+        login_user(User.get(username='guest'))
         gen_guest_login()
         return redirect(url_for('display'))

@@ -135,12 +135,12 @@ def handle_task(post, client):
 
 def gen_guest_login():
     global guest_path, guest_path_qr
-    guest_path = '/display/' + random_string()
+    guest_path = 'display/' + random_string()
     buf = BytesIO()
     qr = qrcode.make(BASE_URL + guest_path)
     qr.save(buf, "PNG")
-    guest_path_qr = b64encode(buf.getvalue())
+    guest_path_qr = b64encode(buf.getvalue()).decode()
 
 
 def get_qr():
-    return guest_path_qr.decode()
+    return guest_path_qr, guest_path

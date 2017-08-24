@@ -181,7 +181,7 @@
                         <div class="panel-heading">
                             <h3 class="panel-title">Guest Display QR Code</h3>
                         </div>
-                        <img src="data:image/png;base64, {{ qr }}" alt="qr code"/>
+                        <a href="{{ qr[1] }}"><img src="data:image/png;base64, {{ qr[0] }}" alt="qr code"/></a>
                     </div>
                 {% endif %}
             </div>
