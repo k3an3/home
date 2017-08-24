@@ -36,6 +36,7 @@ packaging
 paramiko
 passlib
 peewee
+pillow
 protobuf
 pyasn1
 PyChromecast
@@ -52,6 +53,7 @@ pytz
 py_vapid
 pywebpush
 PyYAML
+qrcode
 redis
 requests
 six

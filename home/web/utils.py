@@ -2,7 +2,10 @@ import functools
 import hashlib
 import hmac
 import subprocess
+from base64 import b64encode
+from io import BytesIO
 
+import qrcode
 from flask import abort
 from flask import request
 from flask import session
@@ -14,6 +17,7 @@ from home import settings
 from home.core.async import run
 from home.core.models import get_device
 from home.core.utils import random_string, method_from_name
+from home.settings import BASE_URL
 from home.web.models import APIClient, Subscriber
 
 try:
@@ -22,6 +26,8 @@ except:
     VERSION = 'unknown'
 
 logger = None
+guest_path = ""
+guest_path_qr = None
 
 
 def ws_login_required(f):
@@ -125,3 +131,16 @@ def handle_task(post, client):
         method(**kwargs)
     else:
         device.last_task = run(method, **kwargs)
+
+
+def gen_guest_login():
+    global guest_path, guest_path_qr
+    guest_path = '/display/' + random_string()
+    buf = BytesIO()
+    qr = qrcode.make(BASE_URL + guest_path)
+    qr.save(buf, "PNG")
+    guest_path_qr = b64encode(buf.getvalue())
+
+
+def get_qr():
+    return guest_path_qr.decode()

@@ -18,7 +18,7 @@ from home.settings import SECRET_KEY, DEBUG, LOG_FILE
 from home.web.models import *
 from home.web.models import User, APIClient
 from home.web.utils import ws_login_required, generate_csrf_token, VERSION, api_auth_required, send_to_subscribers, \
-    handle_task
+    handle_task, guest_path_qr, guest_path, gen_guest_login, get_qr
 
 try:
     from home.settings import GOOGLE_API_KEY
@@ -61,6 +61,7 @@ def index():
                                version=VERSION,
                                logs=logs,
                                debug=DEBUG,
+                               qr=get_qr(),
                                )
 
 
@@ -181,7 +182,7 @@ def session_permanent():
 
 @app.after_request
 def add_header(response):
-    #response.headers['Content-Security-Policy'] = "default-src 'self'"
+    # response.headers['Content-Security-Policy'] = "default-src 'self'"
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response
 
@@ -246,3 +247,16 @@ def logout():
 def test_push(**kwargs):
     send_to_subscribers("This is only a test.")
     return '', 204
+
+
+@app.route("/display")
+@login_required
+def display():
+    return render_template('display.html', **locals())
+
+@app.route("/display/<path:path>")
+def guest_auth(path):
+    if path == guest_path:
+        login_user('guest')
+        gen_guest_login()
+        return redirect(url_for('display'))

@@ -7,6 +7,7 @@ from logging.handlers import RotatingFileHandler
 from home import settings
 from home.core.parser import parse
 from home.web.models import db_init
+from home.web.utils import gen_guest_login
 from home.web.web import socketio, app
 
 sys.path.append(os.path.dirname(os.path.realpath(__file__)))
@@ -45,4 +46,5 @@ handler.setLevel(logging.INFO)
 handler.setFormatter(logging.Formatter("%(asctime)s: %(message)s"))
 app.logger.addHandler(handler)
 app.logger.setLevel(logging.INFO)
+gen_guest_login()
 socketio.run(app, debug=settings.DEBUG)
