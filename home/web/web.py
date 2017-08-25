@@ -253,6 +253,8 @@ def test_push(**kwargs):
 @app.route("/display")
 @login_required
 def display():
+    if not current_user.is_authenticated:
+        gen_guest_login()
     return render_template('display.html', **locals())
 
 
@@ -261,5 +263,5 @@ def guest_auth(path):
     if path == get_qr()[1].split('/')[-1]:
         if not current_user.is_authenticated:
             login_user(User.get(username='guest'))
-            gen_guest_login()
         return redirect(url_for('display'))
+    abort(403)
