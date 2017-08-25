@@ -259,6 +259,7 @@ def display():
 @app.route("/display/<path:path>")
 def guest_auth(path):
     if path == get_qr()[1].split('/')[-1]:
-        login_user(User.get(username='guest'))
-        gen_guest_login()
+        if not request.user:
+            login_user(User.get(username='guest'))
+            gen_guest_login()
         return redirect(url_for('display'))
