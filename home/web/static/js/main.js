@@ -21,8 +21,14 @@ $('.visibility ').click(function(e) {
     ws.emit('admin', {
         command: 'visible',
         iface: $(this).attr('id'),
-    })
-})
+    });
+});
+
+$('#refresh_display').click(function() {
+    ws.emit('admin', {
+        command: 'refresh_display'
+    });
+});
 
 function revoke(name) {
     ws.emit('admin', {command: 'revoke', name: name});

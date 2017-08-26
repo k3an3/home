@@ -113,6 +113,8 @@ def ws_admin(data):
     elif command == 'revoke':
         client = APIClient.get(name=data.get('name'))
         client.delete_instance()
+    elif command == 'refresh_display':
+        emit('display refresh', broadcast=True)
 
 
 @socketio.on('subscribe')

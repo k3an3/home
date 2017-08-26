@@ -179,9 +179,10 @@
                     </div>
                     <div class="panel panel-primary">
                         <div class="panel-heading">
-                            <h3 class="panel-title">Guest Display QR Code</h3>
+                            <h3 class="panel-title">Guest Display</h3>
                         </div>
                         <a href="{{ qr[1] }}"><img src="data:image/png;base64, {{ qr[0] }}" alt="qr code"/></a>
+                        <a href="javascript:void(0)" id="refresh_display">Refresh</a>
                     </div>
                 {% endif %}
             </div>

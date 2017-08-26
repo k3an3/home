@@ -10,7 +10,7 @@ from multiprocessing import Process
 from time import sleep
 
 import yaml
-from typing import Iterator, Dict, List
+from typing import Iterator, Dict, List, Callable
 
 from home.core.async import run as queue_run, scheduler
 from home.core.utils import class_from_name, method_from_name, random_string
@@ -21,62 +21,6 @@ drivers = []
 devices = []
 interfaces = []
 actions = []
-
-
-def get_device_by_key(key):
-    return next(device for device in devices if device.key == key)
-
-
-def get_device_by_uuid(uuid):
-    return next(device for device in devices if device.uuid == uuid)
-
-
-def get_device(name):
-    return next(device for device in devices if device.name == name)
-
-
-def get_devices_by_group(group_name):
-    return (device for device in devices if device.group == group_name)
-
-
-def get_action(action_name):
-    return next(action for action in actions if action.name == action_name)
-
-
-def get_driver(driver_name):
-    return next(driver for driver in drivers if driver.name == driver_name)
-
-
-def get_interface(interface_name):
-    return next(interface for interface in interfaces if interface.name == interface_name)
-
-
-class YAMLConfigParseError(Exception):
-    pass
-
-
-class DriverNotInstalledError(YAMLConfigParseError):
-    pass
-
-
-class DriverNotFoundError(YAMLConfigParseError):
-    pass
-
-
-class DeviceNotFoundError(YAMLConfigParseError):
-    pass
-
-
-class DeviceSetupError(YAMLConfigParseError):
-    pass
-
-
-class DuplicateDeviceNameError(YAMLConfigParseError):
-    pass
-
-
-class ActionSetupError(YAMLConfigParseError):
-    pass
 
 
 class YAMLObject(yaml.YAMLObject):
@@ -135,7 +79,8 @@ class Driver(YAMLObject):
     """
     yaml_tag = '!driver'
 
-    def __init__(self, module: str, klass: str, name: str = None, interface: str = None, noserialize: bool = False, static: bool = False):
+    def __init__(self, module: str, klass: str, name: str = None, interface: str = None, noserialize: bool = False,
+                 static: bool = False):
         self.name = name or module
         self.interface = interface
         self.klass = class_from_name(module, klass)
@@ -164,6 +109,7 @@ class Action(YAMLObject):
         self.name = name
         self.devices = []
         self.actions = []
+        self.subscriptions = []
         self.devs = devices
         self.acts = actions
         self.jitter = jitter
@@ -189,6 +135,8 @@ class Action(YAMLObject):
     def prerun(self) -> (Iterator[Process], Iterator[int]):
         for action in self.actions:
             action.run()
+        for callback, args, kwargs in self.subscriptions:
+            callback(*args, **kwargs)
         for device, config in self.devices:
             if config['method'] == 'last':
                 method = method_from_name(device.dev, device.last_method)
@@ -233,7 +181,7 @@ yaml.add_path_resolver('!action', ['ActionGroup'], dict)
 yaml.add_path_resolver('!interface', ['Interface'], dict)
 
 
-def add_scheduled_job(job):
+def add_scheduled_job(job: Dict):
     if job.get('action'):
         scheduler.add_job(get_action(job.pop('action')).run,
                           trigger=job.pop('trigger', 'cron'),
@@ -242,3 +190,64 @@ def add_scheduled_job(job):
         device = get_device(job.pop('device'))
         method = method_from_name(device.dev, job.pop('method'))
         scheduler.add_job(method, trigger=job.pop('trigger', 'cron'), kwargs=job.pop('config', {}), **job)
+
+
+def get_device_by_key(key: str) -> Device:
+    return next(device for device in devices if device.key == key)
+
+
+def get_device_by_uuid(uuid: str) -> Device:
+    return next(device for device in devices if device.uuid == uuid)
+
+
+def get_device(name: str) -> Device:
+    return next(device for device in devices if device.name == name)
+
+
+def get_devices_by_group(group_name: str) -> Iterator[Device]:
+    return (device for device in devices if device.group == group_name)
+
+
+def get_action(action_name: str) -> Action:
+    return next(action for action in actions if action.name == action_name)
+
+
+def get_driver(driver_name: str) -> Driver:
+    return next(driver for driver in drivers if driver.name == driver_name)
+
+
+def get_interface(interface_name: str) -> Interface:
+    return next(interface for interface in interfaces if interface.name == interface_name)
+
+
+def subscribe_to_action(action_name: str, callback: Callable, *args, **kwargs):
+    action = get_action(action_name)
+    action.subscriptions.append((callback, args, kwargs))
+
+
+class YAMLConfigParseError(Exception):
+    pass
+
+
+class DriverNotInstalledError(YAMLConfigParseError):
+    pass
+
+
+class DriverNotFoundError(YAMLConfigParseError):
+    pass
+
+
+class DeviceNotFoundError(YAMLConfigParseError):
+    pass
+
+
+class DeviceSetupError(YAMLConfigParseError):
+    pass
+
+
+class DuplicateDeviceNameError(YAMLConfigParseError):
+    pass
+
+
+class ActionSetupError(YAMLConfigParseError):
+    pass

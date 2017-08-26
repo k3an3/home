@@ -2,9 +2,14 @@ var ws = io.connect('//' + document.domain + ':' + location.port);
 
 nextbus();
 setInterval(nextbus, 30000);
+setInterval(presence, 30000);
 
 function nextbus() {
     ws.emit('next bus');
+}
+
+function presence() {
+    ws.emit('get presence');
 }
 
 function nicetime(date) {
@@ -16,7 +21,7 @@ function pad2(number) {
     return (number < 10 ? '0' : '') + number
 }
 
-ws.on('next bus data', function (data) {
+ws.on('next bus data', function(data) {
     var nbd = $('#nextbusdata');
     nbd.html('');
     data.forEach(function (a) {
@@ -28,6 +33,10 @@ ws.on('next bus data', function (data) {
             nbd.append('<p>' + Math.floor(delta / 60000) + " minutes (" + nicetime(d) + ')</p>');
         });
     });
+});
+
+ws.on('presence data', function(data) {
+    alert(data);
 });
 
 ws.on('display refresh', function () {
