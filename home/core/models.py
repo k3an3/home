@@ -21,6 +21,7 @@ drivers = []
 devices = []
 interfaces = []
 actions = []
+widgets = []
 
 
 class YAMLObject(yaml.YAMLObject):
@@ -51,6 +52,7 @@ class Device(YAMLObject):
         self.dev = None
         self.last = deque(maxlen=DEVICE_HISTORY)
         self.last_task = None
+        self.widget = None
 
     def setup(self) -> None:
         """
@@ -71,6 +73,28 @@ class Device(YAMLObject):
                 self.dev = dev(**config_d)
             except Exception as e:
                 raise DeviceSetupError("Failed to configure device '" + self.name + "'")
+            try:
+                self.build_widget(self.dev.widget)
+            except AttributeError:
+                pass
+
+    def build_widget(self, config: Dict) -> str:
+        html = '<div class="panel panel-primary"><div class="panel-heading"><h3 class="panel-title">{}</h3></div>'
+        '<div class="panel-body">'
+        mapping = {}
+        for button in config.get('buttons'):
+            if not button.get('function') or button.get('action'):
+                raise WidgetSetupError('Widget must have at least a function or action defined')
+            _id = random_string(6)
+            html += '<button class="btn {_class}" id="{id}">{text}</button>'.format(
+                _class=button.get('class', 'btn-primary'),
+                id=_id,
+                text=button.get('text', _id)
+            )
+            mapping[_id] = ('function' if button.get('function') else 'action', button.get('function')
+                            or button.get('action'), button.get('config', {}))
+        html += '</div></div>'
+        self.widget = {'html': html, 'mapping': mapping}
 
 
 class Driver(YAMLObject):
@@ -250,4 +274,8 @@ class DuplicateDeviceNameError(YAMLConfigParseError):
 
 
 class ActionSetupError(YAMLConfigParseError):
+    pass
+
+
+class WidgetSetupError(YAMLConfigParseError):
     pass

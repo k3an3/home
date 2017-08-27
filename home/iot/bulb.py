@@ -43,11 +43,11 @@ tail:
 """
 import socket
 import sys
-from datetime import datetime
-from typing import Dict
 
 from astral import Astral
+from datetime import datetime
 from flask_socketio import emit
+from typing import Dict
 
 from home import settings
 from home.core import utils as utils
@@ -117,6 +117,19 @@ class Bulb:
     """
     A class representing a single MagicHome LED Bulb.
     """
+    widget = {
+        'buttons': (
+            {
+                'text': 'On',
+                'function': 'on',
+            },
+            {
+                'text': 'Off',
+                'function': 'off',
+                'class': 'btn-danger'
+            }
+        )
+    }
 
     def __init__(self, host):
         self.host = host

@@ -9,6 +9,7 @@ import importlib
 import os
 import re
 import subprocess
+
 from typing import Any, List
 
 from home.core.async import scheduler
@@ -78,8 +79,8 @@ def method_from_name(klass, method_name: str):
         raise NotImplementedError()
 
 
-def random_string() -> str:
-    return hashlib.sha256(os.urandom(128)).hexdigest()
+def random_string(length: int = 128) -> str:
+    return hashlib.sha256(os.urandom(length)).hexdigest()
 
 
 def reload():
