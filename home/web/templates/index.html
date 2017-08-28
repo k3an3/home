@@ -96,7 +96,7 @@
             {% if current_user.is_authenticated %}
                 <div class="row">
                     {% for widget in widgets %}
-                        <div class="col-sm-4">
+                        <div class="col-sm-2">
                             {{ widget | safe }}
                         </div>
                     {% endfor %}

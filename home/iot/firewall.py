@@ -14,6 +14,24 @@ FIREWALL_TYPES = {
 
 
 class SSHFirewall(SSH):
+    """
+    widget = {
+        'form': {
+            'text_fields': (
+            {
+                'text': 'On',
+                'function': 'on',
+            },
+            ),
+            {
+                'text': 'Off',
+                'function': 'off',
+                'class': 'btn-danger'
+            },
+        }
+    }
+    """
+
     def __init__(self, firewall="iptables", path=FIREWALL_TYPES['iptables'], *args, **kwargs):
         super().__init__(*args, **kwargs)
         if firewall not in FIREWALL_TYPES:

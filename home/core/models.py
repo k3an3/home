@@ -10,13 +10,13 @@ from multiprocessing import Process
 from time import sleep
 
 import yaml
+# Arrays to store object instances
 from typing import Iterator, Dict, List, Callable
 
 from home.core.async import run as queue_run, scheduler
 from home.core.utils import class_from_name, method_from_name, random_string
 from home.settings import TEMPLATE_DIR, DEVICE_HISTORY
 
-# Arrays to store object instances
 drivers = []
 devices = []
 interfaces = []
@@ -80,13 +80,16 @@ class Device(YAMLObject):
                 pass
 
     def build_widget(self, config: Dict) -> str:
+        mapping = {}
         html = '<div class="widget-panel panel panel-primary"><div class="panel-heading"><h3 class="panel-title">{' \
                '}</h3></div>'.format(self.name)
         '<div class="panel-body">'
-        mapping = {}
-        for button in config.get('buttons'):
+        buttons = config.get('buttons')
+        if len(buttons) > 1:
+            html += '<div class="btn-group" role="group" aria-label="...">'
+        for button in buttons:
             if not button.get('function') or button.get('action'):
-                raise WidgetSetupError('Widget must have at least a function or action defined')
+                raise AttributeError('Widget must have at least a function or action defined')
             _id = random_string(6)
             html += '<button class="widget btn {_class}" id="{id}">{text}</button>'.format(
                 _class=button.get('class', 'btn-primary'),
@@ -96,6 +99,8 @@ class Device(YAMLObject):
             mapping[_id] = ('function' if button.get('function') else 'action',
                             method_from_name(self.dev, button.get('function')) if button.get('function')
                             else get_action(button.get('action')), button.get('config', {}))
+        if len(buttons) > 1:
+            html += '</div>'
         html += '</div>'
         self.widget = {'html': html, 'mapping': mapping}
 
