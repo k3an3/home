@@ -80,7 +80,7 @@ def method_from_name(klass, method_name: str):
 
 
 def random_string(length: int = 128) -> str:
-    return hashlib.sha256(os.urandom(length)).hexdigest()
+    return hashlib.sha256(os.urandom(128)).hexdigest()[:length]
 
 
 def reload():

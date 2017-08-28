@@ -63,3 +63,7 @@ body {
 .mouse_over:hover {
     opacity: 1;
 }
+
+.widget {
+    margin: 20px;
+}

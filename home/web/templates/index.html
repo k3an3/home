@@ -15,7 +15,7 @@
     {% endassets %}
     <link rel="manifest" href="/static/manifest.json">
 </head>
-<body>
+<body style="background: black;">
 <div id="loadingScreen"></div>
 <div class="container">
     <!-- Static navbar -->
@@ -29,7 +29,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="/"><img src="/static/img/home.png" alt="Home"/></a>
+                <a class="navbar-brand" href="/">Home</a>
             </div>
             <div id="navbar" class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
@@ -93,7 +93,15 @@
 
     <div class="tab-content">
         <div id="home" class="tab-pane fade in active" style="text-align: center;">
-            <h1>Welcome Home</h1>
+            {% if current_user.is_authenticated %}
+                <div class="row">
+                    {% for widget in widgets %}
+                        <div class="col-sm-4">
+                            {{ widget | safe }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
         </div>
         {% for device in devices %}
             {% if current_user.is_authenticated or device.driver.interface.public %}

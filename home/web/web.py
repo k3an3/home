@@ -13,7 +13,7 @@ from webassets.loaders import PythonLoader as PythonAssetsLoader
 
 import home.core.parser as parser
 import home.core.utils as utils
-from home.core.models import devices, interfaces, get_action, actions, get_interface, get_driver
+from home.core.models import devices, interfaces, get_action, actions, get_interface, get_driver, widgets
 from home.settings import SECRET_KEY, DEBUG, LOG_FILE
 from home.web.models import *
 from home.web.models import User, APIClient
@@ -46,8 +46,15 @@ def index():
     sec = SecurityController.get()
     events = sec.events
     interface_list = []
+    widget_html = []
     for i in interfaces:
         interface_list.append((i, [d for d in devices if d.driver and d.driver.interface == i]))
+    for d in devices:
+        # Todo: ACLs
+        try:
+            widget_html.append(d.widget['html'])
+        except (AttributeError, TypeError):
+            pass
     if current_user:
         with open(LOG_FILE) as f:
             logs = f.read()
@@ -62,6 +69,7 @@ def index():
                                logs=logs,
                                debug=DEBUG,
                                qr=get_qr(),
+                               widgets=widget_html,
                                )
 
 
@@ -267,3 +275,15 @@ def guest_auth(path):
             login_user(User.get(username='guest'))
         return redirect(url_for('display'))
     abort(403)
+
+
+@socketio.on("widget")
+@ws_login_required
+def widget(data):
+    target = widgets[data['id']]
+    if target[0] == 'function':
+        func = target[1]
+        args = target[2]
+        func(**args)
+    elif target[0] == 'action':
+        target[1].run()

@@ -9,6 +9,16 @@ from time import sleep
 
 
 class Test:
+    widget = {
+        'buttons': (
+            {
+                'text': 'Test',
+                'function': 'test',
+                'class': 'btn-info',
+            },
+        )
+    }
+
     def __init__(self, host="localhost", port=1234):
         self.host = host
         self.port = port

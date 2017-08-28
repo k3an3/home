@@ -110,7 +110,7 @@ ws.on('state change', function (data) {
         color = 'white';
         state.html('alert');
         button.html('Clear');
-        button.removeAttr('class')
+        button.removeAttr('class');
         button.addClass('btn btn-warning');
     } else if (data.state == 'armed') {
         bg = 'green';
@@ -129,6 +129,10 @@ ws.on('state change', function (data) {
     $('.jumbotron').css('color', color);
     if (data.message != "")
         $('#warning').html(data.message);
+});
+
+$(".widget").click(function () {
+    ws.emit('widget', {id: this.id});
 });
 
 setTimeout(function () {
