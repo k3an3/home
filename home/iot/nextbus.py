@@ -24,7 +24,10 @@ class NextBus:
                 if p.get('direction'):
                     times = []
                     for prediction in p['direction']['prediction']:
-                        times.append(int(prediction['epochTime']))
+                        try:
+                            times.append(int(prediction['epochTime']))
+                        except TypeError:
+                            pass
                     upcoming.append((p['routeTitle'], times))
         self.data_time = datetime.datetime.now()
         self.data = upcoming

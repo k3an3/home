@@ -1,5 +1,6 @@
 var ws = io.connect('//' + document.domain + ':' + location.port);
 
+$('#widgets').hide();
 nextbus();
 setInterval(nextbus, 30000);
 setInterval(presence, 30000);
@@ -42,3 +43,20 @@ ws.on('presence data', function(data) {
 ws.on('display refresh', function () {
     location.reload();
 });
+
+$('body').click(showWidgets);
+$('body').on("tap", showWidgets);
+
+var intervalid;
+function showWidgets() {
+    clearInterval(intervalid);
+    $('#dashboard').fadeToggle();
+    $('#widgets').fadeToggle();
+    intervalid = setInterval(showDash, 60000);
+}
+
+function showDash() {
+    $('#widgets').fadeOut("slow", function() {});
+    $('#dashboard').fadeIn();
+    clearInterval(intervalid);
+}
