@@ -121,7 +121,7 @@ class Bulb:
         'buttons': (
             {
                 'text': 'Auto',
-                'function': 'on',
+                'function': 'sunlight',
                 'class': 'btn-info'
             },
             {

@@ -44,8 +44,10 @@ ws.on('display refresh', function () {
     location.reload();
 });
 
-$('body').click(showWidgets);
-$('body').on("tap", showWidgets);
+$('#dashboard').click(showWidgets);
+$('#dashboard').on("tap", showWidgets);
+$('#note').click(showWidgets);
+$('#note').on("tap", showWidgets);
 
 var intervalid;
 function showWidgets() {
