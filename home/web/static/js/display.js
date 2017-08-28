@@ -1,6 +1,7 @@
 var ws = io.connect('//' + document.domain + ':' + location.port);
 
 $('#widgets').hide();
+$('#update').hide();
 nextbus();
 setInterval(nextbus, 30000);
 setInterval(presence, 30000);
@@ -62,3 +63,18 @@ function showDash() {
     $('#dashboard').fadeIn();
     clearInterval(intervalid);
 }
+
+var update = false;
+ws.on('update', function (data) {
+    update = true;
+    $('#widgets').hide();
+    $('#dashboard').hide();
+    $('#update').show();
+
+});
+
+ws.on('connect', function () {
+    if (update) {
+        location.reload(true);
+    }
+});
