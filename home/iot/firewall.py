@@ -17,7 +17,7 @@ class SSHFirewall(SSH):
     """
     widget = {
         'form': {
-            'text_fields': (
+            'input': (
             {
                 'text': 'On',
                 'function': 'on',

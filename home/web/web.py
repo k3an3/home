@@ -263,9 +263,16 @@ def test_push(**kwargs):
 @app.route("/display")
 @login_required
 def display():
-    if not current_user.is_authenticated:
-        gen_guest_login()
-    return render_template('display.html', **locals())
+    widget_html = []
+    for d in devices:
+        # Todo: ACLs
+        try:
+            widget_html.append(d.widget['html'])
+        except (AttributeError, TypeError):
+            pass
+    return render_template('display.html',
+                           widgets=widget_html
+                           )
 
 
 @app.route("/display/<path:path>")

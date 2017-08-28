@@ -120,6 +120,11 @@ class Bulb:
     widget = {
         'buttons': (
             {
+                'text': 'Auto',
+                'function': 'on',
+                'class': 'btn-info'
+            },
+            {
                 'text': 'On',
                 'function': 'on',
             },
@@ -128,7 +133,12 @@ class Bulb:
                 'function': 'off',
                 'class': 'btn-danger'
             }
-        )
+        ),
+        'form': {
+            'buttons': (
+                {}
+            )
+        }
     }
 
     def __init__(self, host):

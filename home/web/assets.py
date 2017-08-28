@@ -27,11 +27,14 @@ common_js = Bundle(
     ),
 )
 
+display_css = Bundle(
+    'dist/css/bootstrap.min.css',
+)
+
 display_js = Bundle(
-    'https://code.jquery.com/jquery-3.1.1.slim.min.js',
+    'dist/js/jquery.min.js',
     'dist/js/socketio.min.js',
-    'https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js',
-    'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js',
+    'dist/js/bootstrap.min.js',
     Bundle(
         'js/display.js',
         filters='jsmin',
