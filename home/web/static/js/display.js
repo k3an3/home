@@ -55,14 +55,20 @@ function showWidgets() {
     clearInterval(intervalid);
     $('#dashboard').toggle();
     $('#widgets').toggle();
-    intervalid = setInterval(showDash, 60000);
+    intervalid = setInterval(showDash, 5000);
+    console.log("Showed widgets");
 }
 
 function showDash() {
     $('#widgets').hide();
     $('#dashboard').show();
+    console.log("Showed dash");
     clearInterval(intervalid);
 }
+
+setInterval(function () {
+    console.log(intervalid);
+}, 1000);
 
 function resetTimer() {
     clearInterval(intervalid);
@@ -75,6 +81,7 @@ var update = false;
 ws.on('update', function (data) {
     update = true;
     $('#widgets').hide();
+    $('#note').hide();
     $('#dashboard').hide();
     $('#update').show();
 
