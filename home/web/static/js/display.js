@@ -53,16 +53,23 @@ $('#note').on("tap", showWidgets);
 var intervalid;
 function showWidgets() {
     clearInterval(intervalid);
-    $('#dashboard').fadeToggle();
-    $('#widgets').fadeToggle();
+    $('#dashboard').toggle();
+    $('#widgets').toggle();
     intervalid = setInterval(showDash, 60000);
 }
 
 function showDash() {
-    $('#widgets').fadeOut("slow", function() {});
-    $('#dashboard').fadeIn();
+    $('#widgets').hide();
+    $('#dashboard').show();
     clearInterval(intervalid);
 }
+
+function resetTimer() {
+    clearInterval(intervalid);
+}
+
+$('body').click(resetTimer);
+$('body').on("tap", resetTimer);
 
 var update = false;
 ws.on('update', function (data) {
