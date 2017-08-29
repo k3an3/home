@@ -78,3 +78,7 @@ ws.on('connect', function () {
         location.reload(true);
     }
 });
+
+$(".widget").click(function () {
+    ws.emit('widget', {id: this.id});
+});
