@@ -164,7 +164,8 @@ def reload():
     if current_user.admin:
         try:
             parser.parse("config.yml")
-        except Exception:
+        except Exception as e:
+            app.logger.error(e)
             flash('Error in device config file. Please fix and reload.')
         else:
             flash('Device config reload successful.')
