@@ -22,8 +22,8 @@ Thank you for doing business with us.
 
 
 def db_init():
-    db.connect()
     try:
+        db.connect()
         db.create_tables([Payment, Due, User])
     except OperationalError:
         pass
@@ -44,7 +44,6 @@ def dues(due):
             emit("payment sent", "There was an error sending the email(s).")
         else:
             emit("payment sent", "Success")
-
 
 
 @socketio.on('add payment user')
