@@ -1,4 +1,5 @@
 *.pyc
+public/
 __pycache__
 bin/ 
 local/

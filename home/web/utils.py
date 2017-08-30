@@ -15,10 +15,10 @@ from peewee import DoesNotExist
 
 from home import settings
 from home.core.async import run
-from home.core.models import get_device
+from home.core.models import get_device, devices
 from home.core.utils import random_string, method_from_name
-from home.settings import BASE_URL
-from home.web.models import APIClient, Subscriber
+from home.settings import BASE_URL, PUBLIC_GROUPS
+from home.web.models import APIClient, Subscriber, User
 
 try:
     VERSION = 'v' + subprocess.check_output(['git', 'describe', '--tags', 'HEAD']).decode('UTF-8')
@@ -144,3 +144,14 @@ def gen_guest_login():
 
 def get_qr():
     return guest_path_qr, guest_path
+
+
+def get_widgets(user: User):
+    widget_html = []
+    for d in devices:
+        if d.group in PUBLIC_GROUPS or d.group in user.groups or user.admin:
+            try:
+                widget_html.append(d.widget['html'])
+            except (AttributeError, TypeError):
+                pass
+    return widget_html

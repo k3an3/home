@@ -49,6 +49,7 @@ class User(BaseModel):
     authenticated = BooleanField(default=False)
     password = CharField()
     admin = BooleanField(default=False)
+    _groups = CharField(default='')
 
     def is_active(self):
         return True
@@ -67,6 +68,10 @@ class User(BaseModel):
 
     def set_password(self, password):
         self.password = sha256_crypt.encrypt(password)
+
+    @property
+    def groups(self):
+        return self._groups.split(',')
 
 
 class APIClient(BaseModel):
