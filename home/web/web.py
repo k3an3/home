@@ -276,12 +276,12 @@ def guest_auth(path):
 @ws_login_required
 def widget(data):
     target = widgets[data['id']]
-    if target[0] == 'function':
-        if target[3] in current_user.groups or target[3] in PUBLIC_GROUPS or current_user.admin:
+    if target[3] in current_user.groups or target[3] in PUBLIC_GROUPS or current_user.admin:
+        if target[0] == 'function':
             func = target[1]
             args = target[2]
             func(**args)
-        else:
-            disconnect()
-    elif target[0] == 'action':
-        target[1].run()
+        elif target[0] == 'action':
+            target[1].run()
+    else:
+        disconnect()

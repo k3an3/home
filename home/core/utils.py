@@ -104,3 +104,11 @@ def update():
 def clear_scheduled_jobs():
     for job in scheduler.get_jobs():
         job.remove()
+
+
+def get_groups(it):
+    groups = {}
+    for t in it:
+        if not groups.get(t.group):
+            groups[t.group] = [t]
+    return groups

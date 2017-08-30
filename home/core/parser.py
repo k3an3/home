@@ -40,10 +40,12 @@ def parse(file='config.yml', data=None):
                 print(device)
         print("Configured actions:")
         if y.get('actions'):
-            for action in y['actions']:
-                actions.append(action)
-                action.setup()
-                print(action.devices)
+            for group in y['actions']:
+                for action in y['actions'][group]:
+                    action.group = group
+                    actions.append(action)
+                    action.setup()
+                    print(action.devices)
         if y.get('cron'):
             for job in y['cron']:
                 add_scheduled_job(job)
