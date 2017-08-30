@@ -12,9 +12,28 @@ PORT = 80
 
 
 class Plug:
+    widget = {
+        'buttons': (
+            {
+                'text': 'On',
+                'function': 'on'
+            },
+            {
+                'text': 'Off',
+                'function': 'off',
+                'class': 'btn-danger'
+            },
+            {
+                'text': 'Re-Auth',
+                'function': 'auth',
+                'class': 'btn-warning'
+            }
+        )
+    }
     """
     A class representing a single Broadlink smart plug
     """
+
     def __init__(self, host, mac):
         self.device = broadlink.gendevice(0x2711, (host, 80), bytearray.fromhex(mac.replace(':', '')))
         try:

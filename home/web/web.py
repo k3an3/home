@@ -46,10 +46,10 @@ def index():
     sec = SecurityController.get()
     events = sec.events
     interface_list = []
-    widget_html = get_widgets(current_user) + get_action_widgets(current_user)
     for i in interfaces:
         interface_list.append((i, [d for d in devices if d.driver and d.driver.interface == i]))
     if current_user:
+        widget_html = get_widgets(current_user) + get_action_widgets(current_user)
         with open(LOG_FILE) as f:
             logs = f.read()
         return render_template('index.html',

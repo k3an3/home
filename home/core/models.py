@@ -82,7 +82,7 @@ class Device(YAMLObject):
     def build_widget(self, config: Dict) -> str:
         mapping = {}
         html = '<div class="widget-panel panel panel-primary"><div class="panel-heading"><h3 class="panel-title">{' \
-               '}</h3></div><div class="panel-body">'.format(self.name)
+               '} ({})</h3></div><div class="panel-body">'.format(self.name, self.driver)
         buttons = config.get('buttons')
         if len(buttons) > 1:
             html += '<div class="btn-group" role="group" aria-label="...">'
