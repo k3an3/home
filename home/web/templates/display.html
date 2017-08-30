@@ -8,42 +8,6 @@
         <link rel="stylesheet" type="text/css" href="{{ ASSET_URL }}" />
     {% endassets %}
 </head>
-<style>
-    body {
-        background-color: black;
-    }
-
-    #nextbus {
-        color: white;
-        text-align: center;
-    }
-
-    #note {
-        color: white;
-        text-align: center;
-        padding-top: 10px;
-    }
-
-    #status_panel {
-        color: white;
-        text-align: center;
-    }
-
-    .widget {
-        margin-top: 20px;
-        margin-bottom: 20px;
-    }
-
-    #widgets {
-        text-align: center;
-    }
-
-    #update {
-        text-align: center;
-        color: red;
-    }
-
-</style>
 <body>
 <div class="container-fluid">
     <p id="note"><strong>Tap to Switch</strong></p>
@@ -80,8 +44,13 @@
     </div>
     <div id="update">
         <h1>Upgrade in Progress. Please Wait.</h1>
+        <div class="sk-folding-cube">
+            <div class="sk-cube1 sk-cube"></div>
+            <div class="sk-cube2 sk-cube"></div>
+            <div class="sk-cube4 sk-cube"></div>
+            <div class="sk-cube3 sk-cube"></div>
+        </div>
     </div>
-</div>
 </body>
 {% assets "display_js" %}
     <script type="text/javascript" src="{{ ASSET_URL }}"></script>

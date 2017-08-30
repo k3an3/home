@@ -8,7 +8,7 @@ lib64
 env/
 pip-selfcheck.json
 pyvenv.cfg
-app.db
+*.db
 .idea/
 settings_local.py
 config.yml

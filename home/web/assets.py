@@ -29,6 +29,11 @@ common_js = Bundle(
 
 display_css = Bundle(
     'dist/css/bootstrap.min.css',
+    Bundle(
+        'css/display.css',
+        filters='cssmin',
+        output='public/css/display.css'
+    ),
 )
 
 display_js = Bundle(
