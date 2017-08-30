@@ -18,7 +18,7 @@ from home.settings import SECRET_KEY, DEBUG, LOG_FILE, PUBLIC_GROUPS
 from home.web.models import *
 from home.web.models import User, APIClient
 from home.web.utils import ws_login_required, generate_csrf_token, VERSION, api_auth_required, send_to_subscribers, \
-    handle_task, gen_guest_login, get_qr, get_widgets
+    handle_task, get_qr, get_widgets, get_action_widgets
 
 try:
     from home.settings import GOOGLE_API_KEY
@@ -46,7 +46,7 @@ def index():
     sec = SecurityController.get()
     events = sec.events
     interface_list = []
-    widget_html = get_widgets(current_user)
+    widget_html = get_widgets(current_user) + get_action_widgets(current_user)
     for i in interfaces:
         interface_list.append((i, [d for d in devices if d.driver and d.driver.interface == i]))
     if current_user:
@@ -258,7 +258,7 @@ def test_push(**kwargs):
 @app.route("/display")
 @login_required
 def display():
-    widget_html = get_widgets(current_user)
+    widget_html = get_widgets(current_user) + get_action_widgets(current_user)
     return render_template('display.html',
                            widgets=widget_html
                            )
@@ -279,10 +279,13 @@ def widget(data):
     target = widgets[data['id']]
     if target[3] in current_user.groups or target[3] in PUBLIC_GROUPS or current_user.admin:
         if target[0] == 'function':
+            app.logger.info(
+                "({}) Execute {} on {} with config {}".format(current_user.username, target[1].__name__, None, target[2]))
             func = target[1]
             args = target[2]
             func(**args)
         elif target[0] == 'action':
+            app.logger.info("({}) Execute action {}".format(current_user.username, target[1]))
             target[1].run()
     else:
         disconnect()

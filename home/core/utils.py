@@ -9,7 +9,6 @@ import importlib
 import os
 import re
 import subprocess
-
 from typing import Any, List
 
 from home.core.async import scheduler
@@ -111,4 +110,6 @@ def get_groups(it):
     for t in it:
         if not groups.get(t.group):
             groups[t.group] = [t]
+        else:
+            groups[t.group].append(t)
     return groups

@@ -15,8 +15,8 @@ from peewee import DoesNotExist
 
 from home import settings
 from home.core.async import run
-from home.core.models import get_device, devices
-from home.core.utils import random_string, method_from_name
+from home.core.models import get_device, devices, actions
+from home.core.utils import random_string, method_from_name, get_groups
 from home.settings import BASE_URL, PUBLIC_GROUPS
 from home.web.models import APIClient, Subscriber, User
 
@@ -154,4 +154,20 @@ def get_widgets(user: User):
                 widget_html.append(d.widget['html'])
             except (AttributeError, TypeError):
                 pass
+    return widget_html
+
+
+def get_action_widgets(user: User):
+    widget_html = []
+    groups = get_groups(actions)
+    for group in groups:
+        if group in user.groups or group in PUBLIC_GROUPS or user.admin:
+            html = ''
+            html += '<div class="widget-panel panel panel-info"><div class="panel-heading"><h3 ' \
+                    'class="panel-title">{}</h3></div><div class="panel-body">'.format(group)
+            html += '<div class="btn-group" role="group" aria-label="...">'
+            for action in groups[group]:
+                html += '<button class="widget btn btn-info" id="{0}">{0}</button>'.format(action.name)
+            html += '</div></div></div>'
+            widget_html.append(html)
     return widget_html

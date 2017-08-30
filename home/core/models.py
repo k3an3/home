@@ -8,10 +8,10 @@ import os
 from collections import deque
 from multiprocessing import Process
 from time import sleep
-
-import yaml
 # Arrays to store object instances
 from typing import Iterator, Dict, List, Callable
+
+import yaml
 
 from home.core.async import run as queue_run, scheduler
 from home.core.utils import class_from_name, method_from_name, random_string
@@ -82,8 +82,7 @@ class Device(YAMLObject):
     def build_widget(self, config: Dict) -> str:
         mapping = {}
         html = '<div class="widget-panel panel panel-primary"><div class="panel-heading"><h3 class="panel-title">{' \
-               '}</h3></div>'.format(self.name)
-        '<div class="panel-body">'
+               '}</h3></div><div class="panel-body">'.format(self.name)
         buttons = config.get('buttons')
         if len(buttons) > 1:
             html += '<div class="btn-group" role="group" aria-label="...">'
@@ -101,7 +100,7 @@ class Device(YAMLObject):
                             else get_action(button.get('action')), button.get('config', {}), self.group)
         if len(buttons) > 1:
             html += '</div>'
-        html += '</div>'
+        html += '</div></div>'
         self.widget = {'html': html, 'mapping': mapping}
 
 
@@ -163,6 +162,7 @@ class Action(YAMLObject):
             except StopIteration:
                 raise ActionSetupError(
                     "Failed to configure action " + self.name + ": Can't find action " + act)
+        widgets.update({self.name: ('action', self, None, self.group)})
 
     def prerun(self) -> (Iterator[Process], Iterator[int]):
         for action in self.actions:
