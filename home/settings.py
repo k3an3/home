@@ -9,6 +9,7 @@ BASE_URL = 'https://105ww.xyz/'
 SECURITY_FOOTAGE_DIRS = ('/media/external/cam1', '/media/external/cam2')
 TEMPLATE_DIR = 'iot'
 DEVICE_HISTORY = 10
+PUBLIC_GROUPS = ('living_room', 'general')
 
 try:
     from home.settings_local import *

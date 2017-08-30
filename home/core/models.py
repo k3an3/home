@@ -98,7 +98,7 @@ class Device(YAMLObject):
             )
             mapping[_id] = ('function' if button.get('function') else 'action',
                             method_from_name(self.dev, button.get('function')) if button.get('function')
-                            else get_action(button.get('action')), button.get('config', {}))
+                            else get_action(button.get('action')), button.get('config', {}), self.group)
         if len(buttons) > 1:
             html += '</div>'
         html += '</div>'

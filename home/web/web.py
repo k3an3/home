@@ -14,11 +14,11 @@ from webassets.loaders import PythonLoader as PythonAssetsLoader
 import home.core.parser as parser
 import home.core.utils as utils
 from home.core.models import devices, interfaces, get_action, actions, get_interface, get_driver, widgets
-from home.settings import SECRET_KEY, DEBUG, LOG_FILE
+from home.settings import SECRET_KEY, DEBUG, LOG_FILE, PUBLIC_GROUPS
 from home.web.models import *
 from home.web.models import User, APIClient
 from home.web.utils import ws_login_required, generate_csrf_token, VERSION, api_auth_required, send_to_subscribers, \
-    handle_task, gen_guest_login, get_qr
+    handle_task, gen_guest_login, get_qr, get_widgets
 
 try:
     from home.settings import GOOGLE_API_KEY
@@ -46,15 +46,9 @@ def index():
     sec = SecurityController.get()
     events = sec.events
     interface_list = []
-    widget_html = []
+    widget_html = get_widgets(current_user)
     for i in interfaces:
         interface_list.append((i, [d for d in devices if d.driver and d.driver.interface == i]))
-    for d in devices:
-        # Todo: ACLs
-        try:
-            widget_html.append(d.widget['html'])
-        except (AttributeError, TypeError):
-            pass
     if current_user:
         with open(LOG_FILE) as f:
             logs = f.read()
@@ -263,13 +257,7 @@ def test_push(**kwargs):
 @app.route("/display")
 @login_required
 def display():
-    widget_html = []
-    for d in devices:
-        # Todo: ACLs
-        try:
-            widget_html.append(d.widget['html'])
-        except (AttributeError, TypeError):
-            pass
+    widget_html = get_widgets(current_user)
     return render_template('display.html',
                            widgets=widget_html
                            )
@@ -289,8 +277,11 @@ def guest_auth(path):
 def widget(data):
     target = widgets[data['id']]
     if target[0] == 'function':
-        func = target[1]
-        args = target[2]
-        func(**args)
+        if target[3] in current_user.groups or target[3] in PUBLIC_GROUPS or current_user.admin:
+            func = target[1]
+            args = target[2]
+            func(**args)
+        else:
+            disconnect()
     elif target[0] == 'action':
         target[1].run()

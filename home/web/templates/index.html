@@ -94,13 +94,17 @@
     <div class="tab-content">
         <div id="home" class="tab-pane fade in active" style="text-align: center;">
             {% if current_user.is_authenticated %}
-                <div class="row">
-                    {% for widget in widgets %}
-                        <div class="col-sm-2">
-                            {{ widget | safe }}
-                        </div>
-                    {% endfor %}
-                </div>
+                {% if widgets %}
+                    <div class="row">
+                        {% for widget in widgets %}
+                            <div class="col-sm-2">
+                                {{ widget | safe }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <h2>Welcome Home!</h2>
+                {% endif %}
             {% endif %}
         </div>
         {% for device in devices %}
