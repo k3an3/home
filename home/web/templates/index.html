@@ -245,7 +245,7 @@
                     {% endif %}
                     <br>
                     {% if current_user.admin %}
-                        <a href="javascript:void(0)" onclick="ws.emit('update')">Update</a>
+                        <a href="javascript:void(0)" onclick="ws.emit('admin', {command: 'update'})">Update</a>
                         <a href="/reload">Reload</a>
                     {% endif %}
                 </div>

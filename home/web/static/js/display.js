@@ -56,19 +56,13 @@ function showWidgets() {
     $('#dashboard').toggle();
     $('#widgets').toggle();
     intervalid = setInterval(showDash, 5000);
-    console.log("Showed widgets");
 }
 
 function showDash() {
     $('#widgets').hide();
     $('#dashboard').show();
-    console.log("Showed dash");
     clearInterval(intervalid);
 }
-
-setInterval(function () {
-    console.log(intervalid);
-}, 1000);
 
 function resetTimer() {
     clearInterval(intervalid);
