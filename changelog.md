@@ -8,6 +8,10 @@
 * Jitter delay for actions
 * Security fixes
 * Ability to revert last command
+* Automatic widget generation
+* Widgets on homepage
+* Support for display panel with info and controls
+* API ACLs based on zones/groups
 * Misc. fixes and improvements
 ## v0.9
 * Task management with Celery or Multiprocessing
