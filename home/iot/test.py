@@ -13,7 +13,7 @@ class Test:
         'buttons': (
             {
                 'text': 'Test',
-                'function': 'test',
+                'method': 'test',
                 'class': 'btn-info',
             },
         )

@@ -16,16 +16,16 @@ class Plug:
         'buttons': (
             {
                 'text': 'On',
-                'function': 'on'
+                'method': 'on'
             },
             {
                 'text': 'Off',
-                'function': 'off',
+                'method': 'off',
                 'class': 'btn-danger'
             },
             {
                 'text': 'Re-Auth',
-                'function': 'auth',
+                'method': 'auth',
                 'class': 'btn-warning'
             }
         )

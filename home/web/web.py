@@ -280,7 +280,7 @@ def guest_auth(path):
 def widget(data):
     target = widgets[data['id']]
     if target[3] in current_user.groups or target[3] in PUBLIC_GROUPS or current_user.admin:
-        if target[0] == 'function':
+        if target[0] == 'method':
             app.logger.info(
                 "({}) Execute {} on {} with config {}".format(current_user.username, target[1].__name__, None, target[2]))
             func = target[1]

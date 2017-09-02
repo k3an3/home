@@ -30,6 +30,39 @@ def get_album_art(album_id, image=1):
 
 
 class Mopidy:
+    widget = {
+        'buttons': (
+            {
+                'text': 'Play',
+                'method': 'play',
+                'class': 'btn-success'
+            },
+            {
+                'text': 'Pause',
+                'method': 'pause',
+                'class': 'btn-warning'
+            },
+            {
+                'text': 'Stop',
+                'method': 'stop',
+                'class': 'btn-danger'
+            },
+            {
+                'text': 'Next',
+                'method': 'next',
+            },
+            {
+                'text': 'Prev',
+                'method': 'previous'
+            },
+            {
+                'text': 'Clear',
+                'method': 'clear',
+                'class': 'btn-danger'
+            }
+        )
+    }
+
     def __init__(self, host):
         self.host = "http://" + host + ":6680/mopidy/rpc"
         self.id = 1
