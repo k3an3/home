@@ -8,12 +8,12 @@ import os
 from collections import deque
 from multiprocessing import Process
 from time import sleep
+
+import yaml
 # Arrays to store object instances
 from typing import Iterator, Dict, List, Callable
 
-import yaml
-
-from home.core.async import run as queue_run, scheduler
+from home.core.async import run as queue_run, scheduler, multiprocessing_run
 from home.core.utils import class_from_name, method_from_name, random_string
 from home.settings import TEMPLATE_DIR, DEVICE_HISTORY
 
@@ -180,7 +180,7 @@ class Action(YAMLObject):
                 device.last_kwargs = kwargs
             print("Execute action", config['method'])
             if device.driver.noserialize:
-                Process(target=method, kwargs=kwargs).start()
+                multiprocessing_run(target=method, delay=config.get('delay', 0), kwargs=kwargs)
                 continue
             try:
                 yield device, method, config.get('delay', 0), kwargs

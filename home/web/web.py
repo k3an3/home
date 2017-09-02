@@ -48,7 +48,7 @@ def index():
     interface_list = []
     for i in interfaces:
         interface_list.append((i, [d for d in devices if d.driver and d.driver.interface == i]))
-    if current_user:
+    if current_user.is_active:
         widget_html = get_widgets(current_user) + get_action_widgets(current_user)
         with open(LOG_FILE) as f:
             logs = f.read()
@@ -65,6 +65,7 @@ def index():
                                qr=get_qr(),
                                widgets=widget_html,
                                )
+    return render_template('index.html')
 
 
 @app.route('/api/command', methods=['POST'])
@@ -169,6 +170,7 @@ def reload():
             flash('Error in device config file. Please fix and reload.')
         else:
             flash('Device config reload successful.')
+            socketio.emit('reload', {}, broadcast=True)
     return redirect(url_for('index'))
 
 

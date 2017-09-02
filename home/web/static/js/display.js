@@ -87,6 +87,10 @@ ws.on('connect', function () {
     }
 });
 
+ws.on('reload', function () {
+    location.reload();
+});
+
 $(".widget").click(function () {
     ws.emit('widget', {id: this.id});
 });

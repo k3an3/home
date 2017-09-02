@@ -93,6 +93,10 @@ ws.on('update', function (data) {
     waitingDialog({title: 'Updating...'})
 });
 
+ws.on('reload', function () {
+    location.reload();
+});
+
 function waitingDialog(waiting) {
     $("#loadingScreen").html(waiting.message && '' != waiting.message ? waiting.message : 'Please wait...');
     $("#loadingScreen").dialog('option', 'title', waiting.title && '' != waiting.title ? waiting.title : 'Loading');
