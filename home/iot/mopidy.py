@@ -44,7 +44,7 @@ class Mopidy:
             },
             {
                 'text': 'Stop',
-                'method': 'stop',
+                'method': 'clear',
                 'class': 'btn-danger'
             },
             {
@@ -55,11 +55,6 @@ class Mopidy:
                 'text': 'Prev',
                 'method': 'previous'
             },
-            {
-                'text': 'Clear',
-                'method': 'clear',
-                'class': 'btn-danger'
-            }
         )
     }
 

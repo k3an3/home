@@ -18,9 +18,10 @@ body {
     text-align: center;
 }
 
+button {
+}
+
 .widget {
-    margin-top: 20px;
-    margin-bottom: 20px;
 }
 
 #widgets {

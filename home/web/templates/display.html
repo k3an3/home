@@ -34,13 +34,11 @@
         </div>
     </div>
     <div id="widgets">
-        <div class="row">
             {% for widget in widgets %}
                 <div class="col-md-2">
                     {{ widget | safe }}
                 </div>
             {% endfor %}
-        </div>
     </div>
     <div id="update">
         <h1>Upgrade in Progress. Please Wait.</h1>

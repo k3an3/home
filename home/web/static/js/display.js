@@ -5,6 +5,8 @@ $('#update').hide();
 nextbus();
 setInterval(nextbus, 30000);
 setInterval(presence, 30000);
+$('.btn').addClass('btn-block');
+$('.btn-group').removeClass('btn-group');
 
 function nextbus() {
     ws.emit('next bus');
@@ -50,26 +52,42 @@ $('#dashboard').on("tap", showWidgets);
 $('#note').click(showWidgets);
 $('#note').on("tap", showWidgets);
 
-var intervalid;
 function showWidgets() {
-    clearInterval(intervalid);
     $('#dashboard').toggle();
     $('#widgets').toggle();
-    intervalid = setInterval(showDash, 5000);
 }
 
 function showDash() {
     $('#widgets').hide();
     $('#dashboard').show();
-    clearInterval(intervalid);
 }
 
-function resetTimer() {
-    clearInterval(intervalid);
+// https://stackoverflow.com/a/4029518
+var idleInterval = setInterval(timerIncrement, 6000);
+var idleTime = 0;
+
+//Zero the idle timer on mouse movement.
+$(this).mousemove(function (e) {
+    idleTime = 0;
+});
+
+$(this).keypress(function (e) {
+    idleTime = 0;
+});
+
+$(this).on("tap", function (e) {
+    idleTime = 0;
+});
+
+function timerIncrement() {
+    idleTime += 1;
+    if (idleTime > 9) {
+        showDash();
+        idleTime = 0;
+    }
 }
 
-$('body').click(resetTimer);
-$('body').on("tap", resetTimer);
+// End copy
 
 var update = false;
 ws.on('update', function (data) {
