@@ -40,3 +40,15 @@ class Chromecast:
 
     def play(self):
         self.cast.media_controller.play()
+
+    def reboot(self):
+        self.cast.reboot()
+
+    def quit(self):
+        self.cast.quit_app()
+
+    def volume_up(self, delta=0.1):
+        self.cast.volume_up(delta)
+
+    def volume_down(self, delta=0.1):
+        self.cast.volume_down(delta)
