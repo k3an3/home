@@ -4,20 +4,49 @@ chromecast.py
 
 Module to wrap pychromecast
 """
+
 import pychromecast
+
+from home.core.utils import method_from_name
+
+
+def get_chromecast(host: str = None, name: str = None):
+    if host:
+        return pychromecast.Chromecast(host=host)
+    elif name:
+        chromecasts = pychromecast.get_chromecasts()
+        return next(cc for cc in chromecasts if cc.device.friendly_name == name)
 
 
 class Chromecast:
+    widget = {
+        'buttons': (
+            {
+                'text': 'TV On',
+                'action': 'tv on',
+                'class': 'btn-success'
+            },
+            {
+                'text': 'Quit',
+                'method': 'command',
+                'config': {
+                    'command': 'quit'
+                },
+                'class': 'btn-danger'
+            }
+        )
+    }
+
     def __init__(self, host=None, name=None, port=8009, cec=None):
         self.host = host
         self.name = name
         self.port = port
         self.cec = cec
-        if host:
-            self.cast = pychromecast.Chromecast(host=host)
-        elif name:
-            chromecasts = pychromecast.get_chromecasts()
-            self.cast = next(cc for cc in chromecasts if cc.device.friendly_name == name)
+        self.cast = get_chromecast(host, name)
+
+    def command(self, command: str, **kwargs):
+        self.cast = get_chromecast(self.host, self.name)
+        method_from_name(self, command)(**kwargs)
 
     def test_cast(self):
         self.cast.media_controller.play_media(

@@ -87,8 +87,8 @@ class Device(YAMLObject):
         if len(buttons) > 1:
             html += '<div class="btn-group" role="group" aria-label="...">'
         for button in buttons:
-            if not button.get('method') or button.get('action'):
-                raise AttributeError('Widget must have at least a method or action defined')
+            if not button.get('method') and not button.get('action'):
+                raise WidgetSetupError('Widget must have at least a method or action defined')
             _id = random_string(6)
             html += '<button class="widget btn {_class}" id="{id}">{text}</button>'.format(
                 _class=button.get('class', 'btn-primary'),
@@ -97,7 +97,7 @@ class Device(YAMLObject):
             )
             mapping[_id] = ('method' if button.get('method') else 'action',
                             method_from_name(self.dev, button.get('method')) if button.get('method')
-                            else get_action(button.get('action')), button.get('config', {}), self.group)
+                            else button.get('action'), button.get('config', {}), self.group)
         if len(buttons) > 1:
             html += '</div>'
         html += '</div></div>'
