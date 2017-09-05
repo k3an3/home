@@ -4,7 +4,6 @@ plug.py
 
 Module for communicating with the Broadlink smart plug
 """
-import socket
 
 import broadlink
 
@@ -35,22 +34,17 @@ class Plug:
     """
 
     def __init__(self, host, mac):
-        self.device = broadlink.gendevice(0x2711, (host, 80), bytearray.fromhex(mac.replace(':', '')))
-        try:
-            self.auth()
-        except socket.timeout:
-            print("Plug: Failed to auth with plug at", host)
+        self.host = host
+        self.mac = mac
 
-    def auth(self):
-        return self.device.auth()
+    def get_plug(self):
+        device = broadlink.gendevice(0x2711, (self.host, 80), bytearray.fromhex(self.mac.replace(':', '')))
+        device.auth()
+        return device
 
     def power(self, state):
-        try:
-            self.device.set_power(state)
-        except Exception as e:
-            self.auth()
-            self.device.set_power(state)
-            print("Plug: " + str(e))
+        device = self.get_plug()
+        device.set_power(state)
 
     def on(self):
         self.power(True)
@@ -59,4 +53,5 @@ class Plug:
         self.power(False)
 
     def get_state(self):
-        return self.device.check_power()
+        device = self.get_plug()
+        return device.check_power()
