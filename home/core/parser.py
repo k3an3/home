@@ -7,7 +7,8 @@ Parses YAML configuration files.
 """
 import yaml
 
-from home.core.models import drivers, devices, actions, interfaces, add_scheduled_job
+from home.core.models import drivers, devices, actions, interfaces, add_scheduled_job, widgets, get_action, \
+    WidgetSetupError
 from home.core.utils import clear_scheduled_jobs
 
 
@@ -22,6 +23,7 @@ def parse(file='config.yml', data=None):
         devices.clear()
         actions.clear()
         interfaces.clear()
+        widgets.clear()
         clear_scheduled_jobs()
         y = yaml.load(f)
         for interface in y['interfaces']:
@@ -46,6 +48,16 @@ def parse(file='config.yml', data=None):
                     actions.append(action)
                     action.setup()
                     print(action.devices)
+        # During device setup, couldn't pair widget buttons to actions since they didn't exist yet. Here, we match up
+        #  the actions and save the actual action object in the widget dict
+        for w in widgets:
+            wi = widgets[w]
+            if wi[0] == 'action':
+                try:
+                    act = get_action(wi[1])
+                    widgets[w] = (wi[0], act, wi[2], wi[3])
+                except StopIteration:
+                    raise WidgetSetupError("Failed to find action '{}' while configuring widget".format(widgets[w][1]))
         if y.get('cron'):
             for job in y['cron']:
                 add_scheduled_job(job)

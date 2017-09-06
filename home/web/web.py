@@ -288,6 +288,6 @@ def widget(data):
             func(**args)
         elif target[0] == 'action':
             app.logger.info("({}) Execute action {}".format(current_user.username, target[1]))
-            get_action(target[1]).run()
+            target[1].run()
     else:
         disconnect()

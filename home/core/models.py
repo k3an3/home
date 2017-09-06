@@ -162,7 +162,7 @@ class Action(YAMLObject):
             except StopIteration:
                 raise ActionSetupError(
                     "Failed to configure action " + self.name + ": Can't find action " + act)
-        widgets.update({self.name: ('action', self, None, self.group)})
+        widgets.update({self.name: ('action', self.name, None, self.group)})
 
     def prerun(self) -> (Iterator[Process], Iterator[int]):
         for action in self.actions:
