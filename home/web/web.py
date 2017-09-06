@@ -7,7 +7,7 @@ Flask web application for Home.
 import flask_assets
 from flask import Flask, render_template, request, redirect, abort, url_for, session, flash
 from flask_login import LoginManager, login_required, current_user
-from flask_login import login_user, fresh_login_required, logout_user
+from flask_login import login_user, logout_user
 from flask_socketio import SocketIO, emit, disconnect
 from webassets.loaders import PythonLoader as PythonAssetsLoader
 
@@ -210,7 +210,6 @@ def login():
 
 
 @app.route("/user/password", methods=['POST'])
-@fresh_login_required
 @login_required
 def change_password():
     if current_user.admin:
@@ -224,7 +223,6 @@ def change_password():
 
 
 @app.route("/user/create", methods=['POST'])
-@fresh_login_required
 @login_required
 def create_user():
     if not current_user.admin:
