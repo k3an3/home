@@ -1,17 +1,45 @@
 ---
+# Interfaces
+#
+# Interfaces define HTML webpages that appear as links in the main navbar,
+# which may be used to provide custom frontend functionality beyond
+# the auto-generated widgets.
 interfaces:
     - !interface
         name: colormap
+        # The friendly name will be the displayed name on the webpage.
+        # If left blank, it will assume the value of name.title().
         friendly_name: Lights
+        # The HTML template to use as an include. Does not need <html>
+        # or <body> tags, etc. Do not include scripts that require
+        # SocketIO or JQuery, as these scripts are loaded later. Instead,
+        # add a JavaScript file to static/js/iot.
         template: bulb.html
     - !interface
+        # The friendly_name and template attributes will automatically
+        # be set to "Security" and "security.html", respectively.
+        name: security
+    - !interface
+        name: payments
+    - !interface
         name: music
-        public: True
+        # Whether or not this interface should be visible to
+        # unauthenticated users.
+        public: true
 
+# Drivers
+#
+# Drivers represent different types of IoT devices and functionality sets.
+# There may be many instances of a driver defined in the devices section
+# further below.
 installed_drivers:
     - !driver
+        # The Python module for this driver, located in home.iot.
         module: bulb
+        # The Python class for this driver inside the given module.
         klass: Bulb
+        # Optionally, whether this driver has an HTML interface
+        # defined above.
         interface: colormap
     - !driver
         module: motion
@@ -19,33 +47,84 @@ installed_drivers:
     - !driver
         module: plug
         klass: Plug
-        noserialize: True
     - !driver
         module: wol
         klass: WakeOnLAN
     - !driver
+        # If a name is not specified, it defaults to the module name.
         name: sshfirewall
         module: firewall
         klass: SSHFirewall
-    - !driver
-        module: mopidy
-        klass: Mopidy
     - !driver
         module: chromecast
         klass: Chromecast
     - !driver
         module: audio
         klass: Audio
+        # If static is true, this driver may be accessed by its name
+        # as if it were a device. This is useful for situations where
+        # it is not necessary to have multiple instances of this driver,
+        # and/or the configuration can be received on the fly. In this
+        # example, the audio module can be used to play a sound file on
+        # on the server running Home. The filename to play is specified
+        # at call time.
+        static: True
     - !driver
-        module: http
+        module: ping
+        klass: Ping
+        static: True
+    - !driver
+        module: mopidy
+        klass: Mopidy
+        interface: music
+        # The noserialize option, not actually used here,
+        # is useful for development or debugging. Instead of passing
+        # method calls to Celery, it will use Process from multiprocessing.
+        # This is needed when a class contains objects (e.g. sockets)
+        # that cannot be serialized.
+        #
+        # noserialize: true
+    - !driver
+        module: weather
+        klass: Weather
+    - !driver
+        module: speech
+        klass: Speech
+    - !driver
+        name: http
+        module: httpclient
         klass: Http
         static: True
+    - !driver
+        module: test
+        klass: Test
+    - !driver
+        module: security
+        klass: Security
+        interface: security
+    - !driver
+        module: payments
+        klass: Payments
+        interface: payments
 
+# Devices
+#
+# Devices are configured instances of the drivers defined above.
 devices:
+    # Devices are organized into access groups, which may be zones
+    # or other user groups. Users may be assigned to groups for
+    # which devices they are allowed to control. The 'living_room'
+    # group is added to PUBLIC_GROUPS in settings.py, meaning
+    # all authenticated users can manipulate these devices.
     living_room:
         - !device
+            # The name of the device will be used throughout to
+            # uniquely identify it.
             name: Left
+            # The name of the driver to use, which is defined above.
             driver: bulb
+            # Configuration for this device. These keyword arguments
+            # are passed directly to the class during instantiation.
             config:
              host: 192.168.1.124
         - !device
@@ -54,12 +133,6 @@ devices:
             config:
              host: 192.168.1.125
         - !device
-            name: Cabinet
-            driver: plug
-            config:
-             host: 192.168.1.126
-             mac: B4:43:0D:C1:CB:18
-        - !device
             name: r1
             driver: sshfirewall
             config:
@@ -67,12 +140,25 @@ devices:
              keyfile: /srv/www/home/.ssh/id_rsa
              path: /usr/sbin/iptables
         - !device
-            name: media
+            name: Cast
+            driver: chromecast
+            config:
+             host: 172.24.1.253
+        - !device
+            name: Mopidy
             driver: mopidy
             config:
-             host: localhost
+             host: media
 
+    # Another group that requires access to be granted on an
+    # individual basis.
     bedroom:
+        - !device
+            name: Backdrop
+            driver: plug
+            config:
+             host: 192.168.1.126
+             mac: B4:43:0D:C1:CB:18
         - !device
             name: Bed
             driver: bulb
@@ -81,9 +167,14 @@ devices:
         - !device
             name: cam1
             driver: motion
-            key: cam1
             config:
              thread: 1
+        - !device
+            name: cam2
+            driver: motion
+            config:
+             thread: 0
+             host: 172.24.0.25
         - !device
             name: Desktop
             driver: wol
@@ -94,16 +185,67 @@ devices:
             name: Audio
             driver: audio
 
+    # Another group in PUBLIC_GROUPS
+    general:
+        - !device
+            name: Weather
+            driver: weather
+            config:
+             api_key: d736abb519b9c5733666248e89a4f57f
+             city_id: 4846834
+        - !device
+            name: Speech
+            driver: speech
+            config:
+             name: Keane
+             weather: Weather
+        - !device
+            name: Security
+            driver: security
+        - !device
+            name: Payments
+            driver: payments
+
+# Actions
+#
+# Actions are where the action is. They allow for multiple methods on
+# multiple devices to be called simultaneously.
 actions:
+    # Actions follow the same group pattern as devices above.
+    bedroom:
+    - !action
+      # The unique name for this action.
+      name: tv on
+      # Each method call is one list item here.
+      devices:
+      # The name of the device, defined above, that the method should
+      # be called on.
+      - name: Cast
+        # The name of the method to call.
+        method: cast_media
+        # Keyword arguments that will be passed directly to the method
+        # call.
+        config:
+         url: serv1.lan/black.mp4
+      # A second method to be called on the same device.
+      - name: Cast
+        # Method calls may be delayed within an action for time-sensitive
+        # functionality.
+        delay: 5
+        method: quit
     - !action
       name: arm
       devices:
       - name: cam1
         method: start_detection
+      - name: cam2
+        method: start_detection
     - !action
       name: disable
       devices:
       - name: cam1
+        method: stop_detection
+      - name: cam2
         method: stop_detection
     - !action
       name: alert
@@ -119,6 +261,10 @@ actions:
         method: change_color
         config:
          white: 0
+      - name: Backdrop
+        # Because YAML, methods named such as 'off' or 'on'
+        # must be placed in quotes.
+        method: 'off'
     - !action
       name: wake
       devices:
@@ -126,6 +272,23 @@ actions:
         method: fade_sunlight
       - name: Desktop
         method: wake
+    - !action
+      name: bedroom occupied
+      devices:
+      - name: Bed
+        method: sunlight
+      - name: Backdrop
+        method: 'on'
+    - !action
+      name: bedroom vacant
+      devices:
+      - name: Bed
+        method: change_color
+        config:
+         white: 0
+      - name: Backdrop
+        method: 'off'
+    living_room:
     - !action
       name: living room on
       devices:
@@ -144,8 +307,6 @@ actions:
         method: change_color
         config:
          white: 0
-      - name: Cabinet
-        method: 'off'
     - !action
       name: movie mode
       devices:
@@ -159,52 +320,117 @@ actions:
         config:
          white: 10
          mode: '41'
-      - name: Cabinet
-        method: 'off'
     - !action
       name: party mode
+      # Actions can call other actions.
+      actions:
+      - living room off
       devices:
-      - name: Left
-        method: change_color
+      - name: Mopidy
+        method: custom
+        delay: .5
         config:
-         mode: '61'
-         function: '25'
-         speed: '0a'
-      - name: Right
-        method: change_color
+         target: core.tracklist.set_consume
+         key: value
+         value: 'true'
+      - name: Mopidy
+        method: custom
+        delay: .5
         config:
-         mode: '61'
-         function: '25'
-         speed: '0a'
-      - name: Cabinet
-        method: 'on'
-    - !action
-      name: bedroom occupied
-      devices:
-      - name: Bed
-        method: sunlight
-    - !action
-      name: bedroom vacant
-      devices:
-      - name: cam1
-        method: stop_detection
-      - name: Bed
-        method: change_color
+         target: core.tracklist.set_random
+         key: value
+         value: 'true'
+      - name: http
+        method: get
         config:
-         white: 0
-      - name: cam1
+         url: http://media.lan:5000/on
+      - name: http
+        method: get
+        config:
+         url: http://pi.lan:5000/on
+      - name: Mopidy
+        method: clear
+      - name: Mopidy
+        method: add_track
+        delay: .25
+        config:
+         uri: spotify:user:korockinout13:playlist:3g3GFbHwdYr2GHZc4bmeaW
+      - name: Mopidy
+        method: play
         delay: 1
-        method: start_detection
     - !action
-      name: test
+      name: stop party
       devices:
-      - name: Audio
-        method: test
+      - name: Mopidy
+        method: stop
+      - name: Left
+        delay: .9
+        method: sunlight
+      - name: Right
+        delay: .9
+        method: sunlight
+      - name: http
+        method: get
+        delay: .50
+        config:
+         url: http://media.lan:5000/off
+      - name: http
+        method: get
+        delay: .50
+        config:
+         url: http://pi.lan:5000/off
+    - !action
+      name: enable leds
+      devices:
+      - name: http
+        method: get
+        config:
+         url: http://media.lan:5000/on
+      - name: http
+        method: get
+        config:
+         url: http://pi.lan:5000/on
+    - !action
+      name: disable leds
+      devices:
+      - name: http
+        method: get
+        config:
+         url: http://media.lan:5000/off
+      - name: http
+        method: get
+        config:
+         url: http://pi.lan:5000/off
+    misc:
+    - !action
+      name: ping check
+      devices:
+      - name: ping
+        method: ping_all
+        config:
+         hosts:
+         - host: 172.24.0.25
+           port: 22
+         - host: 172.24.0.240
+           port: 22
 
+# Cron
+#
+# Cron jobs are defined here. These are actions or methods that are
+# fired at the specified times or intervals.
 cron:
-    - name: lights on
-      hour: 17
-      action: living room on
-    - name: lights off
+    - name: ping check
+      # This job will trigger every 5 minutes
+      trigger: interval
+      minutes: 5
+      # Launch an action
+      action: ping check
+    - name: lro
+      # This job will trigger at 3AM.
+      trigger: cron
       hour: 3
       action: living room off
+    - name: lron
+      # Cron is the default mode.
+      hour: 17
+      action: living room on
