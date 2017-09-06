@@ -26,6 +26,16 @@ class Chromecast:
                 'class': 'btn-success'
             },
             {
+                'text': 'Play',
+                'method': 'play',
+                'class': 'btn-success'
+            },
+            {
+                'text': 'Pause',
+                'method': 'pause',
+                'class': 'btn-warning'
+            },
+            {
                 'text': 'Quit',
                 'method': 'quit',
                 'class': 'btn-danger'
