@@ -22,11 +22,6 @@ class Plug:
                 'method': 'off',
                 'class': 'btn-danger'
             },
-            {
-                'text': 'Re-Auth',
-                'method': 'auth',
-                'class': 'btn-warning'
-            }
         )
     }
     """

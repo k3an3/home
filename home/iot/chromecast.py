@@ -27,10 +27,7 @@ class Chromecast:
             },
             {
                 'text': 'Quit',
-                'method': 'command',
-                'config': {
-                    'command': 'quit'
-                },
+                'method': 'quit',
                 'class': 'btn-danger'
             }
         )
