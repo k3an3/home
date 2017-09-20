@@ -12,6 +12,7 @@ DEVICE_HISTORY = 10
 PUBLIC_GROUPS = ('living_room', 'general')
 LDAP_PORT = 389
 LDAP_SSL = False
+LDAP_FILTER = "uid={},"
 
 try:
     from home.settings_local import *

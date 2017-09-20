@@ -29,6 +29,7 @@ itsdangerous
 Jinja2
 jsmin
 kombu
+ldap3
 MarkupSafe
 mccabe
 netifaces

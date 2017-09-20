@@ -247,6 +247,7 @@
                     {% if current_user.admin %}
                         <a href="javascript:void(0)" onclick="ws.emit('admin', {command: 'update'})">Update</a>
                         <a href="/reload">Reload</a>
+                        <a href="/restart">Restart</a>
                     {% endif %}
                 </div>
                 {% if current_user.admin %}

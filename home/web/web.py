@@ -19,7 +19,7 @@ from home.settings import SECRET_KEY, DEBUG, LOG_FILE, PUBLIC_GROUPS
 from home.web.models import *
 from home.web.models import User, APIClient
 from home.web.utils import ws_login_required, generate_csrf_token, VERSION, api_auth_required, send_to_subscribers, \
-    handle_task, get_qr, get_widgets, get_action_widgets
+    handle_task, get_qr, get_widgets, get_action_widgets, ldap_auth
 
 try:
     from home.settings import GOOGLE_API_KEY
@@ -40,6 +40,7 @@ for name, bundle in assets_loader.load_bundles().items():
 
 try:
     from home.settings import LDAP_CONFIG
+
     app.config.update(LDAP_CONFIG)
 except ImportError:
     ldap = None
@@ -181,6 +182,15 @@ def reload():
     return redirect(url_for('index'))
 
 
+@app.route("/restart")
+@login_required
+def restart():
+    if current_user.admin:
+        socketio.emit('update', {}, broadcast=True)
+        utils.reload()
+    return redirect(url_for('index'))
+
+
 @app.before_request
 def csrf_protect():
     if request.method == "POST" and not request.path.startswith('/api/'):
@@ -208,15 +218,18 @@ def user_loader(user_id):
 
 @app.route('/login', methods=['POST'])
 def login():
+    username = request.form.get('username')
+    password = request.form.get('password')
     try:
-        user = User.get(username=request.form.get('username'))
+        user = User.get(username=username)
     except DoesNotExist:
-        test = ldap.bind_user(request.form.get('username',
-                                               request.form.get('password')))
-    if not user.username == 'guest':
-        if user.check_password(request.form.get('password')):
+        user = ldap_auth(username, password)
+    if user and not user.username == 'guest':
+        if user.check_password(password):
             login_user(user)
             flash('Logged in successfully.')
+    if not user:
+        flash('Invalid credentials.')
     return redirect(url_for('index'))
 
 
@@ -227,9 +240,11 @@ def change_password():
         user = User.get(username=request.form.get('username'))
     elif current_user.check_password(request.form.get('password')):
         user = current_user
-    if request.form.get('new_password') == request.form.get('new_password_confirm'):
+    if not user.ldap and request.form.get('new_password') == request.form.get('new_password_confirm'):
         user.set_password(request.form.get('new_password'))
         user.save()
+    if user.ldap:
+        flash('Sorry, cannot change passwords for LDAP accounts.')
     return redirect(url_for('index'))
 
 

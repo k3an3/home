@@ -11,14 +11,14 @@ from flask import request
 from flask import session
 from flask_login import current_user
 from flask_socketio import disconnect
-from ldap3 import Server, Connection
+from ldap3 import Server, Connection, ALL_ATTRIBUTES
 from peewee import DoesNotExist
 
 from home import settings
 from home.core.async import run
 from home.core.models import get_device, devices, actions
 from home.core.utils import random_string, method_from_name, get_groups
-from home.settings import BASE_URL, PUBLIC_GROUPS, LDAP_BASE_DN
+from home.settings import BASE_URL, PUBLIC_GROUPS, LDAP_BASE_DN, LDAP_FILTER, LDAP_ADMIN_GID
 from home.web.models import APIClient, Subscriber, User
 
 try:
@@ -176,7 +176,22 @@ def get_action_widgets(user: User):
 
 def ldap_auth(username: str, password: str) -> User:
     s = Server(host=settings.LDAP_HOST, port=settings.LDAP_PORT, use_ssl=settings.LDAP_SSL)
-    with Connection(s, user=LDAP_BASE_DN.format(username), password=password) as c:
-        print(c.bind(), c.result, c.response, c.last_error)
-        #if not c.bind():
-        #    return None
+    with Connection(s, user=(LDAP_FILTER.format(username) + LDAP_BASE_DN), password=password) as c:
+        u = None
+        from home.web.web import app
+        if c.bind():
+            app.logger.info("Successful bind for user " + username)
+            c.search(search_base=LDAP_BASE_DN,
+                     search_filter='(uid={})'.format(username),
+                     attributes=ALL_ATTRIBUTES)
+            r = c.response[0]['attributes']
+            u, created = User.get_or_create(username=username,
+                                            defaults={'ldap': True,
+                                                      'password': '',
+                                                      'admin': r['gidnumber'] == LDAP_ADMIN_GID
+                                                      })
+            if created:
+                app.logger.info("Created new user from LDAP: " + username)
+        else:
+            app.logger.info("Failed to bind with user " + LDAP_FILTER.format(username) + LDAP_BASE_DN)
+        return u

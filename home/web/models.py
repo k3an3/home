@@ -28,7 +28,7 @@ def db_init():
         print('Creating tables...')
         # TODO: fix to use app.debug
         if True:
-            u = User.create(username='keane', password="")
+            u = User.create(username='root', password="")
             User.create(username='guest', password="")
             u.set_password('root')
             u.admin = True
@@ -50,6 +50,7 @@ class User(BaseModel):
     password = CharField()
     admin = BooleanField(default=False)
     _groups = CharField(default='')
+    ldap = BooleanField(default=False)
 
     def is_active(self):
         return True
@@ -64,6 +65,9 @@ class User(BaseModel):
         return False
 
     def check_password(self, password):
+        if self.ldap:
+            from home.web.utils import ldap_auth
+            return ldap_auth(self.username, password)
         return sha256_crypt.verify(password, self.password)
 
     def set_password(self, password):
