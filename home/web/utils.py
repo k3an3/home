@@ -11,13 +11,14 @@ from flask import request
 from flask import session
 from flask_login import current_user
 from flask_socketio import disconnect
+from ldap3 import Server, Connection
 from peewee import DoesNotExist
 
 from home import settings
 from home.core.async import run
 from home.core.models import get_device, devices, actions
 from home.core.utils import random_string, method_from_name, get_groups
-from home.settings import BASE_URL, PUBLIC_GROUPS
+from home.settings import BASE_URL, PUBLIC_GROUPS, LDAP_BASE_DN
 from home.web.models import APIClient, Subscriber, User
 
 try:
@@ -171,3 +172,11 @@ def get_action_widgets(user: User):
             html += '</div></div></div>'
             widget_html.append(html)
     return widget_html
+
+
+def ldap_auth(username: str, password: str) -> User:
+    s = Server(host=settings.LDAP_HOST, port=settings.LDAP_PORT, use_ssl=settings.LDAP_SSL)
+    with Connection(s, user=LDAP_BASE_DN.format(username), password=password) as c:
+        print(c.bind(), c.result, c.response, c.last_error)
+        #if not c.bind():
+        #    return None

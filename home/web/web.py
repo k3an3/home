@@ -9,6 +9,7 @@ from flask import Flask, render_template, request, redirect, abort, url_for, ses
 from flask_login import LoginManager, login_required, current_user
 from flask_login import login_user, logout_user
 from flask_socketio import SocketIO, emit, disconnect
+from peewee import DoesNotExist
 from webassets.loaders import PythonLoader as PythonAssetsLoader
 
 import home.core.parser as parser
@@ -36,6 +37,12 @@ assets.init_app(app)
 assets_loader = PythonAssetsLoader('home.web.assets')
 for name, bundle in assets_loader.load_bundles().items():
     assets.register(name, bundle)
+
+try:
+    from home.settings import LDAP_CONFIG
+    app.config.update(LDAP_CONFIG)
+except ImportError:
+    ldap = None
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -201,7 +208,11 @@ def user_loader(user_id):
 
 @app.route('/login', methods=['POST'])
 def login():
-    user = User.get(username=request.form.get('username'))
+    try:
+        user = User.get(username=request.form.get('username'))
+    except DoesNotExist:
+        test = ldap.bind_user(request.form.get('username',
+                                               request.form.get('password')))
     if not user.username == 'guest':
         if user.check_password(request.form.get('password')):
             login_user(user)
@@ -280,7 +291,8 @@ def widget(data):
     if target[3] in current_user.groups or target[3] in PUBLIC_GROUPS or current_user.admin:
         if target[0] == 'method':
             app.logger.info(
-                "({}) Execute {} on {} with config {}".format(current_user.username, target[1].__name__, None, target[2]))
+                "({}) Execute {} on {} with config {}".format(current_user.username, target[1].__name__, None,
+                                                              target[2]))
             func = target[1]
             args = target[2]
             func(**args)

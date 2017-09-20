@@ -10,6 +10,8 @@ SECURITY_FOOTAGE_DIRS = ('/media/external/cam1', '/media/external/cam2')
 TEMPLATE_DIR = 'iot'
 DEVICE_HISTORY = 10
 PUBLIC_GROUPS = ('living_room', 'general')
+LDAP_PORT = 389
+LDAP_SSL = False
 
 try:
     from home.settings_local import *
