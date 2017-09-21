@@ -11,7 +11,7 @@ from wakeonlan import wol
 
 class WakeOnLAN:
     widget = {
-        'buttons'(
+        'buttons': (
             {
                 'text': 'Wake',
                 'method': 'wake',
