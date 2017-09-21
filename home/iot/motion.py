@@ -18,6 +18,20 @@ class MotionController:
     """
     Driver for interfacing with the Motion API.
     """
+    widget = {
+        'buttons': (
+            {
+                'text': 'Enable',
+                'method': 'start_detection',
+                'class': 'btn-success'
+            },
+            {
+                'text': 'Disable',
+                'method': 'stop_detection',
+                'class': 'btn-danger'
+            },
+        )
+    }
 
     def __init__(self, thread=0, host="localhost", control_port=8080, feed_port=8081):
         self.base_url = BASE_URL.format(host, control_port, thread)

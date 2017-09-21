@@ -10,6 +10,16 @@ from wakeonlan import wol
 
 
 class WakeOnLAN:
+    widget = {
+        'buttons'(
+            {
+                'text': 'Wake',
+                'method': 'wake',
+                'class': 'btn-success'
+            },
+        )
+    }
+
     def __init__(self, mac, host=None, port=None, manual_interface=None):
         self.mac = mac
         self.host = host

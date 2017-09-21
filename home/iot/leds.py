@@ -16,12 +16,15 @@ RED_PIN = 4
 GREEN_PIN = 17
 BLUE_PIN = 22
 WHITE_PIN = 18
+
+
 # End defaults
 
 class gpioLEDstrip:
     """
     A class representing a 5-pin RGBW LED strip.
     """
+
     def __init__(self, red=RED_PIN, green=GREEN_PIN, blue=BLUE_PIN, white=WHITE_PIN):
         """
         Initializer with default pins for each color.

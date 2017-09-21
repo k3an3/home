@@ -23,21 +23,39 @@ WINDY_SAYINGS = (
     "Hold on to your hat! It's going to be a breezy one.",
     "Batten down the hatches! It may get windy.",
     "Watch out for falling trees on this windy day!",
-    "The wind might just blow you over."
+    "The wind might just blow you over today.",
 )
 
 HOT_SAYINGS = (
-    "Drop your socks and put on some crocks! It's going to be a hot one.",
+    "Drop your socks and grab your crocs! It's going to be a hot one.",
     "Might want to stay inside, or go to the pool. It will be a bit hot.",
     "Soak up that air conditioning! It's hot out.",
-    "Make sure to stay hydrated in this hot weather!"
+    "Make sure to stay hydrated in this hot weather!",
+    "Spend some quality time inside today, it'll be hot out there.",
 )
 
 COLD_SAYINGS = (
     "It might be a hat and glove kind of day.",
     "Try to keep warm!",
-    "The weather outside is frightful, but the inside is pretty nice.",
-    "Break out the handwarmers! It may be hard to type."
+    "The weather outside is frightful, but the inside is pretty darn nice.",
+    "Break out the handwarmers! It may be hard to type.",
+    "Crank up the heater and get toasty!",
+    "Better put another log on the fire, it is cold out!",
+)
+
+SNOWY_SAYINGS = (
+    "Put on your snowshoes, you'll need them today.",
+    "Gone away is the bluebird, here to stay is the new bird. a k a, it might be a winter wonderland out there.",
+    "Don't go to Dairy Queen today, eat some snow instead!",
+    "Might just be a good day for a snowball fight! Rally your troops.",
+    "Just because it's snowing doesn't mean you get the day off.",
+)
+
+STORMY_SAYINGS = (
+    "Stay away from doors and windows!",
+    "You may want to seek shelter indoors today.",
+    "Don't get struck by lightning!",
+    "Thunder and lightning from above!",
 )
 
 
@@ -63,27 +81,33 @@ class Weather:
 
 
 class Forecast:
-    def __init__(self, data):
+    def __init__(self, data: dict):
         if data.get('list'):
             data = data['list'][1]
         self.temp = data['main']['temp']
         self.description = data['weather'][0]['description']
         self.wind = data['wind']['speed']
 
-    def windy(self):
+    def windy(self) -> bool:
         return self.wind > 20
 
-    def rainy(self):
+    def rainy(self) -> bool:
         return 'rain' in self.description.lower()
 
+    def snowy(self) -> bool:
+        return 'snow' in self.description.lower()
 
-def get_quote():
+    def stormy(self) -> bool:
+        return 'storm' in self.description.lower()
+
+
+def get_quote() -> str:
     r = requests.get('https://quotes.rest/qod', headers={'Accept': 'application/json'})
     if r.status_code == 200:
         return r.json()['contents']['quotes'][0]['quote']
 
 
-def format_weather(speech):
+def format_weather(speech: Speech) -> str:
     weather = speech.weather.get()
     forecast = speech.weather.get('forecast')
     dt = datetime.datetime.now()
@@ -92,6 +116,8 @@ def format_weather(speech):
         extra.append(random.choice(WINDY_SAYINGS))
     if weather.rainy() or forecast.rainy():
         extra.append("Don't forget to bring an umbrella, " + random.choice(RAINY_SAYINGS))
+    if weather.snowy() or forecast.snowy():
+        extra.append(random.choice(SNOWY_SAYINGS))
     if weather.temp > 90 or forecast.temp > 90:
         extra.append(random.choice(HOT_SAYINGS))
     if weather.temp < 28 or forecast.temp < 28:
