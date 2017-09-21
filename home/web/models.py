@@ -6,6 +6,7 @@ from peewee import SqliteDatabase, MySQLDatabase, CharField, BooleanField, Forei
     DateTimeField, \
     OperationalError, Model
 from pywebpush import WebPusher
+from typing import List, Dict
 
 from home.core.utils import random_string
 from home.settings import GOOGLE_API_KEY
@@ -16,7 +17,7 @@ else:
     db = MySQLDatabase(host="localhost", database="party", user="party", passwd="party")
 
 
-def db_init():
+def db_init() -> None:
     db.connect()
     try:
         db.create_tables([User,
@@ -52,29 +53,29 @@ class User(BaseModel):
     _groups = CharField(default='')
     ldap = BooleanField(default=False)
 
-    def is_active(self):
+    def is_active(self) -> bool:
         return True
 
-    def get_id(self):
+    def get_id(self) -> str:
         return self.username
 
-    def is_authenticated(self):
+    def is_authenticated(self) -> bool:
         return self.authenticated
 
-    def is_anonymous(self):
+    def is_anonymous(self) -> bool:
         return False
 
-    def check_password(self, password):
+    def check_password(self, password: str) -> bool:
         if self.ldap:
             from home.web.utils import ldap_auth
             return ldap_auth(self.username, password)
         return sha256_crypt.verify(password, self.password)
 
-    def set_password(self, password):
+    def set_password(self, password: str) -> None:
         self.password = sha256_crypt.encrypt(password)
 
     @property
-    def groups(self):
+    def groups(self) -> List[str]:
         return self._groups.split(',')
 
 
@@ -89,7 +90,7 @@ class Subscriber(BaseModel):
     p256dh = CharField()
     user = ForeignKeyField(User, related_name='subscribers')
 
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, str]:
         return {
             'endpoint': self.endpoint,
             'keys': {'auth': self.auth,
@@ -97,7 +98,7 @@ class Subscriber(BaseModel):
                      }
             }
 
-    def push(self, message, icon='/static/favicon.ico'):
+    def push(self, message: str, icon: str = '/static/favicon.ico') -> None:
         WebPusher(self.to_dict()).send(
             json.dumps({'body': message,
                         'icon': icon}),
@@ -107,26 +108,26 @@ class Subscriber(BaseModel):
 class SecurityController(BaseModel):
     state = CharField(default='disabled')
 
-    def arm(self):
+    def arm(self) -> None:
         self.state = 'armed'
         self.save()
 
-    def occupied(self):
+    def occupied(self) -> None:
         self.state = 'occupied'
         self.save()
 
-    def alert(self):
+    def alert(self) -> None:
         self.state = 'alert'
         self.save()
 
-    def disable(self):
+    def disable(self) -> None:
         self.state = 'disabled'
         self.save()
 
-    def is_alert(self):
+    def is_alert(self) -> bool:
         return self.state == 'alert'
 
-    def is_armed(self):
+    def is_armed(self) -> bool:
         return self.state == 'armed'
 
 

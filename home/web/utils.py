@@ -13,6 +13,7 @@ from flask_login import current_user
 from flask_socketio import disconnect
 from ldap3 import Server, Connection, ALL_ATTRIBUTES
 from peewee import DoesNotExist
+from typing import List
 
 from home import settings
 from home.core.async import run
@@ -81,13 +82,13 @@ def api_auth_required(f):
     return wrapped
 
 
-def generate_csrf_token():
+def generate_csrf_token() -> str:
     if '_csrf_token' not in session:
         session['_csrf_token'] = random_string()
     return session['_csrf_token']
 
 
-def send_to_subscribers(message):
+def send_to_subscribers(message: str) -> None:
     for subscriber in Subscriber.select():
         try:
             subscriber.push(message)
@@ -95,7 +96,7 @@ def send_to_subscribers(message):
             print("Webpusher:", str(e))
 
 
-def handle_task(post, client):
+def handle_task(post: dict, client: APIClient) -> None:
     device = get_device(post.pop('device'))
     try:
         c_method, c_kwargs = device.last.pop()
@@ -134,7 +135,7 @@ def handle_task(post, client):
         device.last_task = run(method, **kwargs)
 
 
-def gen_guest_login():
+def gen_guest_login() -> None:
     global guest_path, guest_path_qr
     guest_path = 'display/' + random_string()
     buf = BytesIO()
@@ -143,11 +144,11 @@ def gen_guest_login():
     guest_path_qr = b64encode(buf.getvalue()).decode()
 
 
-def get_qr():
+def get_qr() -> (str, str):
     return guest_path_qr, guest_path
 
 
-def get_widgets(user: User):
+def get_widgets(user: User) -> List[str]:
     widget_html = []
     for d in devices:
         if d.group in PUBLIC_GROUPS or d.group in user.groups or user.admin:
@@ -158,7 +159,7 @@ def get_widgets(user: User):
     return widget_html
 
 
-def get_action_widgets(user: User):
+def get_action_widgets(user: User) -> List[str]:
     widget_html = []
     groups = get_groups(actions)
     for group in groups:
