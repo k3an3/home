@@ -15,7 +15,7 @@ from webassets.loaders import PythonLoader as PythonAssetsLoader
 import home.core.parser as parser
 import home.core.utils as utils
 from home.core.models import devices, interfaces, get_action, actions, get_interface, get_driver, widgets
-from home.settings import SECRET_KEY, DEBUG, LOG_FILE, PUBLIC_GROUPS
+from home.settings import SECRET_KEY, DEBUG, LOG_FILE, PUBLIC_GROUPS, USE_LDAP
 from home.web.models import *
 from home.web.models import User, APIClient
 from home.web.utils import ws_login_required, generate_csrf_token, VERSION, api_auth_required, send_to_subscribers, \
@@ -223,7 +223,8 @@ def login():
     try:
         user = User.get(username=username)
     except DoesNotExist:
-        user = ldap_auth(username, password)
+        if USE_LDAP:
+            user = ldap_auth(username, password)
     if user and not user.username == 'guest':
         if user.check_password(password):
             login_user(user)
