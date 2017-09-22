@@ -136,7 +136,7 @@ class Action(YAMLObject):
     """
     yaml_tag = '!action'
 
-    def __init__(self, name, devices: List = [], actions: List = [], jitter: int = 0, widget: bool = True):
+    def __init__(self, name, devices: List = [], actions: List = [], jitter: int = 0, button: str = 'btn-info'):
         self.name = name
         self.devices = []
         self.actions = []
@@ -144,7 +144,7 @@ class Action(YAMLObject):
         self.devs = devices
         self.acts = actions
         self.jitter = jitter
-        self.widget = widget
+        self.button = button
 
     def setup(self) -> None:
         for dev in self.devs:
@@ -163,7 +163,7 @@ class Action(YAMLObject):
             except StopIteration:
                 raise ActionSetupError(
                     "Failed to configure action " + self.name + ": Can't find action " + act)
-        if self.widget:
+        if self.button:
             widgets.update({self.name: ('action', self.name, None, self.group)})
 
     def prerun(self) -> (Iterator[Process], Iterator[int]):
