@@ -168,11 +168,14 @@ def get_action_widgets(user: User) -> List[str]:
             html += '<div class="widget-panel panel panel-info"><div class="panel-heading"><h3 ' \
                     'class="panel-title">{}</h3></div><div class="panel-body">'.format(group)
             html += '<div class="btn-group" role="group" aria-label="...">'
+            action_html = ''
             for action in groups[group]:
                 if action.button:
-                    html += '<button class="widget btn {1}" id="{0}">{0}</button>'.format(action.name, action.button)
+                    action_html += '<button class="widget btn {1}" id="{0}">{0}</button>'.format(action.name, action.button)
+            html += action_html
             html += '</div></div></div>'
-            widget_html.append(html)
+            if action_html:
+                widget_html.append(html)
     return widget_html
 
 
