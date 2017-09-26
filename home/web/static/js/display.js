@@ -34,7 +34,8 @@ ws.on('next bus data', function(data) {
             var d = new Date(0);
             d.setUTCMilliseconds(b);
             var delta = d - new Date();
-            nbd.append('<p>' + Math.floor(delta / 60000) + " minutes (" + nicetime(d) + ')</p>');
+            if (delta >= -1)
+                nbd.append('<p>' + Math.floor(delta / 60000) + " minutes (" + nicetime(d) + ')</p>');
         });
     });
 });
