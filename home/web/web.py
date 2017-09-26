@@ -304,10 +304,10 @@ def guest_auth(path):
 @ws_login_required
 def widget(data):
     target = widgets[data['id']]
-    if target[3] in current_user.groups or target[3] in PUBLIC_GROUPS or current_user.admin:
+    if target[3].group in current_user.groups or target[3].group in PUBLIC_GROUPS or current_user.admin:
         if target[0] == 'method':
             app.logger.info(
-                "({}) Execute {} on {} with config {}".format(current_user.username, target[1].__name__, None,
+                "({}) Execute {} on {} with config {}".format(current_user.username, target[1].__name__, target[3].name,
                                                               target[2]))
             func = target[1]
             args = target[2]

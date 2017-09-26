@@ -42,9 +42,8 @@ class Device(YAMLObject):
     """
     yaml_tag = '!device'
 
-    def __init__(self, name: str, driver: str = None, config: Dict = None, key: str = None, group: str = None):
+    def __init__(self, name: str, driver: str = None, config: Dict = None, group: str = None):
         self.name = name
-        self.key = key  # deprecated?
         self.driver = driver
         self.group = group
         self.config = config
@@ -97,7 +96,7 @@ class Device(YAMLObject):
             )
             mapping[_id] = ('method' if button.get('method') else 'action',
                             method_from_name(self.dev, button.get('method')) if button.get('method')
-                            else button.get('action'), button.get('config', {}), self.group)
+                            else button.get('action'), button.get('config', {}), self)
         if len(buttons) > 1:
             html += '</div>'
         html += '</div></div>'
@@ -164,7 +163,7 @@ class Action(YAMLObject):
                 raise ActionSetupError(
                     "Failed to configure action " + self.name + ": Can't find action " + act)
         if self.button:
-            widgets.update({self.name: ('action', self.name, None, self.group)})
+            widgets.update({self.name: ('action', self.name, None, self)})
 
     def prerun(self) -> (Iterator[Process], Iterator[int]):
         for action in self.actions:
