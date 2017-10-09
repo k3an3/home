@@ -14,6 +14,7 @@ USE_LDAP = False
 LDAP_PORT = 389
 LDAP_SSL = False
 LDAP_FILTER = "uid={},"
+SPOTIFY_API_KEY = 'your_key_here'
 
 try:
     from home.settings_local import *
