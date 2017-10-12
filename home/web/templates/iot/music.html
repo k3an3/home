@@ -17,15 +17,19 @@
     <ul id="results" class="list-group">
     </ul>
 </div>
-<script src="static/dist/js/socket.io-1.4.5.js"></script>
+{% assets 'common_js' %}
+<script type="text/javascript" src="{{ ASSET_URL }}"></script>
+{% endassets %}
+<script src="static/dist/js/socketio.min.js"></script>
 <script>
     var u_ws = io.connect('//' + document.domain + ':' + location.port + '/mopidy');
+    var song = null;
 
     u_ws.on('track', function (data) {
-        var song = JSON.parse(data);
+        song = JSON.parse(data);
         $('#song-title').html(song.title);
         $('#song-artist').html(song.artists);
-        $('#album-art').attr('src', song.art.url);
+        $('#album-art').attr('src', song.art);
     });
 
     $('#search-btn').click(function () {
@@ -74,7 +78,8 @@
     setInterval(function () {
         u_ws.emit('mopidy', {
             action: 'get_current_track',
-            device: '{{ device.name }}'
+            device: '{{ device.name }}',
+            song: song,
         });
     }, 5000);
 </script>

@@ -8,6 +8,7 @@ import json
 
 import requests
 from flask_socketio import disconnect, emit
+from requests.auth import HTTPBasicAuth
 
 from home.core.models import get_device
 from home.web.utils import ws_optional_auth
@@ -22,11 +23,28 @@ UNAUTH_COMMANDS = (
     'get_time_position',
 )
 
-SPOTIFY_API = 'https://api.spotify.com/v1/{}/{}'
+SPOTIFY_API = 'https://api.spotify.com/v1/{}'
 
 
-def get_album_art(album_id, image=1):
-    return requests.get(SPOTIFY_API.format('albums', album_id)).json().get('images')[image]
+class Spotify:
+    def __init__(self, client_id, client_secret):
+        self.token = self.auth(client_id, client_secret)
+
+    def spotify_get(self, query):
+        return requests.get(SPOTIFY_API.format(query), headers={'Authorization': 'Bearer ' + self.token}).json()
+
+    def auth(self, cid, cs):
+        data = {
+            'grant_type': 'client_credentials'
+        }
+        r = requests.post('https://accounts.spotify.com/api/token',
+                         data=data,
+                         auth=HTTPBasicAuth(cid, cs))
+        return r.json().get('access_token')
+
+    def get_album_art(self, album_id, image=1):
+        r = self.spotify_get('albums/' + album_id)['images'][image]['url']
+        return r
 
 
 class Mopidy:
@@ -58,16 +76,22 @@ class Mopidy:
         )
     }
 
-    def __init__(self, host):
+    def __init__(self, host, client_id=None, client_secret=None):
         self.host = "http://" + host + ":6680/mopidy/rpc"
         self.id = 1
+        self.spotify = Spotify(client_id, client_secret)
+        self.song = None
 
     def send(self, method, **kwargs):
         msg = {"jsonrpc": "2.0", "id": self.id, 'method': method, 'params': dict(kwargs)}
         return requests.post(self.host, data=json.dumps(msg)).json()
 
     def get_current_track(self):
-        return self.send('core.playback.get_current_tl_track')['result']['track']
+        song = self.send('core.playback.get_current_tl_track')['result']['track']
+        if not self.song or not song['uri'] == self.song['uri']:
+            self.song = song
+            self.song['art'] = self.spotify.get_album_art(song['album']['uri'].split(':')[2])
+        return self.song
 
     def get_state(self):
         return self.send('core.playback.get_state')
@@ -146,5 +170,5 @@ def mopidy_ws(data, **kwargs):
             'title': track['name'],
             'artists': ', '.join(artist['name'] for artist in track['artists']),
             'album': track['album']['name'],
-            'art': get_album_art(track['album']['uri'].split(':')[2])
+            'art': track['art']
         }))

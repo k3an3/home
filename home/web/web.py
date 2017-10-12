@@ -73,7 +73,7 @@ def index():
                                qr=get_qr(),
                                widgets=widget_html,
                                )
-    return render_template('index.html')
+    return render_template('index.html', interfaces=interface_list, devices=devices)
 
 
 @app.route('/api/command', methods=['POST'])
