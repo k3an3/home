@@ -15,11 +15,11 @@ from ldap3 import Server, Connection, ALL_ATTRIBUTES
 from peewee import DoesNotExist
 from typing import List
 
-from home import settings
 from home.core.async import run
 from home.core.models import get_device, devices, actions
 from home.core.utils import random_string, method_from_name, get_groups
-from home.settings import LDAP_FILTER, LDAP_BASE_DN
+from home.settings import PUBLIC_GROUPS, BASE_URL, LDAP_BASE_DN, LDAP_FILTER, LDAP_HOST, LDAP_PORT, LDAP_SSL, \
+    LDAP_ADMIN_GID, DEBUG
 from home.web.models import APIClient, Subscriber, User
 
 try:
@@ -73,7 +73,7 @@ def api_auth_required(f):
                 client = APIClient.get(token=request.values.get('key'))
             kwargs['client'] = client
         except DoesNotExist:
-            if settings.DEBUG:
+            if DEBUG:
                 kwargs['client'] = APIClient.get()
             else:
                 abort(403)
@@ -180,14 +180,14 @@ def get_action_widgets(user: User) -> List[str]:
 
 
 def ldap_auth(username: str, password: str) -> User:
-    s = Server(host=settings.LDAP_HOST, port=settings.LDAP_PORT, use_ssl=settings.LDAP_SSL)
+    s = Server(host=LDAP_HOST, port=LDAP_PORT, use_ssl=LDAP_SSL)
     with Connection(s, user=(LDAP_FILTER.format(username) + LDAP_BASE_DN), password=password) as c:
         u = None
         from home.web.web import app
         if c.bind():
             app.logger.info("Successful bind for user " + username)
             c.search(search_base=LDAP_BASE_DN,
-                     search_filter='(uid={})'.format(username),
+                     search_filter='({})'.format(LDAP_FILTER.format(username)),
                      attributes=ALL_ATTRIBUTES)
             r = c.response[0]['attributes']
             u, created = User.get_or_create(username=username,
