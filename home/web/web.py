@@ -220,13 +220,15 @@ def user_loader(user_id):
 def login():
     username = request.form.get('username')
     password = request.form.get('password')
+    created = False
     try:
         user = User.get(username=username)
     except DoesNotExist:
         if USE_LDAP:
             user = ldap_auth(username, password)
+            created = True
     if user and not user.username == 'guest':
-        if user.check_password(password):
+        if created or user.check_password(password):
             login_user(user)
             flash('Logged in successfully.')
     if not user:
