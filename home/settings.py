@@ -13,7 +13,7 @@ PUBLIC_GROUPS = ('living_room', 'general')
 USE_LDAP = False
 LDAP_PORT = 389
 LDAP_SSL = False
-LDAP_FILTER = "uid={},"
+LDAP_FILTER = "uid={}"
 LDAP_ADMIN_GID = 0
 SPOTIFY_API_KEY = 'your_key_here'
 

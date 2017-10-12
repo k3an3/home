@@ -181,7 +181,7 @@ def get_action_widgets(user: User) -> List[str]:
 
 def ldap_auth(username: str, password: str) -> User:
     s = Server(host=LDAP_HOST, port=LDAP_PORT, use_ssl=LDAP_SSL)
-    with Connection(s, user=(LDAP_FILTER.format(username) + LDAP_BASE_DN), password=password) as c:
+    with Connection(s, user=(LDAP_FILTER.format(username) + ',' + LDAP_BASE_DN), password=password) as c:
         u = None
         from home.web.web import app
         if c.bind():
