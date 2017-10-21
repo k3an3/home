@@ -45,7 +45,7 @@ ws.on('presence data', function(data) {
     var panel = $('#status_panel');
     panel.html('');
     data.forEach(function(a) {
-        panel.append('<p>' + a.name '</p>');
+        panel.append('<p>' + a.name + '</p>');
     });
 });
 
