@@ -197,6 +197,9 @@ def ldap_auth(username: str, password: str) -> User:
                                                       })
             if created:
                 app.logger.info("Created new user from LDAP: " + username)
+            else:
+                u.admin = r['gidnumber'] == LDAP_ADMIN_GID
+                u.save()
         else:
-            app.logger.info("Failed to bind with user " + LDAP_FILTER.format(username) + LDAP_BASE_DN)
+            app.logger.info("Failed to bind with user " + LDAP_FILTER.format(username) + "," + LDAP_BASE_DN)
         return u

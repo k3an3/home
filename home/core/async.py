@@ -9,7 +9,6 @@ from multiprocessing import Process
 from time import sleep
 
 from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.schedulers.gevent import GeventScheduler
 from celery import Celery
 from celery.security import setup_security
 from celery.utils.log import get_task_logger
@@ -31,6 +30,7 @@ queue.conf.update(
 try:
     import gevent
 
+    from apscheduler.schedulers.gevent import GeventScheduler
     scheduler = GeventScheduler()
 except ImportError:
     scheduler = BackgroundScheduler()

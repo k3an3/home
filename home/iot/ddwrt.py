@@ -1,8 +1,18 @@
+import json
 import re
+from typing import List, Dict
 
 import requests
+from flask_socketio import emit
 from requests.auth import HTTPBasicAuth
 
+from home.core.models import get_device
+from home.web.utils import ws_login_required
+from home.web.web import socketio, app
+
+_ACTIVE_CLIENTS_REGEX = re.compile(
+    r"'([\w\d*-]+)','((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4]["
+    r"0-9]|25[0-5]))','(([0-9A-Fa-f]{1,2}\:){5}[0-9A-Fa-f]{1,2})','\d+',?")
 # https://github.com/home-assistant/home-assistant/blob/dev/homeassistant/components/device_tracker/ddwrt.py
 _DDWRT_DATA_REGEX = re.compile(r'\{(\w+)::([^\}]*)\}')
 _MAC_REGEX = re.compile(r'(([0-9A-Fa-f]{1,2}\:){5}[0-9A-Fa-f]{1,2})')
@@ -14,15 +24,28 @@ def _parse_ddwrt_response(data_str):
         key: val for key, val in _DDWRT_DATA_REGEX
         .findall(data_str)
     }
+
+
+def _parse_clients(data_str):
+    clients = {}
+    for client in _ACTIVE_CLIENTS_REGEX.findall(data_str):
+        clients[client[5]] = {'hostname': client[0] if not client[0] == '*' else None,
+                              'ip_addr': client[1],
+                              }
+    return clients
+
+
 # End copy
 
 
 class DDwrt:
-    def __init__(self, host: str, proto: str = 'http', port: int = 80, username: str = None, password: str = None):
+    def __init__(self, host: str, proto: str = 'http', port: int = None, username: str = None, password: str = None,
+                 users: List[Dict] = []):
         self.host = host
         self.proto = proto
-        self.port = port
+        self.port = port if port else 443 if proto == 'https' else 80
         self.auth = HTTPBasicAuth(username, password)
+        self.users = users
 
     def get(self, path):
         r = requests.get("{}://{}:{}/{}".format(
@@ -32,4 +55,29 @@ class DDwrt:
         return _parse_ddwrt_response(r.text)
 
     def get_active_clients(self):
-        return self.get('Status_Lan.live.asp').get('arp_table')
+        return _parse_clients(self.get('Status_Lan.live.asp').get('arp_table'))
+
+    def clients_to_users(self):
+        clients = self.get_active_clients()
+        users = []
+        for user in self.users:
+            client = clients.get(user['mac_addr'])
+            if client:
+                client.update(user)
+                users.append(client)
+        return users
+
+
+@socketio.on('get presence')
+@ws_login_required
+def get_presence():
+    dd = get_device('router').dev
+    users = dd.clients_to_users()
+    emit('presence data', users)
+
+
+@app.route('/api/presence')
+def get_presence_api():
+    dd = get_device('router').dev
+    users = dd.clients_to_users()
+    return json.dumps(users)

@@ -14,7 +14,7 @@ USE_LDAP = False
 LDAP_PORT = 389
 LDAP_SSL = False
 LDAP_FILTER = "uid={}"
-LDAP_ADMIN_GID = 0
+LDAP_ADMIN_GID = 10000
 SPOTIFY_API_KEY = 'your_key_here'
 
 try:

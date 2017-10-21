@@ -3,8 +3,9 @@ var ws = io.connect('//' + document.domain + ':' + location.port);
 $('#widgets').hide();
 $('#update').hide();
 nextbus();
+presence();
 setInterval(nextbus, 30000);
-setInterval(presence, 30000);
+setInterval(presence, 10000);
 $('.btn').addClass('btn-block');
 $('.btn-group').removeClass('btn-group');
 
@@ -28,7 +29,7 @@ function pad2(number) {
 ws.on('next bus data', function(data) {
     var nbd = $('#nextbusdata');
     nbd.html('');
-    data.forEach(function (a) {
+    data.forEach(function(a) {
         nbd.append('<h3>' + a[0] + '</h3>');
         a[1].forEach(function (b) {
             var d = new Date(0);
@@ -41,7 +42,11 @@ ws.on('next bus data', function(data) {
 });
 
 ws.on('presence data', function(data) {
-    alert(data);
+    var panel = $('#status_panel');
+    panel.html('');
+    data.forEach(function(a) {
+        panel.append(a.name);
+    });
 });
 
 ws.on('display refresh', function () {
