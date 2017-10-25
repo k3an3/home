@@ -50,7 +50,6 @@ class DDwrt:
         for user in users:
             if user.get('username'):
                 user['avatar'] = get_social_avatar(username=user['username'], network="facebook", size="medium")
-        print(users)
         self.users = users
 
     def get(self, path):
