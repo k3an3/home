@@ -36,6 +36,8 @@ def _parse_clients(data_str):
 
 
 # End copy
+def get_social_avatar(username: str, network: str = "facebook", size: str = ""):
+    return "https://avatars.io/{1}/{0}/{2}".format(username, network, size)
 
 
 class DDwrt:
@@ -45,6 +47,10 @@ class DDwrt:
         self.proto = proto
         self.port = port if port else 443 if proto == 'https' else 80
         self.auth = HTTPBasicAuth(username, password)
+        for user in users:
+            if user.get('username'):
+                user['avatar'] = get_social_avatar(username=user['username'], network="facebook", size="medium")
+        print(users)
         self.users = users
 
     def get(self, path):
