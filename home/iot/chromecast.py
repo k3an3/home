@@ -16,7 +16,6 @@ def get_chromecast(host: str = None, name: str = None):
     elif name:
         chromecasts = pychromecast.get_chromecasts()
         return next(cc for cc in chromecasts if cc.device.friendly_name == name)
-    sleep(0.5)
 
 
 class Chromecast:
@@ -56,6 +55,7 @@ class Chromecast:
         @wraps(f)
         def wrapped(self, *args, **kwargs):
             self.cast = get_chromecast(self.host, self.name)
+            sleep(0.2)
             return f(self, *args, **kwargs)
 
         return wrapped
