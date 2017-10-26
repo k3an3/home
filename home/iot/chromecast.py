@@ -48,42 +48,39 @@ class Chromecast:
         self.name = name
         self.port = port
         self.cec = cec
+        self.cast = get_chromecast(host, name)
 
     def get_cast(f):
         @wraps(f)
         def wrapped(self, *args, **kwargs):
-            kwargs['cast'] = get_chromecast(self.host, self.name)
+            self.cast = get_chromecast(self.host, self.name)
             return f(self, *args, **kwargs)
 
         return wrapped
 
     @get_cast
-    def test_cast(self, cast):
+    def test_cast(self):
         self.cast.media_controller.play_media(
             'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
             'video/mp4')
         self.cast.media_controller.block_until_active(20)
 
     @get_cast
-    def cast_media(self, cast, url, type='video/mp4'):
-        cast.media_controller.play_media(url, type)
-        cast.media_controller.block_until_active(20)
+    def cast_media(self, url, type='video/mp4'):
+        self.cast.media_controller.play_media(url, type)
+        self.cast.media_controller.block_until_active(20)
 
-    @get_cast
-    def get_status(self, cast):
-        return cast.media_controller.status
+    def get_status(self):
+        return self.cast.media_controller.status
 
-    @get_cast
-    def stop(self, cast):
-        cast.media_controller.stop()
+    def stop(self):
+        self.cast.media_controller.stop()
 
-    @get_cast
-    def pause(self, cast):
-        cast.media_controller.pause()
+    def pause(self):
+        self.cast.media_controller.pause()
 
-    @get_cast
-    def play(self, cast):
-        cast.media_controller.play()
+    def play(self):
+        self.cast.media_controller.play()
 
     @get_cast
     def reboot(self, cast):
@@ -93,10 +90,8 @@ class Chromecast:
     def quit(self, cast):
         cast.quit_app()
 
-    @get_cast
-    def volume_up(self, cast, delta=0.1):
-        cast.volume_up(delta)
+    def volume_up(self, delta=0.1):
+        self.cast.volume_up(delta)
 
-    @get_cast
-    def volume_down(self, cast, delta=0.1):
-        cast.volume_down(delta)
+    def volume_down(self, delta=0.1):
+        self.cast.volume_down(delta)
