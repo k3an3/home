@@ -49,7 +49,7 @@ class DDwrt:
         self.auth = HTTPBasicAuth(username, password)
         for user in users:
             if user.get('username'):
-                user['avatar'] = get_social_avatar(username=user['username'], network="facebook", size="small")
+                user['avatar'] = get_social_avatar(username=user['username'], network="facebook", size="medium")
         self.users = users
 
     def get(self, path):
