@@ -48,7 +48,11 @@ class Chromecast:
         self.name = name
         self.port = port
         self.cec = cec
-        self.cast = get_chromecast(host, name)
+        self.cast = None
+        try:
+            self.cast = get_chromecast(host, name)
+        except:
+            pass
 
     def get_cast(f):
         @wraps(f)
