@@ -5,6 +5,7 @@ chromecast.py
 Module to wrap pychromecast
 """
 from functools import wraps
+from time import sleep
 
 import pychromecast
 
@@ -15,6 +16,7 @@ def get_chromecast(host: str = None, name: str = None):
     elif name:
         chromecasts = pychromecast.get_chromecasts()
         return next(cc for cc in chromecasts if cc.device.friendly_name == name)
+    sleep(0.5)
 
 
 class Chromecast:
@@ -49,10 +51,6 @@ class Chromecast:
         self.port = port
         self.cec = cec
         self.cast = None
-        try:
-            self.cast = get_chromecast(host, name)
-        except:
-            pass
 
     def get_cast(f):
         @wraps(f)
@@ -74,28 +72,34 @@ class Chromecast:
         self.cast.media_controller.play_media(url, type)
         self.cast.media_controller.block_until_active(20)
 
+    @get_cast
     def get_status(self):
         return self.cast.media_controller.status
 
+    @get_cast
     def stop(self):
         self.cast.media_controller.stop()
 
+    @get_cast
     def pause(self):
         self.cast.media_controller.pause()
 
+    @get_cast
     def play(self):
         self.cast.media_controller.play()
 
     @get_cast
-    def reboot(self, cast):
-        cast.reboot()
+    def reboot(self):
+        self.cast.reboot()
 
     @get_cast
-    def quit(self, cast):
-        cast.quit_app()
+    def quit(self):
+        self.cast.quit_app()
 
+    @get_cast
     def volume_up(self, delta=0.1):
         self.cast.volume_up(delta)
 
+    @get_cast
     def volume_down(self, delta=0.1):
         self.cast.volume_down(delta)
