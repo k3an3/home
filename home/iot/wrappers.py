@@ -25,4 +25,4 @@ class SSH:
 
 
 def escape(command):
-    return re.sub(r'[;&|]', '', command)
+    return re.sub(r'[&|]', '', command)

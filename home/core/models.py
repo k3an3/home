@@ -111,7 +111,7 @@ class Driver(YAMLObject):
 
     def __init__(self, module: str, klass: str, name: str = None, interface: str = None, noserialize: bool = False,
                  static: bool = False):
-        self.name = name or module
+        self.name = name or klass.lower()
         self.interface = interface
         self.klass = class_from_name(module, klass)
         self.noserialize = noserialize

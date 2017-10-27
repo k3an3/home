@@ -48,10 +48,11 @@ installed_drivers:
         module: plug
         klass: Plug
     - !driver
+        # If a name is not specified, it defaults to klass.lower().
+        name: wol
         module: wol
         klass: WakeOnLAN
     - !driver
-        # If a name is not specified, it defaults to the module name.
         name: sshfirewall
         module: firewall
         klass: SSHFirewall
