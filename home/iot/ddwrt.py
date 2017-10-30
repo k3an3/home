@@ -10,12 +10,10 @@ from home.core.models import get_device
 from home.web.utils import ws_login_required
 from home.web.web import socketio, app
 
-_ACTIVE_CLIENTS_REGEX = re.compile(
-    r"'([\w\d*-]+)','((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4]["
-    r"0-9]|25[0-5]))','(([0-9A-Fa-f]{1,2}\:){5}[0-9A-Fa-f]{1,2})','\d+',?")
+_ACTIVE_CLIENTS_REGEX = re.compile(r"(([0-9A-Fa-f]{1,2}:){5}[0-9A-Fa-f]{1,2})','[\w\d.]+','[\d:]+',('[\d\w-]+',?){7}")
 # https://github.com/home-assistant/home-assistant/blob/dev/homeassistant/components/device_tracker/ddwrt.py
-_DDWRT_DATA_REGEX = re.compile(r'\{(\w+)::([^\}]*)\}')
-_MAC_REGEX = re.compile(r'(([0-9A-Fa-f]{1,2}\:){5}[0-9A-Fa-f]{1,2})')
+_DDWRT_DATA_REGEX = re.compile(r'{(\w+)::([^\}]*)\}')
+_MAC_REGEX = re.compile(r'(([0-9A-Fa-f]{1,2}:){5}[0-9A-Fa-f]{1,2})')
 
 
 def _parse_ddwrt_response(data_str):
@@ -29,9 +27,7 @@ def _parse_ddwrt_response(data_str):
 def _parse_clients(data_str):
     clients = {}
     for client in _ACTIVE_CLIENTS_REGEX.findall(data_str):
-        clients[client[5]] = {'hostname': client[0] if not client[0] == '*' else None,
-                              'ip_addr': client[1],
-                              }
+        clients[client[0]] = {'mac_addr': client[0]}
     return clients
 
 
@@ -60,7 +56,7 @@ class DDwrt:
         return _parse_ddwrt_response(r.text)
 
     def get_active_clients(self):
-        return _parse_clients(self.get('Status_Lan.live.asp').get('arp_table'))
+        return _parse_clients(self.get('Status_Wireless.live.asp').get('active_wireless'))
 
     def clients_to_users(self):
         clients = self.get_active_clients()
