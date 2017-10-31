@@ -2,7 +2,6 @@
  * Created by keane on 2/26/17.
  */
 function mouseOverColor(hex) {
-    console.log(target);
     ws.emit('change color', {color: hex, bright: bright, device: target});
     $("#preview").css('background-color', hex);
     $("#preview").css('visibility', 'visible');
@@ -35,7 +34,6 @@ function changeState() {
 }
 
 ws.on('push color', function (data) {
-    console.log(data.device == target);
     if (data.device == target) {
         $("#preview" + target).css('background-color', data.color);
         $("#preview" + target).css('visibility', 'visible');

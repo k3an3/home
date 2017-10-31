@@ -42,7 +42,7 @@ class Device(YAMLObject):
     """
     yaml_tag = '!device'
 
-    def __init__(self, name: str, driver: str = None, config: Dict = None, group: str = None):
+    def __init__(self, name: str, driver: str = None, config: Dict = None, group: str = None, widget: bool = True):
         self.name = name
         self.driver = driver
         self.group = group
@@ -51,7 +51,7 @@ class Device(YAMLObject):
         self.dev = None
         self.last = deque(maxlen=DEVICE_HISTORY)
         self.last_task = None
-        self.widget = None
+        self.widget = widget
 
     def setup(self) -> None:
         """
@@ -72,11 +72,12 @@ class Device(YAMLObject):
                 self.dev = dev(**config_d)
             except Exception as e:
                 raise DeviceSetupError("Failed to configure device '" + self.name + "'")
-            try:
-                self.build_widget(self.dev.widget)
-                widgets.update(self.widget['mapping'])
-            except AttributeError:
-                pass
+            if self.widget:
+                try:
+                    self.build_widget(self.dev.widget)
+                    widgets.update(self.widget['mapping'])
+                except AttributeError:
+                    pass
 
     def build_widget(self, config: Dict) -> str:
         mapping = {}
@@ -106,10 +107,10 @@ class Device(YAMLObject):
 class MultiDevice(YAMLObject):
     yaml_tag = '!multidevice'
 
-    def __init__(self, name: str, devices: List):
+    def __init__(self, name: str, devices: List, widget: bool = True):
         self.name = name
         self.devices = devices
-        self.widget = None
+        self.widget = widget
         self.group = None
 
     def __getattr__(self, name):
@@ -129,13 +130,15 @@ class MultiDevice(YAMLObject):
 
     def setup(self):
         for device in self.devices:
+            device.widget = self.widget
             device.setup()
-        self.widget = self.devices[0].widget
-        for key in self.widget['mapping']:
-            _map = self.widget['mapping'][key]
-            self.widget['mapping'][key] = (_map[0], method_from_name(self, _map[1].__name__), _map[2], self)
-        widgets.update(self.widget['mapping'])
-        self.widget['html'] = self.widget['html'].replace(self.devices[0].name, self.name)
+        if self.widget:
+            self.widget = self.devices[0].widget
+            for key in self.widget['mapping']:
+                _map = self.widget['mapping'][key]
+                self.widget['mapping'][key] = (_map[0], method_from_name(self, _map[1].__name__), _map[2], self)
+            widgets.update(self.widget['mapping'])
+            self.widget['html'] = self.widget['html'].replace(self.devices[0].name, self.name)
 
 
 class Driver(YAMLObject):
