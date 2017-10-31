@@ -103,6 +103,41 @@ class Device(YAMLObject):
         self.widget = {'html': html, 'mapping': mapping}
 
 
+class MultiDevice(YAMLObject):
+    yaml_tag = '!multidevice'
+
+    def __init__(self, name: str, devices: List):
+        self.name = name
+        self.devices = devices
+        self.widget = None
+        self.group = None
+
+    def __getattr__(self, name):
+        if name == 'driver':
+            return self.devices[0].driver
+        elif name == 'widget':
+            return self.widget
+        elif name == 'dev':
+            return self
+
+        def method(*args, **kwargs):
+            for device in self.devices:
+                method = method_from_name(device.dev, name)
+                method(*args, **kwargs)
+
+        return method
+
+    def setup(self):
+        for device in self.devices:
+            device.setup()
+        self.widget = self.devices[0].widget
+        for key in self.widget['mapping']:
+            _map = self.widget['mapping'][key]
+            self.widget['mapping'][key] = (_map[0], method_from_name(self, _map[1].__name__), _map[2], self)
+        widgets.update(self.widget['mapping'])
+        self.widget['html'] = self.widget['html'].replace(self.devices[0].name, self.name)
+
+
 class Driver(YAMLObject):
     """
     Represents the driver for a type of device.
@@ -210,6 +245,7 @@ class Interface(YAMLObject):
 
 # Set up YAML object instantiation
 yaml.add_path_resolver('!device', ['Device'], dict)
+yaml.add_path_resolver('!multidevice', ['MultiDevice'], dict)
 yaml.add_path_resolver('!action', ['ActionGroup'], dict)
 yaml.add_path_resolver('!interface', ['Interface'], dict)
 

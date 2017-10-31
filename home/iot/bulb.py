@@ -229,7 +229,7 @@ def request_change_color(message):
     """
     emit('push color', {"device": message['device'], "color": message['color']},
          broadcast=True)
-    device = get_device(message['device'])
+    device = get_device(message['device'].replace('-', ' '))
     device.dev.change_color(*utils.RGBfromhex(message['color']),
                             utils.num(message.get('white', 0)), message.get('bright', 100), '41'
                             )

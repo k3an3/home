@@ -39,7 +39,7 @@
                             <li class="dropdown">
                                 {% if devices|length <= 1 %}
                                     {% for device in devices %}
-                                        <li><a href="#{{ device.name }}">{{ interface.friendly_name }}</a></li>
+                                        <li><a href="#{{ device.name | slugify }}">{{ interface.friendly_name }}</a></li>
                                     {% endfor %}
                                 {% else %}
                                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
@@ -47,7 +47,7 @@
                                             class="caret"></span></a>
                                     <ul class="dropdown-menu">
                                         {% for device in devices %}
-                                            <li><a href="#{{ device.name }}">{{ device.name }}</a></li>
+                                            <li><a href="#{{ device.name | slugify }}">{{ device.name }}</a></li>
                                         {% endfor %}
                                     </ul>
                                 {% endif %}
@@ -109,7 +109,7 @@
         </div>
         {% for device in devices %}
             {% if current_user.is_authenticated or device.driver.interface.public %}
-                <div id="{{ device.name }}" class="tab-pane fade in" style="text-align: center;">
+                <div id="{{ device.name | slugify }}" class="tab-pane fade in" style="text-align: center;">
                     {% if device.driver and device.driver.interface.template %}
                         {% include device.driver.interface.template %}
                     {% endif %}

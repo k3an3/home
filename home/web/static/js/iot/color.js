@@ -2,6 +2,7 @@
  * Created by keane on 2/26/17.
  */
 function mouseOverColor(hex) {
+    console.log(target);
     ws.emit('change color', {color: hex, bright: bright, device: target});
     $("#preview").css('background-color', hex);
     $("#preview").css('visibility', 'visible');

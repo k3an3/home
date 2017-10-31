@@ -319,3 +319,8 @@ def widget(data):
             target[1].run()
     else:
         disconnect()
+
+
+@app.template_filter('slugify')
+def slugify(text: str):
+    return text.replace(' ', '-')
