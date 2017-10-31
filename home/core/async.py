@@ -14,6 +14,8 @@ from celery.security import setup_security
 from celery.utils.log import get_task_logger
 from typing import Callable
 
+from home.settings import ASYNC_MODE
+
 setup_security(allowed_serializers=['pickle', 'json'],
                serializer='pickle')
 
@@ -31,6 +33,7 @@ try:
     import gevent
 
     from apscheduler.schedulers.gevent import GeventScheduler
+
     scheduler = GeventScheduler()
 except ImportError:
     scheduler = BackgroundScheduler()
@@ -50,11 +53,14 @@ def _run(method, **kwargs) -> None:
     method(**kwargs)
 
 
-def run(method, delay=0, **kwargs):
-    return _run.apply_async(args=[method], kwargs=kwargs, countdown=float(delay))
+def run(method: Callable, delay: float = 0, **kwargs):
+    if ASYNC_MODE == 'celery':
+        return _run.apply_async(args=[method], kwargs=kwargs, countdown=float(delay))
+    else:
+        return multiprocessing_run(method, delay, **kwargs)
 
 
-def multiprocessing_run(target: Callable, delay: float = 0, kwargs: dict = {}):
+def multiprocessing_run(target: Callable, delay: float = 0, **kwargs):
     if delay:
         sleep(delay)
     Process(target=target, kwargs=kwargs).start()

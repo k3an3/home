@@ -13,7 +13,7 @@ import yaml
 # Arrays to store object instances
 from typing import Iterator, Dict, List, Callable
 
-from home.core.async import run as queue_run, scheduler, multiprocessing_run
+from home.core.async import scheduler, multiprocessing_run, run
 from home.core.utils import class_from_name, method_from_name, random_string
 from home.settings import TEMPLATE_DIR, DEVICE_HISTORY
 
@@ -230,7 +230,7 @@ class Action(YAMLObject):
         if self.jitter and jitter:
             sleep(self.jitter)
         for device, method, delay, kwargs in self.prerun():
-            device.last_task = queue_run(method, delay=delay, **kwargs)
+            device.last_task = run(method, delay=delay, **kwargs)
 
 
 class Interface(YAMLObject):
