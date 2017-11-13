@@ -116,6 +116,8 @@ class MultiDevice(YAMLObject):
     def __getattr__(self, name):
         if name == 'driver':
             return self.devices[0].driver
+        elif name == 'driver.noserialize':
+            return True
         elif name == 'widget':
             return self.widget
         elif name == 'dev':

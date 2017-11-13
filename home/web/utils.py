@@ -16,7 +16,7 @@ from peewee import DoesNotExist
 from typing import List
 
 from home.core.async import run
-from home.core.models import get_device, devices, actions
+from home.core.models import get_device, devices, actions, MultiDevice
 from home.core.utils import random_string, method_from_name, get_groups
 from home.settings import PUBLIC_GROUPS, BASE_URL, LDAP_BASE_DN, LDAP_FILTER, LDAP_HOST, LDAP_PORT, LDAP_SSL, \
     LDAP_ADMIN_GID, DEBUG
@@ -129,7 +129,7 @@ def handle_task(post: dict, client: APIClient) -> None:
     from home.web.web import app
     app.logger.info(
         "({}) Execute {} on {} with config {}".format(client.name, method.__name__, device.name, kwargs))
-    if device.driver.noserialize:
+    if device.driver.noserialize or type(device) is MultiDevice:
         method(**kwargs)
     else:
         device.last_task = run(method, **kwargs)
