@@ -1,4 +1,8 @@
 # Changelog
+## v0.11
+* Multi-devices: a single device object acts as abstraction to multiple devices
+* DDwrt Wi-Fi based presence detection
+* Fix broken Chromecast controls
 ## v0.10
 * Chainable actions
 * Python package
