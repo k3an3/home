@@ -221,7 +221,7 @@ class Action(YAMLObject):
                 device.last_kwargs = kwargs
             print("Execute action", config['method'])
             if device.driver.noserialize or type(device) is MultiDevice:
-                multiprocessing_run(target=method, delay=config.get('delay', 0), kwargs=kwargs)
+                multiprocessing_run(target=method, delay=config.get('delay', 0), **kwargs)
                 continue
             try:
                 yield device, method, config.get('delay', 0), kwargs
