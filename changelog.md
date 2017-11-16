@@ -3,6 +3,7 @@
 * Multi-devices: a single device object acts as abstraction to multiple devices
 * DDwrt Wi-Fi based presence detection
 * Fix broken Chromecast controls
+
 ## v0.10
 * Chainable actions
 * Python package
@@ -24,6 +25,7 @@
 * Guest authentication via QR code
 * Added mail, payments, Android MDM (WIP) modules
 * Misc. fixes and improvements
+
 ## v0.9
 * Task management with Celery or Multiprocessing
 * Scheduled tasks with APScheduler
@@ -36,6 +38,7 @@
 * Separate local YAML config
 * Auto-update on code push
 * Misc. fixes and improvements
+
 ## v0.8
 * Major overhaul
 * Support for Broadlink
@@ -43,6 +46,7 @@
 * Basic admin interface
 * API to trigger actions or device functions
 * Browser push notifications
+
 ## v0.1
 * Basic UI
 * Websocket communication
