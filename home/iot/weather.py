@@ -141,6 +141,7 @@ def motd(**kwargs):
         abort(404)
     if not speech.driver.klass == Speech:
         raise NotImplementedError
+    speech = speech.dev
     weather = speech.weather.get(latlon=request.values.get('loc').split(','))
     forecast = speech.weather.get(latlon=request.values.get('loc').split(','), mode='forecast')
     return format_weather(weather, forecast, speech)
