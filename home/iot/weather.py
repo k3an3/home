@@ -88,6 +88,7 @@ class Forecast:
         self.temp = data['main']['temp']
         self.description = data['weather'][0]['description']
         self.wind = data['wind']['speed']
+        self.name = data['name']
 
     def windy(self) -> bool:
         return self.wind > 20
@@ -125,7 +126,7 @@ def format_weather(weather: Forecast, forecast: Forecast, speech: Speech) -> str
     return message.format(part_of_day(dt), speech.name,
                           calendar.day_name[dt.weekday()],
                           calendar.month_name[dt.month],
-                          dt.day, round(weather.temp),
+                          dt.day, weather.name, round(weather.temp),
                           weather.description,
                           round(forecast.temp),
                           forecast.description,

@@ -1,6 +1,6 @@
 from home.core.models import get_device
 
-message = "Good {}, {}. Today is {}, {} {}. The weather outside is currently {} degrees and {}. Later, " \
+message = "Good {}, {}. Today is {}, {} {}. The weather in {} is currently {} degrees and {}. Later, " \
           "it will be {} degrees and {}. {}"
 
 
