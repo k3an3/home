@@ -60,7 +60,10 @@ STORMY_SAYINGS = (
 
 
 class Weather:
-    def __init__(self, api_key, city_id=None, zip=None, latlon=None, name=None):
+    def __init__(self, api_key):
+        self.api_key = api_key
+
+    def get(self, city_id=None, zip=None, latlon=None, name=None, mode='weather'):
         if not city_id or zip or latlon or name:
             raise Exception("Must specify one of city id, zip code, latlon, or name.")
         if city_id:
@@ -71,10 +74,8 @@ class Weather:
             loc = "lat={0[0]}&lon={0[1]}".format(latlon)
         elif name:
             loc = "q=" + name
-        self.uri = '?{}&APPID={}&units=imperial'.format(loc, api_key)
-
-    def get(self, mode='weather'):
-        r = requests.get(BASE_URL + mode + self.uri)
+        uri = '?{}&APPID={}&units=imperial'.format(loc, self.api_key)
+        r = requests.get(BASE_URL + mode + uri)
         if not r.status_code == 200 or not 'json' in r.headers['content-type']:
             raise Exception("Invalid response from OpenWeatherMap")
         return Forecast(r.json())
@@ -107,9 +108,7 @@ def get_quote() -> str:
         return r.json()['contents']['quotes'][0]['quote']
 
 
-def format_weather(speech: Speech) -> str:
-    weather = speech.weather.get()
-    forecast = speech.weather.get('forecast')
+def format_weather(weather: Forecast, forecast: Forecast, speech: Speech) -> str:
     dt = datetime.datetime.now()
     extra = []
     if weather.windy() or forecast.windy():
@@ -142,4 +141,6 @@ def motd(**kwargs):
         abort(404)
     if not speech.driver.klass == Speech:
         raise NotImplementedError
-    return format_weather(speech.dev)
+    weather = speech.weather.get(latlon=request.values.get('loc').split(','))
+    forecast = speech.weather.get(latlon=request.values.get('loc').split(','), mode='forecast')
+    return format_weather(weather, forecast, speech)
