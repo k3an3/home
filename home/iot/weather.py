@@ -64,8 +64,6 @@ class Weather:
         self.api_key = api_key
 
     def get(self, city_id=None, zip=None, latlon=None, name=None, mode='weather'):
-        if not city_id or zip or latlon or name:
-            raise Exception("Must specify one of city id, zip code, latlon, or name.")
         if city_id:
             loc = "id=" + str(city_id)
         elif zip:
@@ -88,7 +86,7 @@ class Forecast:
         self.temp = data['main']['temp']
         self.description = data['weather'][0]['description']
         self.wind = data['wind']['speed']
-        self.name = data['name']
+        self.name = data.get('name')
 
     def windy(self) -> bool:
         return self.wind > 20
