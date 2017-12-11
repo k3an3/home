@@ -140,8 +140,9 @@ class Bulb:
         }
     }
 
-    def __init__(self, host):
+    def __init__(self, host: str, sunset_minutes: int = 0):
         self.host = host
+        self.sunset_minutes = sunset_minutes
 
     def auth(self) -> None:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -188,6 +189,17 @@ class Bulb:
 
     def sunlight(self) -> None:
         self.change_color(**calc_sunlight())
+
+    def auto_on(self):
+        a = Astral()
+        a.solar_depression = 'civil'
+        city = a[settings.LOCATION]
+        sun = city.sun(date=datetime.now(), local=True)
+        dt = datetime.now(sun['sunset'].tzinfo)
+        if (dt - sun['sunset']).total_seconds() / 60 >= self.sunset_minutes:
+            print('lol')
+            return
+            self.sunlight()
 
     def fade(self, start: Dict = None, stop: Dict = None, bright: int = None, speed: int = 1) -> None:
         speed = abs(speed)
