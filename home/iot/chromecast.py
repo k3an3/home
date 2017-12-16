@@ -9,6 +9,8 @@ from time import sleep
 
 import pychromecast
 
+from home import settings
+
 
 def get_chromecast(host: str = None, name: str = None):
     if host:
@@ -43,6 +45,23 @@ class Chromecast:
             }
         )
     }
+    actions = (
+        {
+            'name': 'tv on',
+            'devices': (
+                {
+                    'method': 'cast_media',
+                    'config': {
+                        'url': settings.MEDIA_TEST_URI
+                    }
+                },
+                {
+                    'delay': 5,
+                    'method': 'quit'
+                }
+            )
+        },
+    )
 
     def __init__(self, host=None, name=None, port=8009, cec=None):
         self.host = host

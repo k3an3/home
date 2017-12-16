@@ -78,6 +78,16 @@ class Device(YAMLObject):
                     widgets.update(self.widget['mapping'])
                 except AttributeError:
                     pass
+            try:
+                for action in self.dev.actions:
+                    for d in action['devices']:
+                        d['name'] = self.name
+                    a = Action(name=action['name'], devices=action['devices'])
+                    a.setup()
+                    a.group = self.group
+                    actions.append(a)
+            except AttributeError:
+                pass
 
     def build_widget(self, config: Dict) -> str:
         mapping = {}

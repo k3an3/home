@@ -9,7 +9,7 @@ from pywebpush import WebPusher
 from typing import List, Dict
 
 from home.core.utils import random_string
-from home.settings import GOOGLE_API_KEY
+from home.settings import GOOGLE_API_KEY, USE_LDAP
 
 if True:
     db = SqliteDatabase('app.db')
@@ -66,7 +66,7 @@ class User(BaseModel):
         return False
 
     def check_password(self, password: str) -> bool:
-        if self.ldap:
+        if self.ldap and USE_LDAP:
             from home.web.utils import ldap_auth
             return ldap_auth(self.username, password)
         return sha256_crypt.verify(password, self.password)

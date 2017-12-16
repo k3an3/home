@@ -17,6 +17,7 @@ LDAP_FILTER = "uid={}"
 LDAP_ADMIN_GID = 10000
 SPOTIFY_API_KEY = 'your_key_here'
 ASYNC_MODE = 'multiprocessing'
+MEDIA_TEST_URI = '/test.mp4'
 
 try:
     from home.settings_local import *
