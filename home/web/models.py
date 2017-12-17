@@ -1,6 +1,8 @@
 import json
 
 import datetime
+
+from flask_login import UserMixin
 from passlib.hash import sha256_crypt
 from peewee import SqliteDatabase, MySQLDatabase, CharField, BooleanField, ForeignKeyField, IntegerField, \
     DateTimeField, \
@@ -45,7 +47,7 @@ class BaseModel(Model):
         database = db
 
 
-class User(BaseModel):
+class User(BaseModel, UserMixin):
     username = CharField(unique=True)
     authenticated = BooleanField(default=False)
     password = CharField()
@@ -53,17 +55,8 @@ class User(BaseModel):
     _groups = CharField(default='')
     ldap = BooleanField(default=False)
 
-    def is_active(self) -> bool:
-        return True
-
     def get_id(self) -> str:
         return self.username
-
-    def is_authenticated(self) -> bool:
-        return self.authenticated
-
-    def is_anonymous(self) -> bool:
-        return False
 
     def check_password(self, password: str) -> bool:
         if self.ldap and USE_LDAP:

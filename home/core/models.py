@@ -22,6 +22,7 @@ devices = []
 interfaces = []
 actions = []
 widgets = {}
+displays = []
 
 
 class YAMLObject(yaml.YAMLObject):
@@ -258,11 +259,32 @@ class Interface(YAMLObject):
         self.public = public
 
 
+class Display(YAMLObject):
+    """
+    Represents a display panel, perhaps wall mounted, that always displays a dashboard.
+    """
+    yaml_tag = '!display'
+
+    def __init__(self, name: str, widgets: List[Dict], controls: bool = True):
+        self.name = name
+        self.widgets = widgets
+        self.controls = controls
+
+    def render(self) -> str:
+        html = []
+        for w in self.widgets:
+            dev = get_device(w['device'])
+            config = w.get('config', {})
+            html.append(dev.dev.render_widget(**config))
+        return html
+
+
 # Set up YAML object instantiation
 yaml.add_path_resolver('!device', ['Device'], dict)
 yaml.add_path_resolver('!multidevice', ['MultiDevice'], dict)
 yaml.add_path_resolver('!action', ['ActionGroup'], dict)
 yaml.add_path_resolver('!interface', ['Interface'], dict)
+yaml.add_path_resolver('!display', ['Display'], dict)
 
 
 def add_scheduled_job(job: Dict):
@@ -276,6 +298,13 @@ def add_scheduled_job(job: Dict):
         scheduler.add_job(method, trigger=job.pop('trigger', 'cron'), kwargs=job.pop('config', {}), **job)
 
 
+def get(name: str, search: List):
+    try:
+        return next(_ for _ in search if _.name == name)
+    except StopIteration:
+        raise StopIteration("Couldn't find " + name + " in " + str(search))
+
+
 def get_device_by_key(key: str) -> Device:
     return next(device for device in devices if device.key == key)
 
@@ -285,7 +314,7 @@ def get_device_by_uuid(uuid: str) -> Device:
 
 
 def get_device(name: str) -> Device:
-    return next(device for device in devices if device.name == name)
+    return get(name, devices)
 
 
 def get_devices_by_group(group_name: str) -> Iterator[Device]:
@@ -293,15 +322,19 @@ def get_devices_by_group(group_name: str) -> Iterator[Device]:
 
 
 def get_action(action_name: str) -> Action:
-    return next(action for action in actions if action.name == action_name)
+    return get(action_name, actions)
 
 
 def get_driver(driver_name: str) -> Driver:
-    return next(driver for driver in drivers if driver.name == driver_name)
+    return get(driver_name, drivers)
 
 
 def get_interface(interface_name: str) -> Interface:
-    return next(interface for interface in interfaces if interface.name == interface_name)
+    return get(interface_name, interfaces)
+
+
+def get_display(display_name: str) -> Display:
+    return get(display_name, displays)
 
 
 def subscribe_to_action(action_name: str, callback: Callable, *args, **kwargs):

@@ -32,6 +32,10 @@ class NextBus:
         self.data_time = datetime.datetime.now()
         self.data = upcoming
 
+    def render_widget(self):
+        return '<img src="https://www.stugov.iastate.edu/assets/images/logo.png" height="100"/><h1>Next Bus</h1><div' \
+               ' id="nextbusdata"></div>'
+
 
 @socketio.on('next bus')
 @ws_login_required

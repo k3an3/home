@@ -78,6 +78,14 @@ class Weather:
             raise Exception("Invalid response from OpenWeatherMap")
         return Forecast(r.json())
 
+    def render_widget(self, lat, lon):
+        return '<iframe src="https://weatherfor.us/widget?" scrolling="no" frameborder="0" allowtransparency="true" ' \
+               'style="background: transparent; width: 720px; height: 250px; overflow: hidden;"></iframe> <img ' \
+               'src="https://radblast.wunderground.com/cgi-bin/radar/WUNIDS_map?station=DMX&brand=wui&num=6&delay=15' \
+               '&type=N0R&frame=0&scale=1.000&noclutter=0&showstorms=0&mapx=400&mapy=240&centerx=400&centery=240' \
+               '&transx=0&transy=0&showlabels=1&severe=0&rainsnow=0&lightning=0&smooth=0&rand=25060044&lat={}' \
+               '&lon={}">'.format(lat, lon)
+
 
 class Forecast:
     def __init__(self, data: dict):

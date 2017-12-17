@@ -4,6 +4,8 @@
 * DDwrt Wi-Fi based presence detection
 * Fix broken Chromecast controls (partially)
 * Allow driver modules to define actions in a class attribute
+* LDAP login logic fixes
+* Multiple, configurable display panels with ACLs
 
 ## v0.10
 * Chainable actions

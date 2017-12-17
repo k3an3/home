@@ -8,7 +8,7 @@ Parses YAML configuration files.
 import yaml
 
 from home.core.models import drivers, devices, actions, interfaces, add_scheduled_job, widgets, get_action, \
-    WidgetSetupError
+    WidgetSetupError, displays
 from home.core.utils import clear_scheduled_jobs
 
 
@@ -48,6 +48,11 @@ def parse(file='config.yml', data=None):
                     actions.append(action)
                     action.setup()
                     print(action.devices)
+        if y.get('displays'):
+            for group in y['displays']:
+                for display in y['displays'][group]:
+                   display.group = group
+                   displays.append(display)
         # During device setup, couldn't pair widget buttons to actions since they didn't exist yet. Here, we match up
         #  the actions and save the actual action object in the widget dict
         for w in widgets:

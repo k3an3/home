@@ -14,7 +14,7 @@ from webassets.loaders import PythonLoader as PythonAssetsLoader
 
 import home.core.parser as parser
 import home.core.utils as utils
-from home.core.models import devices, interfaces, get_action, actions, get_interface, get_driver, widgets
+from home.core.models import devices, interfaces, get_action, actions, get_interface, get_driver, widgets, get_display
 from home.settings import SECRET_KEY, DEBUG, LOG_FILE, PUBLIC_GROUPS, USE_LDAP
 from home.web.models import *
 from home.web.models import User, APIClient
@@ -284,13 +284,17 @@ def test_push(**kwargs):
     return '', 204
 
 
-@app.route("/display")
+@app.route("/display/<disp>")
 @login_required
-def display():
-    widget_html = get_widgets(current_user) + get_action_widgets(current_user)
-    return render_template('display.html',
-                           widgets=widget_html
-                           )
+def display(disp):
+    disp = get_display(disp)
+    if disp.group in current_user.groups or disp.group in PUBLIC_GROUPS:
+        dashboard = disp.render()
+        widget_html = get_widgets(current_user) + get_action_widgets(current_user)
+        return render_template('display.html',
+                               dashboard=dashboard,
+                               widgets=widget_html
+                               )
 
 
 @app.route("/display/<path:path>")

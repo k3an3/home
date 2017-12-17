@@ -12,26 +12,11 @@
 <div class="container-fluid">
     <p id="note"><strong>Tap to Switch</strong></p>
     <div id="dashboard">
+        {% for d in dashboard %}
         <div class="row">
-            <div id="nextbus" class="col-md-4">
-                <img src="https://www.stugov.iastate.edu/assets/images/logo.png" height="100"/>
-                <h1>Next Bus</h1>
-                <div id="nextbusdata">
-                </div>
-                <h4>Who is here</h4>
-                <div id="status_panel">
-                </div>
-            </div>
-            <div id="weather" class="col-sm-4">
-                <iframe src="https://weatherfor.us/widget?" scrolling="no" frameborder="0" allowtransparency="true"
-                        style="background: transparent; width: 720px; height: 250px; overflow: hidden;"></iframe>
-                <img src="https://radblast.wunderground.com/cgi-bin/radar/WUNIDS_map?station=DMX&brand=wui&num=6&delay=15&type=N0R&frame=0&scale=1.000&noclutter=0&showstorms=0&mapx=400&mapy=240&centerx=400&centery=240&transx=0&transy=0&showlabels=1&severe=0&rainsnow=0&lightning=0&smooth=0&rand=25060044&lat=42.02999878&lon=-93.62000275&label=Ames%2C+IA">
-            </div>
+            {{ d|safe }}
         </div>
-        <div class="row">
-            <div class="col-md-6">
-            </div>
-        </div>
+        {% endfor %}
     </div>
     <div id="widgets">
             {% for widget in widgets %}
