@@ -58,10 +58,13 @@ $('#logout').click(function () {
 });
 
 ws.on('message', function (data) {
-    $('#messages').html(data);
+    $('#messages').html(data.content);
     $("#messages").css('visibility', 'visible');
-    $('#messages').fadeIn();
-    alert("Please refresh to update devices.")
+    $('#messages').addClass(data.class);
+    $('#message').fadeIn();
+    setTimeout(function () {
+        $('#messages').fadeOut();
+    }, 5000);
 });
 
 ws.on('event', function (data) {
@@ -133,6 +136,22 @@ ws.on('state change', function (data) {
     $('.jumbotron').css('color', color);
     if (data.message != "")
         $('#warning').html(data.message);
+});
+
+$('#saveconfig').hide();
+$('#editconfig').click(function() {
+    $('#config').removeAttr('readonly');
+    $(this).hide();
+    $('#saveconfig').show();
+});
+
+$('#saveconfig').click(function() {
+    ws.emit('admin',
+        {
+            command: 'update config',
+            config: $('#config').html()
+        }
+    );
 });
 
 $(".widget").click(function () {

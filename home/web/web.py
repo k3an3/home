@@ -58,8 +58,11 @@ def index():
         interface_list.append((i, [d for d in devices if d.driver and d.driver.interface == i]))
     if current_user.is_active:
         widget_html = get_widgets(current_user) + get_action_widgets(current_user)
-        with open(LOG_FILE) as f:
-            logs = f.read()
+        if current_user.admin:
+            with open(LOG_FILE) as f:
+                logs = f.read()
+            with open('config.yml') as f:
+                config = f.read()
         return render_template('index.html',
                                interfaces=interface_list,
                                devices=devices,
@@ -72,6 +75,7 @@ def index():
                                debug=DEBUG,
                                qr=get_qr(),
                                widgets=widget_html,
+                               config=config
                                )
     return render_template('index.html', interfaces=interface_list, devices=devices)
 
@@ -126,6 +130,17 @@ def ws_admin(data):
         client.delete_instance()
     elif command == 'refresh_display':
         emit('display refresh', broadcast=True)
+    elif command == 'update config':
+        try:
+            parser.parse(data=data['config'])
+        except Exception as e:
+            emit('message', {'class': 'alert-danger',
+                             'content': 'Error parsing device config: ' + str(e)})
+        else:
+            with open('config.yml', 'w') as f:
+                f.write(data['config'])
+            emit('message', {'class': 'alert-success',
+                             'content': 'Successfully updated device config.'})
 
 
 @socketio.on('subscribe')

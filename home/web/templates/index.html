@@ -84,8 +84,8 @@
                 </span>
             </div>
         {% else %}
-            <div style="text-align: center;" hidden>
-                <span id="messages" class="alert alert-warning">
+            <div style="text-align: center;">
+                <span id="messages" class="alert">
                 </span>
             </div>
         {% endif %}
@@ -139,6 +139,12 @@
         {% if current_user.is_authenticated %}
             <div id="settings" class="tab-pane fade in">
             <div class="col-md-6">
+                <h3>Config</h3>
+                <textarea id="config" class="form-control" readonly>{{ config }}</textarea>
+            <br>
+                <button class="btn btn-danger" id="editconfig">Edit</button>
+                <button class="btn btn-success" id="saveconfig">Save</button>
+            <br><br>
                 <div class="panel panel-primary">
                     <div class="panel-heading">
                         <h3 class="panel-title">Devices</h3>
