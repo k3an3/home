@@ -134,6 +134,7 @@ def ws_admin(data):
         try:
             parser.parse(data=data['config'])
         except Exception as e:
+            parser.parse(file='config.yml')
             emit('message', {'class': 'alert-danger',
                              'content': 'Error parsing device configuration. ' + str(e)})
         else:
