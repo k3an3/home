@@ -12,7 +12,7 @@ from home.core.models import drivers, devices, actions, interfaces, add_schedule
 from home.core.utils import clear_scheduled_jobs
 
 
-def parse(file='config.yml', data=None):
+def parse(file: str = None, data: str = None):
     """
     Load device config from a YAML file or blob.
     :param file: File to parse

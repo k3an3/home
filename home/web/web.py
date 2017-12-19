@@ -135,12 +135,12 @@ def ws_admin(data):
             parser.parse(data=data['config'])
         except Exception as e:
             emit('message', {'class': 'alert-danger',
-                             'content': 'Error parsing device config: ' + str(e)})
+                             'content': 'Error parsing device configuration. ' + str(e)})
         else:
             with open('config.yml', 'w') as f:
                 f.write(data['config'])
             emit('message', {'class': 'alert-success',
-                             'content': 'Successfully updated device config.'})
+                             'content': 'Successfully updated device configuration.'})
 
 
 @socketio.on('subscribe')

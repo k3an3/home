@@ -61,7 +61,7 @@ ws.on('message', function (data) {
     $('#messages').html(data.content);
     $("#messages").css('visibility', 'visible');
     $('#messages').addClass(data.class);
-    $('#message').fadeIn();
+    $('#messages').fadeIn();
     setTimeout(function () {
         $('#messages').fadeOut();
     }, 5000);
@@ -149,7 +149,7 @@ $('#saveconfig').click(function() {
     ws.emit('admin',
         {
             command: 'update config',
-            config: $('#config').html()
+            config: $('#config').val()
         }
     );
 });
