@@ -143,6 +143,7 @@ class Bulb:
     def __init__(self, host: str, sunset_minutes: int = 0):
         self.host = host
         self.sunset_minutes = sunset_minutes
+        self.state = {}
 
     def auth(self) -> None:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -164,10 +165,10 @@ class Bulb:
             data = bytearray.fromhex(mode + function + speed + TAIL)
         else:
             red, green, blue, white, brightness = num(red, green, blue, white, brightness)
-            red = num(red * brightness / 255)
-            green = num(green * brightness / 255)
-            blue = num(blue * brightness / 255)
-            white = num(white * brightness / 255)
+            red = red * brightness // 255
+            green = green * brightness // 255
+            blue = blue * brightness // 255
+            white = white * brightness // 255
             color_hex = (prepare_hex(red) + prepare_hex(green) + prepare_hex(blue)
                          + prepare_hex(white))
             if white:
@@ -184,6 +185,11 @@ class Bulb:
             sock.connect((self.host, CONTROL_PORT))
             sock.send(data)
             sock.close()
+            self.state = {'red': red,
+                          'green': green,
+                          'blue': blue,
+                          'white': white,
+                          }
         except Exception as e:
             print(e)
 
@@ -220,6 +226,12 @@ class Bulb:
 
     def on(self):
         self.change_color(white=255)
+
+    def get_state(self) -> str:
+        for p in self.state:
+            if self.state[p]:
+                return 'on'
+        return 'off'
 
 
 if __name__ == '__main__':

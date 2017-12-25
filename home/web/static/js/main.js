@@ -106,38 +106,6 @@ function waitingDialog(waiting) {
     $("#loadingScreen").dialog('open');
 }
 
-ws.on('state change', function (data) {
-    var bg;
-    var color;
-    var state = $('#state');
-    var button = $('#statusbutton');
-
-    if (data.state == 'alert') {
-        bg = 'red';
-        color = 'white';
-        state.html('alert');
-        button.html('Clear');
-        button.removeAttr('class');
-        button.addClass('btn btn-warning');
-    } else if (data.state == 'armed') {
-        bg = 'green';
-        color = 'white';
-        state.html('armed');
-        button.html('Disable');
-        button.removeAttr('class').addClass('btn btn-danger');
-    } else {
-        bg = '';
-        color = 'black';
-        state.html('disabled');
-        button.html('Enable');
-        button.removeAttr('class').addClass('btn btn-success');
-    }
-    $('.jumbotron').css('background-color', bg);
-    $('.jumbotron').css('color', color);
-    if (data.message != "")
-        $('#warning').html(data.message);
-});
-
 $('#saveconfig').hide();
 $('#editconfig').click(function() {
     $('#config').removeAttr('readonly');
@@ -156,6 +124,25 @@ $('#saveconfig').click(function() {
 
 $(".widget").click(function () {
     ws.emit('widget', {id: this.id});
+});
+
+$('#refresh_logs').click(function() {
+    ws.emit('admin', {
+        command: 'refresh logs',
+    });
+});
+
+ws.on('logs', function(logs) {
+    $('#logs').html(logs);
+});
+
+$(".device-status").each(function() {
+    ws.emit('device state', {'device': this.id.split('-')[1]});
+});
+
+ws.on("device state", function(data) {
+    var t = $('#status-' + data.device);
+    t.html(data.state);
 });
 
 setTimeout(function () {

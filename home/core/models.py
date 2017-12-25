@@ -93,6 +93,7 @@ class Device(YAMLObject):
         mapping = {}
         html = '<div class="widget-panel panel panel-primary"><div class="panel-heading"><h3 class="panel-title">{' \
                '} ({})</h3></div><div class="panel-body">'.format(self.name, self.driver)
+        html += '<div class="device-status" id="status-{}"></div>'.format(self.name)
         buttons = config.get('buttons')
         if len(buttons) > 1:
             html += '<div class="btn-group" role="group" aria-label="...">'

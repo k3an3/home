@@ -14,7 +14,7 @@ from webassets.loaders import PythonLoader as PythonAssetsLoader
 
 import home.core.parser as parser
 import home.core.utils as utils
-from home.core.models import devices, interfaces, get_action, actions, get_interface, get_driver, widgets
+from home.core.models import devices, interfaces, get_action, actions, get_interface, get_driver, widgets, get_device
 from home.settings import SECRET_KEY, DEBUG, LOG_FILE, PUBLIC_GROUPS, USE_LDAP
 from home.web.models import *
 from home.web.models import User, APIClient
@@ -142,6 +142,10 @@ def ws_admin(data):
                 f.write(data['config'])
             emit('message', {'class': 'alert-success',
                              'content': 'Successfully updated device configuration.'})
+    elif command == 'refresh logs':
+        with open(LOG_FILE) as f:
+            logs = f.read()
+        emit('logs', logs)
 
 
 @socketio.on('subscribe')
@@ -335,6 +339,17 @@ def widget(data):
             target[1].run()
     else:
         disconnect()
+
+
+@socketio.on("device state")
+@ws_login_required
+def device_state(data):
+    target = get_device(data['device'])
+    if target.group in current_user.groups or target.group in PUBLIC_GROUPS or current_user.admin:
+        try:
+            emit('device state', {'device': target.name, 'state': target.dev.get_state()})
+        except AttributeError:
+            emit('device state', {'device': target.name, 'state': None})
 
 
 @app.template_filter('slugify')
