@@ -97,7 +97,7 @@ def command_api(client):
         return '', 204
     sec = SecurityController.get()
     # Trigger an action
-    action = request.form.get('action')
+    action = request.form.get('action').strip()
     if sec.is_armed() or sec.is_alert() and 'event' in action:
         # TODO: This thing is really a mess
         sec_ = get_driver('security').klass

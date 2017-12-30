@@ -294,7 +294,7 @@ def get_devices_by_group(group_name: str) -> Iterator[Device]:
 
 
 def get_action(action_name: str) -> Action:
-    return next(action for action in actions if action.name == action_name)
+    return next(action for action in actions if action.name.lower() == action_name.lower())
 
 
 def get_driver(driver_name: str) -> Driver:

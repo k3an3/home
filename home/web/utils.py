@@ -97,7 +97,7 @@ def send_to_subscribers(message: str) -> None:
 
 
 def handle_task(post: dict, client: APIClient) -> None:
-    device = get_device(post.pop('device'))
+    device = get_device(post.pop('device').strip())
     try:
         c_method, c_kwargs = device.last.pop()
     except IndexError:
@@ -115,7 +115,6 @@ def handle_task(post: dict, client: APIClient) -> None:
         method = l_method
         kwargs = l_kwargs
     else:
-        print(device, device.dev, post.get('method'))
         method = method_from_name(device.dev, post.pop('method'))
         if post.get('increment'):
             kwargs = c_kwargs
@@ -128,7 +127,7 @@ def handle_task(post: dict, client: APIClient) -> None:
     device.last.append((method, kwargs))
     from home.web.web import app
     app.logger.info(
-        "({}) Execute {} on {} with config {}".format(client.name, method.__name__, device.name, kwargs))
+        "({}) Execute '{}' on '{}' with config {}".format(client.name, method.__name__, device.name, kwargs))
     if device.driver.noserialize or type(device) is MultiDevice:
         method(**kwargs)
     else:
