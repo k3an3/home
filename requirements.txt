@@ -19,7 +19,7 @@ flake8
 Flask
 Flask-Assets
 Flask-Login
-flask_oauthlib
+#flask_oauthlib
 Flask-SocketIO
 future
 gevent
@@ -34,6 +34,7 @@ ldap3
 MarkupSafe
 mccabe
 netifaces
+#oauthlib
 packaging
 paramiko
 passlib

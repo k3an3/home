@@ -36,7 +36,8 @@ app.jinja_env.globals['csrf_token'] = generate_csrf_token
 assets = flask_assets.Environment()
 assets.init_app(app)
 assets_loader = PythonAssetsLoader('home.web.assets')
-oauth = OAuth2Provider(app)
+# Experimental oauth support
+# oauth = OAuth2Provider(app)
 for name, bundle in assets_loader.load_bundles().items():
     assets.register(name, bundle)
 

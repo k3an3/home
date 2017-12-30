@@ -4,7 +4,6 @@
 * DDwrt Wi-Fi based presence detection
 * Fix broken Chromecast controls (partially)
 * Allow driver modules to define actions in a class attribute
-* OAuth 2.0 support for integration with other APIs
 
 ## v0.10
 * Chainable actions

@@ -286,7 +286,7 @@ def get_device_by_uuid(uuid: str) -> Device:
 
 
 def get_device(name: str) -> Device:
-    return next(device for device in devices if device.name == name)
+    return next(device for device in devices if device.name.lower() == name.lower())
 
 
 def get_devices_by_group(group_name: str) -> Iterator[Device]:
