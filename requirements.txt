@@ -19,6 +19,7 @@ flake8
 Flask
 Flask-Assets
 Flask-Login
+flask_oauthlib
 Flask-SocketIO
 future
 gevent

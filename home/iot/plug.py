@@ -4,7 +4,6 @@ plug.py
 
 Module for communicating with the Broadlink smart plug
 """
-import socket
 
 import broadlink
 

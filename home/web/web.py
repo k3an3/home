@@ -8,6 +8,7 @@ import flask_assets
 from flask import Flask, render_template, request, redirect, abort, url_for, session, flash
 from flask_login import LoginManager, login_required, current_user
 from flask_login import login_user, logout_user
+from flask_oauthlib.provider import OAuth2Provider
 from flask_socketio import SocketIO, emit, disconnect
 from peewee import DoesNotExist
 from webassets.loaders import PythonLoader as PythonAssetsLoader
@@ -15,7 +16,7 @@ from webassets.loaders import PythonLoader as PythonAssetsLoader
 import home.core.parser as parser
 import home.core.utils as utils
 from home.core.models import devices, interfaces, get_action, actions, get_interface, get_driver, widgets, get_device
-from home.settings import SECRET_KEY, DEBUG, LOG_FILE, PUBLIC_GROUPS, USE_LDAP
+from home.settings import SECRET_KEY, LOG_FILE, PUBLIC_GROUPS
 from home.web.models import *
 from home.web.models import User, APIClient
 from home.web.utils import ws_login_required, generate_csrf_token, VERSION, api_auth_required, send_to_subscribers, \
@@ -35,6 +36,7 @@ app.jinja_env.globals['csrf_token'] = generate_csrf_token
 assets = flask_assets.Environment()
 assets.init_app(app)
 assets_loader = PythonAssetsLoader('home.web.assets')
+oauth = OAuth2Provider(app)
 for name, bundle in assets_loader.load_bundles().items():
     assets.register(name, bundle)
 
