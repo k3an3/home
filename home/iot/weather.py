@@ -133,13 +133,15 @@ def format_weather(weather: Forecast, forecast: Forecast, speech: Speech) -> str
 
 @app.route('/api/motd', methods=['GET', 'POST'])
 @api_auth_required
-def motd(**kwargs):
+def motd(client):
     try:
         speech = get_device(request.values.get('device'))
     except StopIteration:
         abort(404)
     if not speech.driver.klass == Speech:
         raise NotImplementedError
+    if not client.has_permission(speech.group):
+        return 403
     speech = speech.dev
     weather = speech.weather.get(latlon=request.values.get('loc').split(','))
     forecast = speech.weather.get(latlon=request.values.get('loc').split(','), mode='forecast')

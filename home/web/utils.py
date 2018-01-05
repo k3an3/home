@@ -96,7 +96,7 @@ def send_to_subscribers(message: str) -> None:
             print("Webpusher:", str(e))
 
 
-def handle_task(post: dict, client: APIClient) -> None:
+def handle_task(post: dict, client: APIClient) -> bool:
     device = get_device(post.pop('device').strip())
     try:
         c_method, c_kwargs = device.last.pop()
@@ -124,15 +124,20 @@ def handle_task(post: dict, client: APIClient) -> None:
             kwargs[post['decrement']] += post.get('count', 1)
         else:
             kwargs = post
-    device.last.append((method, kwargs))
     from home.web.web import app
+    if not client.has_permission(device.group):
+        app.logger.warning(
+            "({}) Insufficient API permissions to execute '{}' on '{}' with config {}".format(
+                client.name, method.__name__, device.name, kwargs))
+        return False
+    device.last.append((method, kwargs))
     app.logger.info(
         "({}) Execute '{}' on '{}' with config {}".format(client.name, method.__name__, device.name, kwargs))
     if device.driver.noserialize or type(device) is MultiDevice:
         method(**kwargs)
     else:
         device.last_task = run(method, **kwargs)
-
+    return True
 
 def gen_guest_login() -> None:
     global guest_path, guest_path_qr

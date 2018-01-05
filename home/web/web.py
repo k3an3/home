@@ -8,7 +8,6 @@ import flask_assets
 from flask import Flask, render_template, request, redirect, abort, url_for, session, flash
 from flask_login import LoginManager, login_required, current_user
 from flask_login import login_user, logout_user
-from flask_oauthlib.provider import OAuth2Provider
 from flask_socketio import SocketIO, emit, disconnect
 from peewee import DoesNotExist
 from webassets.loaders import PythonLoader as PythonAssetsLoader
@@ -93,20 +92,28 @@ def command_api(client):
     post.pop('key')
     # Send commands directly to device
     if request.form.get('device'):
-        handle_task(post, client)
-        return '', 204
+        return '', 204 if handle_task(post, client) else 403
     sec = SecurityController.get()
     # Trigger an action
     action = request.form.get('action').strip()
-    if sec.is_armed() or sec.is_alert() and 'event' in action:
-        # TODO: This thing is really a mess
-        sec_ = get_driver('security').klass
-        sec_.handle_event(sec, action, app, client)
-        return '', 204
+    if client.has_permission('sec'):
+        if sec.is_armed() or sec.is_alert() and 'event' in action:
+            app.logger.info('({}) Triggered security event'.format(client.name))
+            # TODO: This thing is really a mess
+            sec_ = get_driver('security').klass
+            sec_.handle_event(sec, action, app, client)
+            return '', 204
+    else:
+        app.logger.warning('({}) Insufficient API permissions to trigger security event'.format(client.name))
+        return 403
     try:
         action = get_action(action)
-        app.logger.info("({}) Execute action {}".format(client.name, action))
-        action.run()
+        if client.has_permission(action.group):
+            app.logger.info("({}) Execute action {}".format(client.name, action))
+            action.run()
+        else:
+            app.logger.warning("({}) Insufficient API permissions to execute action {}".format(client.name, action))
+            return 403
         return '', 204
     except StopIteration:
         app.logger.warning("({}) Action '{}' not found".format(client.name, request.form.get('action')))
@@ -169,6 +176,8 @@ def subscribe(subscriber):
 @app.route('/api/update', methods=['POST'])
 @api_auth_required
 def api_update_app(client):
+    if not client.has_permission('update'):
+        return 403
     socketio.emit('update', {}, broadcast=True)
     utils.update()
 
@@ -302,7 +311,9 @@ def logout():
 
 @app.route("/push", methods=['GET', 'POST'])
 @api_auth_required
-def test_push(**kwargs):
+def test_push(client):
+    if not client.has_permission('test'):
+        return 403
     send_to_subscribers("This is only a test.")
     return '', 204
 

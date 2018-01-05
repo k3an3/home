@@ -57,7 +57,7 @@ class SSHFirewall(SSH):
 
 @app.route('/api/firewall/unblock', methods=['GET', 'POST'])
 @api_auth_required
-def unblock_this(*args, **kwargs):
+def unblock_this(client):
     try:
         device = get_device(request.values.get('device'))
     except StopIteration:
@@ -65,6 +65,8 @@ def unblock_this(*args, **kwargs):
     # Eventually, inheritance on "Firewall" class
     if not device.driver.klass == SSHFirewall:
         raise NotImplementedError
+    if not client.has_permission(device.group):
+        return 403
     remote_addr = request.environ['HTTP_X_REAL_IP'] or request.remote_addr
     device.dev.unblock(saddr=remote_addr,
                        proto=request.values.get('proto'),
