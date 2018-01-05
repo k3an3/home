@@ -58,6 +58,7 @@ $('#logout').click(function () {
 });
 
 ws.on('message', function (data) {
+    $('#messages').attr('class', 'alert floating-message');
     $('#messages').html(data.content);
     $("#messages").css('visibility', 'visible');
     $('#messages').addClass(data.class);

@@ -76,7 +76,7 @@
     </nav>
     {% with messages = get_flashed_messages() %}
         {% if messages %}
-            <div style="text-align: center;">
+            <div id="messagediv" style="z-index: 1; text-align: center;">
                 <span id="messages" class="alert alert-warning">
                     {% for message in messages %}
                         {{ message }}
@@ -84,7 +84,7 @@
                 </span>
             </div>
         {% else %}
-            <div style="text-align: center;">
+            <div id="messagediv">
                 <span id="messages" class="alert">
                 </span>
             </div>

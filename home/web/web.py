@@ -124,19 +124,30 @@ def ws_admin(data):
     if command == 'action':
         app.logger.info("({}) Execute action '{}'".format(current_user.username, data.get('action')))
         get_action(data.get('action')).run()
+        emit('message', {'class': 'alert-success',
+                         'content': "Executing action '{}'.".format(data.get('action'))
+                         })
     elif command == 'visible':
         interface = get_interface(data.get('iface'))
         interface.public = not interface.public
+        emit('message', {'class': 'alert-success',
+                         'content': 'Successfully changed interface visibility (until server is restarted).'})
     elif command == 'update':
         utils.update()
         emit('update', {}, broadcast=True)
+        emit('message', {'class': 'alert-success',
+                         'content': 'Updating...'})
     elif command == 'revoke':
         client = APIClient.get(name=data.get('name'))
         client.delete_instance()
+        emit('message', {'class': 'alert-success',
+                         'content': 'Successfully revoked API permissions.'})
     elif command == 'update permissions':
         client = APIClient.get(name=data.get('name'))
         client.permissions = data.get('perms').replace(' ', '')
         client.save()
+        emit('message', {'class': 'alert-success',
+                         'content': 'Successfully updated API permissions.'})
     elif command == 'refresh_display':
         emit('display refresh', broadcast=True)
     elif command == 'update config':
