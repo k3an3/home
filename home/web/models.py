@@ -74,7 +74,11 @@ class APIClient(BaseModel):
     permissions = CharField(default='')
 
     def has_permission(self, permission: str) -> bool:
-        return permission in self.permissions
+        return permission in self.permissions.split(',')
+
+    def add_permission(self, permission: str) -> None:
+        if not self.has_permission(permission):
+            self.permissions = ','.join([self.permissions, permission])
 
 
 class Subscriber(BaseModel):
@@ -163,7 +167,8 @@ class Token(BaseModel):
 
 
 class Grant:
-    def __init(self, user: User, client_id: str, client: OAuthClient, code: str, redirect_uri: str, _scopes: str, expires: datetime.date):
+    def __init(self, user: User, client_id: str, client: OAuthClient, code: str, redirect_uri: str, _scopes: str,
+               expires: datetime.date):
         self.user = user
         self.client_id = client_id
         self.client = client

@@ -93,8 +93,8 @@ def command_api(client):
     sec = SecurityController.get()
     # Trigger an action
     action = request.form.get('action').strip()
-    if client.has_permission('sec'):
-        if sec.is_armed() or sec.is_alert() and 'event' in action:
+    if 'event' in action and client.has_permission('sec'):
+        if sec.is_armed() or sec.is_alert():
             app.logger.info('({}) Triggered security event'.format(client.name))
             # TODO: This thing is really a mess
             sec_ = get_driver('security').klass
