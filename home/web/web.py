@@ -61,8 +61,6 @@ def index():
     if current_user.is_active:
         widget_html = get_widgets(current_user) + get_action_widgets(current_user)
         if current_user.admin:
-            with open(LOG_FILE) as f:
-                logs = f.read()
             with open('config.yml') as f:
                 config = f.read()
         return render_template('index.html',
@@ -73,7 +71,6 @@ def index():
                                clients=APIClient.select(),
                                actions=actions,
                                version=VERSION,
-                               logs=logs,
                                debug=DEBUG,
                                qr=get_qr(),
                                widgets=widget_html,

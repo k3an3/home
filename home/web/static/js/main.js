@@ -145,6 +145,11 @@ ws.on("device state", function(data) {
     t.html(data.state);
 });
 
+
+ws.emit('admin', {
+    command: 'refresh logs',
+});
+
 setTimeout(function () {
     $('#messages').fadeOut();
 }, 3000);
