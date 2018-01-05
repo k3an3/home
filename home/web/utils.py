@@ -139,6 +139,7 @@ def handle_task(post: dict, client: APIClient) -> bool:
         device.last_task = run(method, **kwargs)
     return True
 
+
 def gen_guest_login() -> None:
     global guest_path, guest_path_qr
     guest_path = 'display/' + random_string()
@@ -175,7 +176,8 @@ def get_action_widgets(user: User) -> List[str]:
             action_html = ''
             for action in groups[group]:
                 if action.button:
-                    action_html += '<button class="widget btn {1}" id="{0}">{0}</button>'.format(action.name, action.button)
+                    action_html += '<button class="widget btn {1}" id="{0}">{0}</button>'.format(action.name,
+                                                                                                 action.button)
             html += action_html
             html += '</div></div></div>'
             if action_html:

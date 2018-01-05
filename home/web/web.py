@@ -89,7 +89,9 @@ def command_api(client):
     post.pop('key')
     # Send commands directly to device
     if request.form.get('device'):
-        return '', 204 if handle_task(post, client) else 403
+        if handle_task(post, client):
+            return '', 204
+        abort(403)
     sec = SecurityController.get()
     # Trigger an action
     action = request.form.get('action').strip()
@@ -102,7 +104,7 @@ def command_api(client):
             return '', 204
     else:
         app.logger.warning('({}) Insufficient API permissions to trigger security event'.format(client.name))
-        return 403
+        abort(403)
     try:
         action = get_action(action)
         if client.has_permission(action.group):
@@ -110,7 +112,7 @@ def command_api(client):
             action.run()
         else:
             app.logger.warning("({}) Insufficient API permissions to execute action {}".format(client.name, action))
-            return 403
+            abort(403)
         return '', 204
     except StopIteration:
         app.logger.warning("({}) Action '{}' not found".format(client.name, request.form.get('action')))
@@ -174,7 +176,7 @@ def subscribe(subscriber):
 @api_auth_required
 def api_update_app(client):
     if not client.has_permission('update'):
-        return 403
+        abort(403)
     socketio.emit('update', {}, broadcast=True)
     utils.update()
 
@@ -310,7 +312,7 @@ def logout():
 @api_auth_required
 def test_push(client):
     if not client.has_permission('test'):
-        return 403
+        abort(403)
     send_to_subscribers("This is only a test.")
     return '', 204
 

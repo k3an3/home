@@ -141,7 +141,7 @@ def motd(client):
     if not speech.driver.klass == Speech:
         raise NotImplementedError
     if not client.has_permission(speech.group):
-        return 403
+        abort(403)
     speech = speech.dev
     weather = speech.weather.get(latlon=request.values.get('loc').split(','))
     forecast = speech.weather.get(latlon=request.values.get('loc').split(','), mode='forecast')

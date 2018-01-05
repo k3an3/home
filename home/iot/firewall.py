@@ -66,7 +66,7 @@ def unblock_this(client):
     if not device.driver.klass == SSHFirewall:
         raise NotImplementedError
     if not client.has_permission(device.group):
-        return 403
+        abort(403)
     remote_addr = request.environ['HTTP_X_REAL_IP'] or request.remote_addr
     device.dev.unblock(saddr=remote_addr,
                        proto=request.values.get('proto'),
