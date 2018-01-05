@@ -77,8 +77,12 @@ class APIClient(BaseModel):
         return permission in self.permissions.split(',')
 
     def add_permission(self, permission: str) -> None:
+        permission = permission.replace(' ', '')
         if not self.has_permission(permission):
-            self.permissions = ','.join([self.permissions, permission])
+            if self.permissions and not self.permissions[-1] == ',':
+                self.permissions += ','
+            self.permissions += permission + ','
+            self.save()
 
 
 class Subscriber(BaseModel):

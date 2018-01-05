@@ -60,9 +60,6 @@ def index():
         interface_list.append((i, [d for d in devices if d.driver and d.driver.interface == i]))
     if current_user.is_active:
         widget_html = get_widgets(current_user) + get_action_widgets(current_user)
-        if current_user.admin:
-            with open('config.yml') as f:
-                config = f.read()
         return render_template('index.html',
                                interfaces=interface_list,
                                devices=devices,
@@ -74,7 +71,6 @@ def index():
                                debug=DEBUG,
                                qr=get_qr(),
                                widgets=widget_html,
-                               config=config
                                )
     return render_template('index.html', interfaces=interface_list, devices=devices)
 
@@ -97,11 +93,11 @@ def command_api(client):
     action = request.form.get('action').strip()
     if 'event' in action and sec.is_armed() or sec.is_alert():
         if client.has_permission('sec'):
-                app.logger.info('({}) Triggered security event'.format(client.name))
-                # TODO: This thing is really a mess
-                sec_ = get_driver('security').klass
-                sec_.handle_event(sec, action, app, client)
-                return '', 204
+            app.logger.info('({}) Triggered security event'.format(client.name))
+            # TODO: This thing is really a mess
+            sec_ = get_driver('security').klass
+            sec_.handle_event(sec, action, app, client)
+            return '', 204
         else:
             app.logger.warning('({}) Insufficient API permissions to trigger security event'.format(client.name))
             abort(403)
@@ -111,7 +107,7 @@ def command_api(client):
             app.logger.info("({}) Execute action {}".format(client.name, action))
             action.run()
         else:
-            app.logger.warning("({}) Insufficient API permissions to execute action {}".format(client.name, action))
+            app.logger.warning("({}) Insufficient API permissions to execute action '{}'".format(client.name, action))
             abort(403)
         return '', 204
     except StopIteration:
@@ -126,7 +122,7 @@ def ws_admin(data):
         disconnect()
     command = data.get('command')
     if command == 'action':
-        app.logger.info("({}) Execute action {}".format(current_user.username, data.get('action')))
+        app.logger.info("({}) Execute action '{}'".format(current_user.username, data.get('action')))
         get_action(data.get('action')).run()
     elif command == 'visible':
         interface = get_interface(data.get('iface'))
@@ -137,6 +133,10 @@ def ws_admin(data):
     elif command == 'revoke':
         client = APIClient.get(name=data.get('name'))
         client.delete_instance()
+    elif command == 'update permissions':
+        client = APIClient.get(name=data.get('name'))
+        client.permissions = data.get('perms').replace(' ', '')
+        client.save()
     elif command == 'refresh_display':
         emit('display refresh', broadcast=True)
     elif command == 'update config':
@@ -153,8 +153,10 @@ def ws_admin(data):
                              'content': 'Successfully updated device configuration.'})
     elif command == 'refresh logs':
         with open(LOG_FILE) as f:
-            logs = f.read()
-        emit('logs', logs)
+            emit('logs', f.read())
+    elif command == 'get config':
+        with open('config.yml') as f:
+            emit('config', f.read())
 
 
 @socketio.on('subscribe')

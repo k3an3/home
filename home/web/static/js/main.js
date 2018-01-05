@@ -136,6 +136,10 @@ ws.on('logs', function(logs) {
     $('#logs').html(logs);
 });
 
+ws.on('config', function(config) {
+    $('#config').html(config);
+});
+
 $(".device-status").each(function() {
     ws.emit('device state', {'device': this.id.split('-')[1]});
 });
@@ -146,8 +150,23 @@ ws.on("device state", function(data) {
 });
 
 
+$(".saveperms").click(function() {
+    var client = $(this).attr('id').split('-')[1];
+    ws.emit('admin',
+        {
+            command: 'update permissions',
+            name: client,
+            perms: $('#perms-' + client).val()
+        });
+});
+
+
 ws.emit('admin', {
     command: 'refresh logs',
+});
+
+ws.emit('admin', {
+    command: 'get config',
 });
 
 setTimeout(function () {
