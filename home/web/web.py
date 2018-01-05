@@ -95,16 +95,16 @@ def command_api(client):
     sec = SecurityController.get()
     # Trigger an action
     action = request.form.get('action').strip()
-    if 'event' in action and client.has_permission('sec'):
-        if sec.is_armed() or sec.is_alert():
-            app.logger.info('({}) Triggered security event'.format(client.name))
-            # TODO: This thing is really a mess
-            sec_ = get_driver('security').klass
-            sec_.handle_event(sec, action, app, client)
-            return '', 204
-    else:
-        app.logger.warning('({}) Insufficient API permissions to trigger security event'.format(client.name))
-        abort(403)
+    if 'event' in action and sec.is_armed() or sec.is_alert():
+        if client.has_permission('sec'):
+                app.logger.info('({}) Triggered security event'.format(client.name))
+                # TODO: This thing is really a mess
+                sec_ = get_driver('security').klass
+                sec_.handle_event(sec, action, app, client)
+                return '', 204
+        else:
+            app.logger.warning('({}) Insufficient API permissions to trigger security event'.format(client.name))
+            abort(403)
     try:
         action = get_action(action)
         if client.has_permission(action.group):
