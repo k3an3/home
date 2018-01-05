@@ -79,6 +79,7 @@ class User(BaseModel):
 class APIClient(BaseModel):
     name = CharField(unique=True)
     token = CharField(default=random_string)
+    permissions = CharField(default='')
 
 
 class Subscriber(BaseModel):
