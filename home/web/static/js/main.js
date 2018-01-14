@@ -6,6 +6,7 @@ var ws = io.connect('//' + document.domain + ':' + location.port);
 var last = "#FFFFFF";
 var bright = 100;
 var target = "0";
+$('#messages').hide();
 
 function editDevice() {
     ws.emit('admin', {
@@ -142,12 +143,26 @@ ws.on('config', function(config) {
 });
 
 $(".device-status").each(function() {
-    ws.emit('device state', {'device': this.id.split('-')[1]});
+    ws.emit('device state', {'device': this.id.split('-')[1].replace('_', ' ')});
 });
 
+// https://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
+function rgbToHex(r, g, b) {
+    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}
+
 ws.on("device state", function(data) {
-    var t = $('#status-' + data.device);
-    t.html(data.state);
+    var t = $('#status-' + data.device.replace(' ', '_'));
+    console.log(data);
+    if (data.state != null && typeof data.state === 'object') {
+        var colors = data.state;
+        if (colors.white != 0)
+            t.html('on');
+        else
+            t.html('<div class="color-box" style="background-color: ' + rgbToHex(colors.red, colors.green, colors.blue)+ ';"></div>');
+    }
+    else
+        t.html(data.state);
 });
 
 
@@ -171,5 +186,5 @@ ws.emit('admin', {
 });
 
 setTimeout(function () {
-    $('#messages').fadeOut();
+    $('#messages2').fadeOut();
 }, 3000);

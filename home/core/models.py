@@ -93,7 +93,7 @@ class Device(YAMLObject):
         mapping = {}
         html = '<div class="widget-panel panel panel-primary"><div class="panel-heading"><h3 class="panel-title">{' \
                '} ({})</h3></div><div class="panel-body">'.format(self.name, self.driver)
-        html += '<div class="device-status" id="status-{}"></div>'.format(self.name)
+        html += '<div class="device-status" id="status-{}"></div>'.format(self.name.replace(' ', '-'))
         buttons = config.get('buttons')
         if len(buttons) > 1:
             html += '<div class="btn-group" role="group" aria-label="...">'
@@ -132,7 +132,7 @@ class MultiDevice(YAMLObject):
         elif name == 'widget':
             return self.widget
         elif name == 'dev':
-            return self
+            return self.devices[0].dev
 
         def method(*args, **kwargs):
             for device in self.devices:
@@ -152,6 +152,7 @@ class MultiDevice(YAMLObject):
                 self.widget['mapping'][key] = (_map[0], method_from_name(self, _map[1].__name__), _map[2], self)
             widgets.update(self.widget['mapping'])
             self.widget['html'] = self.widget['html'].replace(self.devices[0].name, self.name)
+            self.widget['html'] = self.widget['html'].replace('status-' + self.name, 'status-' + self.name.replace(' ', '_'))
 
 
 class Driver(YAMLObject):

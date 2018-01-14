@@ -185,11 +185,6 @@ class Bulb:
             sock.connect((self.host, CONTROL_PORT))
             sock.send(data)
             sock.close()
-            self.state = {'red': red,
-                          'green': green,
-                          'blue': blue,
-                          'white': white,
-                          }
         except Exception as e:
             print(e)
 
@@ -227,11 +222,14 @@ class Bulb:
     def on(self):
         self.change_color(white=255)
 
-    def get_state(self) -> str:
-        for p in self.state:
-            if self.state[p]:
-                return 'on'
-        return 'off'
+    def get_state(self):
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.connect((self.host, CONTROL_PORT))
+        sock.send(bytes([0x81, 0x8A, 0x8B, 0x96]))
+        r = sock.recv(14)
+        sock.close()
+        if len(r) == 14:
+            return {'red': r[6], 'green': r[7], 'blue': r[8], 'white': r[9]}
 
 
 if __name__ == '__main__':
