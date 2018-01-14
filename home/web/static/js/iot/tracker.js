@@ -1,4 +1,4 @@
-/*var map;
+var map;
 //noinspection JSUnusedGlobalSymbols
 function initMap() {
     map = new google.maps.Map(document.getElementById('map'), {
@@ -73,4 +73,3 @@ $("#cmd").keyup(function(e) {
     if (e.which === 13)
         exec();
 });
-*/

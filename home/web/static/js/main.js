@@ -153,7 +153,6 @@ function rgbToHex(r, g, b) {
 
 ws.on("device state", function(data) {
     var t = $('#status-' + data.device.replace(' ', '_'));
-    console.log(data);
     if (data.state != null && typeof data.state === 'object') {
         var colors = data.state;
         if (colors.white != 0)
