@@ -14,7 +14,9 @@ from webassets.loaders import PythonLoader as PythonAssetsLoader
 
 import home.core.parser as parser
 import home.core.utils as utils
-from home.core.models import devices, interfaces, get_action, actions, get_interface, get_driver, widgets, get_device
+from home.core.async import run
+from home.core.models import devices, interfaces, get_action, actions, get_interface, get_driver, widgets, get_device, \
+    MultiDevice
 from home.settings import SECRET_KEY, LOG_FILE, PUBLIC_GROUPS
 from home.web.models import *
 from home.web.models import User, APIClient
@@ -359,7 +361,10 @@ def widget(data):
                                                               target[2]))
             func = target[1]
             args = target[2]
-            func(**args)
+            if target[3].driver.noserialize or type(target[3]) is MultiDevice:
+                func(**args)
+            else:
+                run(func, **args)
         elif target[0] == 'action':
             app.logger.info("({}) Execute action {}".format(current_user.username, target[1]))
             target[1].run()
