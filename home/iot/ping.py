@@ -20,7 +20,7 @@ class Ping:
             s.close()
             self.state[host] = True
         except Exception as e:
-            if self.state.get('host'):
+            if self.state.get('host', True):
                 send_to_subscribers("Failed to ping " + host)
             self.state[host] = False
             return e
