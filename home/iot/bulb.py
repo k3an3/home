@@ -197,7 +197,8 @@ class Bulb:
         city = a[settings.LOCATION]
         sun = city.sun(date=datetime.now(), local=True)
         dt = datetime.now(sun['sunset'].tzinfo)
-        if (dt - sun['sunset']).total_seconds() / 60 <= self.sunset_minutes:
+        minutes_until_sunset = (dt - sun['sunset']).total_seconds() / 60 * -1
+        if 0 <= minutes_until_sunset <= self.sunset_minutes:
             self.sunlight()
 
     def fade(self, start: Dict = None, stop: Dict = None, bright: int = None, speed: int = 1) -> None:
