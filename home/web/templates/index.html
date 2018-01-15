@@ -76,16 +76,16 @@
     </nav>
     {% with messages = get_flashed_messages() %}
         {% if messages %}
-            <div style="text-align: center;">
-                <span id="messages" class="alert alert-warning">
+            <div id="messagediv" style="z-index: 1; text-align: center;">
+                <span id="messages2" class="alert alert-warning">
                     {% for message in messages %}
                         {{ message }}
                     {% endfor %}
                 </span>
             </div>
         {% else %}
-            <div style="text-align: center;" hidden>
-                <span id="messages" class="alert alert-warning">
+            <div id="messagediv">
+                <span id="messages" class="alert">
                 </span>
             </div>
         {% endif %}
@@ -139,6 +139,12 @@
         {% if current_user.is_authenticated %}
             <div id="settings" class="tab-pane fade in">
             <div class="col-md-6">
+                <h3>Config</h3>
+                <textarea id="config" class="form-control" style="height:300px" readonly>Loading...</textarea>
+            <br>
+                <button class="btn btn-danger" id="editconfig">Edit</button>
+                <button class="btn btn-success" id="saveconfig">Save</button>
+            <br><br>
                 <div class="panel panel-primary">
                     <div class="panel-heading">
                         <h3 class="panel-title">Devices</h3>
@@ -172,6 +178,8 @@
                             <div class="panel-body">
                                 <strong>name=</strong>{{ client.name }}
                                 <strong>token=</strong><span class="mouse_over">{{ client.token }}</span>
+                                <input class="form-control" id="perms-{{ client.name }}" type="text" value="{{ client.permissions }}">
+                                <button class="btn btn-warning saveperms" id="bp-{{ client.name }}">Update</button>
                                 <button onclick="revoke('{{ client.name }}');this.parentNode.style.display = 'none';"
                                         class="btn btn-danger">Revoke
                                 </button>
@@ -252,7 +260,8 @@
                 </div>
                 {% if current_user.admin %}
                     <h3>Logs</h3>
-                    <pre class="pre-scrollable"><code>{{ logs }}</code></pre>
+                    <pre class="pre-scrollable"><code id="logs">Loading...</code></pre>
+                    <button class="btn btn-primary" id="refresh_logs">Refresh Logs</button>
                 {% endif %}
             </div>
         {% endif %}

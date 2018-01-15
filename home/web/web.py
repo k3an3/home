@@ -14,8 +14,10 @@ from webassets.loaders import PythonLoader as PythonAssetsLoader
 
 import home.core.parser as parser
 import home.core.utils as utils
-from home.core.models import devices, interfaces, get_action, actions, get_interface, get_driver, widgets, get_display
-from home.settings import SECRET_KEY, DEBUG, LOG_FILE, PUBLIC_GROUPS, USE_LDAP
+from home.core.async import run
+from home.core.models import devices, interfaces, get_action, actions, get_interface, get_driver, widgets, get_device, \
+    MultiDevice, get_display
+from home.settings import SECRET_KEY, LOG_FILE, PUBLIC_GROUPS
 from home.web.models import *
 from home.web.models import User, APIClient
 from home.web.utils import ws_login_required, generate_csrf_token, VERSION, api_auth_required, send_to_subscribers, \
@@ -35,6 +37,8 @@ app.jinja_env.globals['csrf_token'] = generate_csrf_token
 assets = flask_assets.Environment()
 assets.init_app(app)
 assets_loader = PythonAssetsLoader('home.web.assets')
+# Experimental oauth support
+# oauth = OAuth2Provider(app)
 for name, bundle in assets_loader.load_bundles().items():
     assets.register(name, bundle)
 
@@ -58,8 +62,6 @@ def index():
         interface_list.append((i, [d for d in devices if d.driver and d.driver.interface == i]))
     if current_user.is_active:
         widget_html = get_widgets(current_user) + get_action_widgets(current_user)
-        with open(LOG_FILE) as f:
-            logs = f.read()
         return render_template('index.html',
                                interfaces=interface_list,
                                devices=devices,
@@ -68,7 +70,6 @@ def index():
                                clients=APIClient.select(),
                                actions=actions,
                                version=VERSION,
-                               logs=logs,
                                debug=DEBUG,
                                qr=get_qr(),
                                widgets=widget_html,
@@ -86,20 +87,30 @@ def command_api(client):
     post.pop('key')
     # Send commands directly to device
     if request.form.get('device'):
-        handle_task(post, client)
-        return '', 204
+        if handle_task(post, client):
+            return '', 204
+        abort(403)
     sec = SecurityController.get()
     # Trigger an action
-    action = request.form.get('action')
-    if sec.is_armed() or sec.is_alert() and 'event' in action:
-        # TODO: This thing is really a mess
-        sec_ = get_driver('security').klass
-        sec_.handle_event(sec, action, app, client)
-        return '', 204
+    action = request.form.get('action').strip()
+    if 'event' in action and sec.is_armed() or sec.is_alert():
+        if client.has_permission('sec'):
+            app.logger.info('({}) Triggered security event'.format(client.name))
+            # TODO: This thing is really a mess
+            sec_ = get_driver('security').klass
+            sec_.handle_event(sec, action, app, client)
+            return '', 204
+        else:
+            app.logger.warning('({}) Insufficient API permissions to trigger security event'.format(client.name))
+            abort(403)
     try:
         action = get_action(action)
-        app.logger.info("({}) Execute action {}".format(client.name, action))
-        action.run()
+        if client.has_permission(action.group):
+            app.logger.info("({}) Execute action {}".format(client.name, action))
+            action.run()
+        else:
+            app.logger.warning("({}) Insufficient API permissions to execute action '{}'".format(client.name, action))
+            abort(403)
         return '', 204
     except StopIteration:
         app.logger.warning("({}) Action '{}' not found".format(client.name, request.form.get('action')))
@@ -113,19 +124,52 @@ def ws_admin(data):
         disconnect()
     command = data.get('command')
     if command == 'action':
-        app.logger.info("({}) Execute action {}".format(current_user.username, data.get('action')))
+        app.logger.info("({}) Execute action '{}'".format(current_user.username, data.get('action')))
         get_action(data.get('action')).run()
+        emit('message', {'class': 'alert-success',
+                         'content': "Executing action '{}'.".format(data.get('action'))
+                         })
     elif command == 'visible':
         interface = get_interface(data.get('iface'))
         interface.public = not interface.public
+        emit('message', {'class': 'alert-success',
+                         'content': 'Successfully changed interface visibility (until server is restarted).'})
     elif command == 'update':
         utils.update()
         emit('update', {}, broadcast=True)
+        emit('message', {'class': 'alert-success',
+                         'content': 'Updating...'})
     elif command == 'revoke':
         client = APIClient.get(name=data.get('name'))
         client.delete_instance()
+        emit('message', {'class': 'alert-success',
+                         'content': 'Successfully revoked API permissions.'})
+    elif command == 'update permissions':
+        client = APIClient.get(name=data.get('name'))
+        client.permissions = data.get('perms').replace(' ', '')
+        client.save()
+        emit('message', {'class': 'alert-success',
+                         'content': 'Successfully updated API permissions.'})
     elif command == 'refresh_display':
         emit('display refresh', broadcast=True)
+    elif command == 'update config':
+        try:
+            parser.parse(data=data['config'])
+        except Exception as e:
+            parser.parse(file='config.yml')
+            emit('message', {'class': 'alert-danger',
+                             'content': 'Error parsing device configuration. ' + str(e)})
+        else:
+            with open('config.yml', 'w') as f:
+                f.write(data['config'])
+            emit('message', {'class': 'alert-success',
+                             'content': 'Successfully updated device configuration.'})
+    elif command == 'refresh logs':
+        with open(LOG_FILE) as f:
+            emit('logs', f.read())
+    elif command == 'get config':
+        with open('config.yml') as f:
+            emit('config', f.read())
 
 
 @socketio.on('subscribe')
@@ -146,6 +190,8 @@ def subscribe(subscriber):
 @app.route('/api/update', methods=['POST'])
 @api_auth_required
 def api_update_app(client):
+    if not client.has_permission('update'):
+        abort(403)
     socketio.emit('update', {}, broadcast=True)
     utils.update()
 
@@ -279,7 +325,9 @@ def logout():
 
 @app.route("/push", methods=['GET', 'POST'])
 @api_auth_required
-def test_push(**kwargs):
+def test_push(client):
+    if not client.has_permission('test'):
+        abort(403)
     send_to_subscribers("This is only a test.")
     return '', 204
 
@@ -317,12 +365,26 @@ def widget(data):
                                                               target[2]))
             func = target[1]
             args = target[2]
-            func(**args)
+            if target[3].driver.noserialize or type(target[3]) is MultiDevice:
+                func(**args)
+            else:
+                run(func, **args)
         elif target[0] == 'action':
             app.logger.info("({}) Execute action {}".format(current_user.username, target[1]))
             target[1].run()
     else:
         disconnect()
+
+
+@socketio.on("device state")
+@ws_login_required
+def device_state(data):
+    target = get_device(data['device'])
+    if target.group in current_user.groups or target.group in PUBLIC_GROUPS or current_user.admin:
+        try:
+            emit('device state', {'device': target.name, 'state': target.dev.get_state()})
+        except AttributeError:
+            emit('device state', {'device': target.name, 'state': None})
 
 
 @app.template_filter('slugify')

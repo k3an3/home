@@ -79,3 +79,35 @@ function hide_stream() {
     $("#monitor").html('');
     streams_visible = false;
 }
+
+ws.on('state change', function (data) {
+    var bg;
+    var color;
+    var state = $('#state');
+    var button = $('#statusbutton');
+
+    if (data.state == 'alert') {
+        bg = 'red';
+        color = 'white';
+        state.html('alert');
+        button.html('Clear');
+        button.removeAttr('class');
+        button.addClass('btn btn-warning');
+    } else if (data.state == 'armed') {
+        bg = 'green';
+        color = 'white';
+        state.html('armed');
+        button.html('Disable');
+        button.removeAttr('class').addClass('btn btn-danger');
+    } else {
+        bg = '';
+        color = 'black';
+        state.html('disabled');
+        button.html('Enable');
+        button.removeAttr('class').addClass('btn btn-success');
+    }
+    $('.jumbotron').css('background-color', bg);
+    $('.jumbotron').css('color', color);
+    if (data.message != "")
+        $('#warning').html(data.message);
+});

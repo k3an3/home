@@ -49,4 +49,4 @@ class Plug:
 
     def get_state(self):
         device = self.get_plug()
-        return device.check_power()
+        return 'on' if device.check_power() else 'off'

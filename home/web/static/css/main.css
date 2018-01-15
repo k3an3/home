@@ -66,3 +66,20 @@ body {
 
 .widget {
 }
+
+.floating-message {
+    text-align: center;
+    position: fixed;
+    margin: auto;
+    display: inline-block;
+    z-index: 1;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.color-box {
+    width: 25px;
+    height: 25px;
+    display: inline-block;
+    background-color: #ffffff;
+}

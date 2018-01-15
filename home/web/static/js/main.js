@@ -6,6 +6,7 @@ var ws = io.connect('//' + document.domain + ':' + location.port);
 var last = "#FFFFFF";
 var bright = 100;
 var target = "0";
+$('#messages').hide();
 
 function editDevice() {
     ws.emit('admin', {
@@ -58,10 +59,14 @@ $('#logout').click(function () {
 });
 
 ws.on('message', function (data) {
-    $('#messages').html(data);
+    $('#messages').attr('class', 'alert floating-message');
+    $('#messages').html(data.content);
     $("#messages").css('visibility', 'visible');
+    $('#messages').addClass(data.class);
     $('#messages').fadeIn();
-    alert("Please refresh to update devices.")
+    setTimeout(function () {
+        $('#messages').fadeOut();
+    }, 5000);
 });
 
 ws.on('event', function (data) {
@@ -103,42 +108,82 @@ function waitingDialog(waiting) {
     $("#loadingScreen").dialog('open');
 }
 
-ws.on('state change', function (data) {
-    var bg;
-    var color;
-    var state = $('#state');
-    var button = $('#statusbutton');
+$('#saveconfig').hide();
+$('#editconfig').click(function() {
+    $('#config').removeAttr('readonly');
+    $(this).hide();
+    $('#saveconfig').show();
+});
 
-    if (data.state == 'alert') {
-        bg = 'red';
-        color = 'white';
-        state.html('alert');
-        button.html('Clear');
-        button.removeAttr('class');
-        button.addClass('btn btn-warning');
-    } else if (data.state == 'armed') {
-        bg = 'green';
-        color = 'white';
-        state.html('armed');
-        button.html('Disable');
-        button.removeAttr('class').addClass('btn btn-danger');
-    } else {
-        bg = '';
-        color = 'black';
-        state.html('disabled');
-        button.html('Enable');
-        button.removeAttr('class').addClass('btn btn-success');
-    }
-    $('.jumbotron').css('background-color', bg);
-    $('.jumbotron').css('color', color);
-    if (data.message != "")
-        $('#warning').html(data.message);
+$('#saveconfig').click(function() {
+    ws.emit('admin',
+        {
+            command: 'update config',
+            config: $('#config').val()
+        }
+    );
 });
 
 $(".widget").click(function () {
     ws.emit('widget', {id: this.id});
 });
 
+$('#refresh_logs').click(function() {
+    ws.emit('admin', {
+        command: 'refresh logs',
+    });
+});
+
+ws.on('logs', function(logs) {
+    $('#logs').html(logs);
+});
+
+ws.on('config', function(config) {
+    $('#config').html(config);
+});
+
+$(".device-status").each(function() {
+    ws.emit('device state', {'device': this.id.split('-')[1].replace('_', ' ')});
+});
+
+// https://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
+function rgbToHex(r, g, b) {
+    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}
+
+ws.on("device state", function(data) {
+    var t = $('#status-' + data.device.replace(' ', '_'));
+    if (data.state != null && typeof data.state === 'object') {
+        var colors = data.state;
+        if (colors.white != 0)
+            t.html('on');
+        else
+            t.html('<div class="color-box" style="background-color: ' + rgbToHex(colors.red, colors.green, colors.blue)+ ';"></div>');
+    }
+    else
+        t.html(data.state);
+});
+
+
+$(".saveperms").click(function() {
+    var client = $(this).attr('id').split('-')[1];
+    ws.emit('admin',
+        {
+            command: 'update permissions',
+            name: client,
+            perms: $('#perms-' + client).val()
+        });
+});
+
+
+ws.emit('admin', {
+    command: 'refresh logs',
+});
+
+ws.emit('admin', {
+    command: 'get config',
+});
+
 setTimeout(function () {
-    $('#messages').fadeOut();
+    $('#messages2').fadeOut();
 }, 3000);

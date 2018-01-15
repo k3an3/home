@@ -96,8 +96,8 @@ def send_to_subscribers(message: str) -> None:
             print("Webpusher:", str(e))
 
 
-def handle_task(post: dict, client: APIClient) -> None:
-    device = get_device(post.pop('device'))
+def handle_task(post: dict, client: APIClient) -> bool:
+    device = get_device(post.pop('device').strip())
     try:
         c_method, c_kwargs = device.last.pop()
     except IndexError:
@@ -115,7 +115,6 @@ def handle_task(post: dict, client: APIClient) -> None:
         method = l_method
         kwargs = l_kwargs
     else:
-        print(device, device.dev, post.get('method'))
         method = method_from_name(device.dev, post.pop('method'))
         if post.get('increment'):
             kwargs = c_kwargs
@@ -125,14 +124,20 @@ def handle_task(post: dict, client: APIClient) -> None:
             kwargs[post['decrement']] += post.get('count', 1)
         else:
             kwargs = post
-    device.last.append((method, kwargs))
     from home.web.web import app
+    if not client.has_permission(device.group):
+        app.logger.warning(
+            "({}) Insufficient API permissions to execute '{}' on '{}' with config {}".format(
+                client.name, method.__name__, device.name, kwargs))
+        return False
+    device.last.append((method, kwargs))
     app.logger.info(
-        "({}) Execute {} on {} with config {}".format(client.name, method.__name__, device.name, kwargs))
+        "({}) Execute '{}' on '{}' with config {}".format(client.name, method.__name__, device.name, kwargs))
     if device.driver.noserialize or type(device) is MultiDevice:
         method(**kwargs)
     else:
         device.last_task = run(method, **kwargs)
+    return True
 
 
 def gen_guest_login() -> None:
@@ -171,7 +176,8 @@ def get_action_widgets(user: User) -> List[str]:
             action_html = ''
             for action in groups[group]:
                 if action.button:
-                    action_html += '<button class="widget btn {1}" id="{0}">{0}</button>'.format(action.name, action.button)
+                    action_html += '<button class="widget btn {1}" id="{0}">{0}</button>'.format(action.name,
+                                                                                                 action.button)
             html += action_html
             html += '</div></div></div>'
             if action_html:

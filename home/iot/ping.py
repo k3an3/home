@@ -7,6 +7,7 @@ class Ping:
     def __init__(self, host=None, port=None):
         self.host = host
         self.port = port
+        self.state = {}
 
     def ping(self, host=None, port=None):
         host = host or self.host
@@ -17,8 +18,11 @@ class Ping:
             s.connect((host, port))
             s.shutdown(2)
             s.close()
+            self.state[host] = True
         except Exception as e:
-            send_to_subscribers("Failed to ping " + host)
+            if self.state.get('host', True):
+                send_to_subscribers("Failed to ping " + host)
+            self.state[host] = False
             return e
 
     def ping_all(self, hosts):

@@ -143,6 +143,7 @@ class Bulb:
     def __init__(self, host: str, sunset_minutes: int = 0):
         self.host = host
         self.sunset_minutes = sunset_minutes
+        self.state = {}
 
     def auth(self) -> None:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -164,10 +165,10 @@ class Bulb:
             data = bytearray.fromhex(mode + function + speed + TAIL)
         else:
             red, green, blue, white, brightness = num(red, green, blue, white, brightness)
-            red = num(red * brightness / 255)
-            green = num(green * brightness / 255)
-            blue = num(blue * brightness / 255)
-            white = num(white * brightness / 255)
+            red = red * brightness // 255
+            green = green * brightness // 255
+            blue = blue * brightness // 255
+            white = white * brightness // 255
             color_hex = (prepare_hex(red) + prepare_hex(green) + prepare_hex(blue)
                          + prepare_hex(white))
             if white:
@@ -196,7 +197,8 @@ class Bulb:
         city = a[settings.LOCATION]
         sun = city.sun(date=datetime.now(), local=True)
         dt = datetime.now(sun['sunset'].tzinfo)
-        if (dt - sun['sunset']).total_seconds() / 60 == self.sunset_minutes:
+        minutes_until_sunset = (dt - sun['sunset']).total_seconds() / 60 * -1
+        if 0 <= minutes_until_sunset <= self.sunset_minutes:
             self.sunlight()
 
     def fade(self, start: Dict = None, stop: Dict = None, bright: int = None, speed: int = 1) -> None:
@@ -220,6 +222,15 @@ class Bulb:
 
     def on(self):
         self.change_color(white=255)
+
+    def get_state(self):
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.connect((self.host, CONTROL_PORT))
+        sock.send(bytes([0x81, 0x8A, 0x8B, 0x96]))
+        r = sock.recv(14)
+        sock.close()
+        if len(r) == 14:
+            return {'red': r[6], 'green': r[7], 'blue': r[8], 'white': r[9]}
 
 
 if __name__ == '__main__':

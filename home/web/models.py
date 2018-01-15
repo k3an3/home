@@ -1,22 +1,18 @@
-import json
-
 import datetime
+import json
+from typing import List, Dict
 
 from flask_login import UserMixin
 from passlib.hash import sha256_crypt
-from peewee import SqliteDatabase, MySQLDatabase, CharField, BooleanField, ForeignKeyField, IntegerField, \
+from peewee import CharField, BooleanField, ForeignKeyField, IntegerField, \
     DateTimeField, \
     OperationalError, Model
 from pywebpush import WebPusher
-from typing import List, Dict
 
 from home.core.utils import random_string
-from home.settings import GOOGLE_API_KEY, USE_LDAP
+from home.settings import GOOGLE_API_KEY, USE_LDAP, db, DEBUG
 
-if True:
-    db = SqliteDatabase('app.db')
-else:
-    db = MySQLDatabase(host="localhost", database="party", user="party", passwd="party")
+grants = []
 
 
 def db_init() -> None:
@@ -26,11 +22,11 @@ def db_init() -> None:
                           Subscriber,
                           SecurityController,
                           SecurityEvent,
-                          APIClient
+                          APIClient,
+                          OAuthClient
                           ])
         print('Creating tables...')
-        # TODO: fix to use app.debug
-        if True:
+        if DEBUG:
             u = User.create(username='root', password="")
             User.create(username='guest', password="")
             u.set_password('root')
@@ -75,6 +71,18 @@ class User(BaseModel, UserMixin):
 class APIClient(BaseModel):
     name = CharField(unique=True)
     token = CharField(default=random_string)
+    permissions = CharField(default='')
+
+    def has_permission(self, permission: str) -> bool:
+        return permission in self.permissions.split(',')
+
+    def add_permission(self, permission: str) -> None:
+        permission = permission.replace(' ', '')
+        if not self.has_permission(permission):
+            if self.permissions and not self.permissions[-1] == ',':
+                self.permissions += ','
+            self.permissions += permission + ','
+            self.save()
 
 
 class Subscriber(BaseModel):
@@ -89,7 +97,7 @@ class Subscriber(BaseModel):
             'keys': {'auth': self.auth,
                      'p256dh': self.p256dh
                      }
-            }
+        }
 
     def push(self, message: str, icon: str = '/static/favicon.ico') -> None:
         WebPusher(self.to_dict()).send(
@@ -130,4 +138,45 @@ class SecurityEvent(BaseModel):
     in_progress = BooleanField(default=True)
     datetime = DateTimeField(default=datetime.datetime.now)
     duration = IntegerField(null=True)
-    #new = BooleanField(default=True)
+    # new = BooleanField(default=True)
+
+
+class OAuthClient(BaseModel):
+    name = CharField()
+    user = ForeignKeyField(User, related_name='oauth_clients')
+
+    client_id = CharField(primary_key=True)
+    client_secret = CharField(unique=True)
+
+
+class Token(BaseModel):
+    client = ForeignKeyField(OAuthClient, related_name='tokens')
+    user = ForeignKeyField(User, related_name='tokens')
+    token_type = CharField()
+    access_token = CharField(unique=True)
+    refresh_token = CharField(unique=True)
+    expires = DateTimeField()
+    _scopes = CharField(null=True)
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+        return self
+
+    @property
+    def scopes(self):
+        if self._scopes:
+            return self._scopes.split()
+        return []
+
+
+class Grant:
+    def __init(self, user: User, client_id: str, client: OAuthClient, code: str, redirect_uri: str, _scopes: str,
+               expires: datetime.date):
+        self.user = user
+        self.client_id = client_id
+        self.client = client
+        self.code = code
+        self.redirect_uri = redirect_uri
+        self._scopes = _scopes
+        self.expires = expires
