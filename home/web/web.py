@@ -16,7 +16,7 @@ import home.core.parser as parser
 import home.core.utils as utils
 from home.core.async import run
 from home.core.models import devices, interfaces, get_action, actions, get_interface, get_driver, widgets, get_device, \
-    MultiDevice, get_display
+    MultiDevice, get_display, displays
 from home.settings import SECRET_KEY, LOG_FILE, PUBLIC_GROUPS
 from home.web.models import *
 from home.web.models import User, APIClient
@@ -73,6 +73,7 @@ def index():
                                debug=DEBUG,
                                qr=get_qr(),
                                widgets=widget_html,
+                               displays=displays,
                                )
     return render_template('index.html', interfaces=interface_list, devices=devices)
 
@@ -332,7 +333,7 @@ def test_push(client):
     return '', 204
 
 
-@app.route("/display/<disp>")
+@app.route("/displays/<disp>")
 @login_required
 def display(disp):
     disp = get_display(disp)
@@ -357,7 +358,10 @@ def guest_auth(path):
 @socketio.on("widget")
 @ws_login_required
 def widget(data):
-    target = widgets[data['id']]
+    try:
+        target = widgets[data['id']]
+    except KeyError:
+        emit('reload')
     if target[3].group in current_user.groups or target[3].group in PUBLIC_GROUPS or current_user.admin:
         if target[0] == 'method':
             app.logger.info(

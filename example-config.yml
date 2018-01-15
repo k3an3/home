@@ -415,6 +415,21 @@ actions:
          - host: 172.24.0.240
            port: 22
 
+# Displays
+#
+# Multiple display panels can be configured here.
+displays:
+    general:
+    - !display
+      name: hallway
+      # Whether this display should show device and action widgets, like the homepage. Default True.
+      controls: True
+      widgets:
+      - device: Weather
+        config:
+         lat: 41
+         lon: -87
+
 # Cron
 #
 # Cron jobs are defined here. These are actions or methods that are

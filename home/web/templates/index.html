@@ -186,24 +186,6 @@
                             </div>
                         {% endfor %}
                     </div>
-                    <div class="panel panel-primary">
-                        <div class="panel-heading">
-                            <h3 class="panel-title">Interface Visibility</h3>
-                        </div>
-                        {% for interface, blah in interfaces %}
-                            <div class="panel-body">
-                                <strong>{{ interface }}</strong>
-                                <input class="visibility" type="checkbox" id="{{ interface }}" {% if interface.public %}checked{% endif %}>
-                            </div>
-                        {% endfor %}
-                    </div>
-                    <div class="panel panel-primary">
-                        <div class="panel-heading">
-                            <h3 class="panel-title">Guest Display</h3>
-                        </div>
-                        <a href="{% if current_user.admin %}/display{% else %}{{ qr[1] }}{% endif %}"><img src="data:image/png;base64, {{ qr[0] }}" alt="qr code"/></a>
-                        <a href="javascript:void(0)" id="refresh_display">Refresh</a>
-                    </div>
                 {% endif %}
             </div>
             <div class="col-md-6">
@@ -262,6 +244,30 @@
                     <h3>Logs</h3>
                     <pre class="pre-scrollable"><code id="logs">Loading...</code></pre>
                     <button class="btn btn-primary" id="refresh_logs">Refresh Logs</button>
+                    <br>
+                    <br>
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Interface Visibility</h3>
+                    </div>
+                    {% for interface, blah in interfaces %}
+                        <div class="panel-body">
+                            <strong>{{ interface }}</strong>
+                            <input class="visibility" type="checkbox" id="{{ interface }}" {% if interface.public %}checked{% endif %}>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Guest Display</h3>
+                    </div>
+                    <img src="data:image/png;base64, {{ qr[0] }}" alt="qr code"/>
+                    {% for display in displays %}
+                        <a href="/displays/{{ display }}"><button class="btn btn-default">{{ display }}</button></a><br>
+                    {% endfor %}
+                    <button class="btn btn-primary" id="refresh_display">Refresh Displays</button>
+                    <br>
+                </div>
                 {% endif %}
             </div>
         {% endif %}
