@@ -1,4 +1,5 @@
 import socket
+from ast import literal_eval
 
 from home.web.utils import send_to_subscribers
 
@@ -7,7 +8,6 @@ class Ping:
     def __init__(self, host=None, port=None):
         self.host = host
         self.port = port
-        self.state = {}
 
     def ping(self, host=None, port=None):
         host = host or self.host
@@ -18,15 +18,22 @@ class Ping:
             s.connect((host, port))
             s.shutdown(2)
             s.close()
-            self.state[host] = True
-        except Exception as e:
-            if self.state.get('host', True):
-                send_to_subscribers("Failed to ping " + host)
-            self.state[host] = False
-            return e
+            return True
+        except Exception:
+            return False
 
     def ping_all(self, hosts):
-        results = []
+        results = {}
+        try:
+            with open('.ping.last') as f:
+                last_results = literal_eval(f.read())
+        except FileNotFoundError:
+            last_results = {}
         for target in hosts:
-            results.append(self.ping(target['host'], target['port']))
+            result = self.ping(target['host'], target['port'])
+            if not result and last_results.get(target['host'], True):
+                send_to_subscribers("Failed to ping " + target['host'])
+            results[target['host']] = result
+        with open('.ping.last', 'w') as f:
+            f.write(str(results))
         return results

@@ -8,6 +8,14 @@ var bright = 100;
 var target = "0";
 $('#messages').hide();
 
+ws.emit('admin', {
+    command: 'refresh logs',
+});
+
+ws.emit('admin', {
+    command: 'get config',
+});
+
 function editDevice() {
     ws.emit('admin', {
         action: 'add',
@@ -175,14 +183,6 @@ $(".saveperms").click(function() {
         });
 });
 
-
-ws.emit('admin', {
-    command: 'refresh logs',
-});
-
-ws.emit('admin', {
-    command: 'get config',
-});
 
 setTimeout(function () {
     $('#messages2').fadeOut();
