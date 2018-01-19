@@ -267,7 +267,7 @@ class Display(YAMLObject):
     """
     yaml_tag = '!display'
 
-    def __init__(self, name: str, widgets: List[Dict], controls: bool = True, template: str = ""):
+    def __init__(self, name: str, widgets: List[Dict] = [], controls: bool = True, template: str = ""):
         self.name = name
         self.widgets = widgets
         self.controls = controls
