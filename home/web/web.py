@@ -340,7 +340,7 @@ def display(disp):
     if disp.group in current_user.groups or disp.group in PUBLIC_GROUPS:
         dashboard = disp.render()
         widget_html = get_widgets(current_user) + get_action_widgets(current_user)
-        return render_template('display.html',
+        return render_template(disp.template or 'display.html',
                                dashboard=dashboard,
                                widgets=widget_html
                                )

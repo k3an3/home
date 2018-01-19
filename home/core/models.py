@@ -267,10 +267,11 @@ class Display(YAMLObject):
     """
     yaml_tag = '!display'
 
-    def __init__(self, name: str, widgets: List[Dict], controls: bool = True):
+    def __init__(self, name: str, widgets: List[Dict], controls: bool = True, template: str = ""):
         self.name = name
         self.widgets = widgets
         self.controls = controls
+        self.template = template
 
     def render(self) -> str:
         html = []
