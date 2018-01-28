@@ -72,23 +72,19 @@ class Device(YAMLObject):
             try:
                 self.dev = dev(**config_d)
             except Exception as e:
-                raise DeviceSetupError("Failed to configure device '" + self.name + "'")
-            if self.widget:
-                try:
-                    self.build_widget(self.dev.widget)
-                    widgets.update(self.widget['mapping'])
-                except AttributeError:
-                    pass
-            try:
+                raise DeviceSetupError("Failed to configure device '" + self.name + "': " + e)
+            if self.widget and hasattr(self.dev, 'widget'):
+                self.build_widget(self.dev.widget)
+                widgets.update(self.widget['mapping'])
+            if hasattr(self.dev, 'actions'):
                 for action in self.dev.actions:
-                    for d in action['devices']:
+                    ta = dict(action)
+                    for d in ta['devices']:
                         d['name'] = self.name
-                    a = Action(name=action['name'], devices=action['devices'])
+                    a = Action(name=action['name'] + " " + self.name, devices=ta['devices'])
                     a.setup()
                     a.group = self.group
                     actions.append(a)
-            except AttributeError:
-                pass
 
     def build_widget(self, config: Dict) -> str:
         mapping = {}
@@ -109,7 +105,7 @@ class Device(YAMLObject):
             )
             mapping[_id] = ('method' if button.get('method') else 'action',
                             method_from_name(self.dev, button.get('method')) if button.get('method')
-                            else button.get('action'), button.get('config', {}), self)
+                            else button.get('action') + " " + self.name, button.get('config', {}), self)
         if len(buttons) > 1:
             html += '</div>'
         html += '</div></div>'
