@@ -13,6 +13,8 @@ import yaml
 # Arrays to store object instances
 from typing import Iterator, Dict, List, Callable
 
+from copy import deepcopy
+
 from home.core.async import scheduler, multiprocessing_run, run
 from home.core.utils import class_from_name, method_from_name, random_string
 from home.settings import TEMPLATE_DIR, DEVICE_HISTORY
@@ -77,11 +79,11 @@ class Device(YAMLObject):
                 self.build_widget(self.dev.widget)
                 widgets.update(self.widget['mapping'])
             if hasattr(self.dev, 'actions'):
-                for action in self.dev.actions:
-                    ta = dict(action)
-                    for d in ta['devices']:
+                ta = deepcopy(self.dev.actions)
+                for action in ta:
+                    for d in action['devices']:
                         d['name'] = self.name
-                    a = Action(name=action['name'] + " " + self.name, devices=ta['devices'])
+                    a = Action(name=action['name'] + " " + self.name, devices=action['devices'])
                     a.setup()
                     a.group = self.group
                     actions.append(a)
