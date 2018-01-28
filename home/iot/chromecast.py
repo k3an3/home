@@ -93,7 +93,7 @@ class Chromecast:
 
     @get_cast
     def get_status(self):
-        return self.cast.media_controller.status
+        return self.cast.media_controller.status.player_state
 
     @get_cast
     def stop(self):

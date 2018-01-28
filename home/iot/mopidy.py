@@ -28,9 +28,13 @@ SPOTIFY_API = 'https://api.spotify.com/v1/{}'
 
 class Spotify:
     def __init__(self, client_id, client_secret):
-        self.token = self.auth(client_id, client_secret)
+        self.client_id = client_id
+        self.client_secret = client_secret
+        self.token = None
 
     def spotify_get(self, query):
+        if not self.token:
+            self.auth(self.client_id, self.client_secret)
         return requests.get(SPOTIFY_API.format(query), headers={'Authorization': 'Bearer ' + self.token}).json()
 
     def auth(self, cid, cs):
