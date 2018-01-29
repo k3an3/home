@@ -7,6 +7,7 @@
 * LDAP login logic fixes
 * Multiple, configurable display panels with ACLs
 * Protect against CORS WS attacks
+* Fix bug preventing long-running WebSockets
 
 ## v0.10
 * Chainable actions

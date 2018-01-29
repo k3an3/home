@@ -131,7 +131,8 @@ class MultiDevice(YAMLObject):
         elif name == 'widget':
             return self.widget
         elif name == 'dev':
-            return self.devices[0].dev
+            #return self.devices[0].dev
+            return self
 
         def method(*args, **kwargs):
             for device in self.devices:
