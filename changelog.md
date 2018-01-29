@@ -8,6 +8,12 @@
 * Multiple, configurable display panels with ACLs
 * Protect against CORS WS attacks
 * Fix bug preventing long-running WebSockets
+* API client enforced ACLs, modifyable on admin panel
+* Several admin functions served asynchronously
+* Ping module push notifications only alert when devices go down
+* Various admin features
+* Improve logging inconsistencies
+* Device config.yml now modifiable and validated from web
 
 ## v0.10
 * Chainable actions
