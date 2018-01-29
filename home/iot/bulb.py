@@ -88,7 +88,6 @@ HF_COMMAND = 'HF-A11ASSISTHREAD'.encode()
 HF_COMMAND_OK = '+ok'.encode()
 
 prepare_hex = lambda x: format(x, 'x').zfill(2)
-socket.setdefaulttimeout(20)
 
 
 def calc_sunlight() -> int:
@@ -182,6 +181,7 @@ class Bulb:
             # Compute checksum
             data.append(sum(data) % 256)
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.settimeout(20)
             sock.connect((self.host, CONTROL_PORT))
             sock.send(data)
             sock.close()

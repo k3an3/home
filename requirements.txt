@@ -15,6 +15,7 @@ cryptography
 cssmin
 ecdsa
 enum-compat
+eventlet
 flake8
 Flask
 Flask-Assets
