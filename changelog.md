@@ -6,6 +6,7 @@
 * Allow driver modules to define actions in a class attribute
 * LDAP login logic fixes
 * Multiple, configurable display panels with ACLs
+* Protect against CORS WS attacks
 
 ## v0.10
 * Chainable actions

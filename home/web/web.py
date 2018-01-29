@@ -30,7 +30,7 @@ except ImportError:
 
 app = Flask(__name__, template_folder='templates')
 app.secret_key = SECRET_KEY
-socketio = SocketIO(app)
+socketio = SocketIO(app, cors_allowed_origins=[])
 login_manager = LoginManager()
 login_manager.init_app(app)
 app.jinja_env.globals['csrf_token'] = generate_csrf_token
