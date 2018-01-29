@@ -69,12 +69,21 @@ def change_state():
     emit('state change', {'state': sec.state, 'message': message}, broadcast=True)
 
 
-@socketio.on('get video')
+@socketio.on('get feeds')
 @ws_login_required
-def get_video(page=6):
-    feeds = [d.name for d in devices if d.driver.name == 'motion']
+def get_feeds():
+    feeds = [d.name for d in devices if d.driver.name == 'motion' and current_user.has_permission(d)]
+    emit('push video', {'feeds': feeds})
+
+
+@socketio.on('get recordings')
+@ws_login_required
+def get_recordings(page=6):
+    if not current_user.admin:
+        disconnect()
     recordings = {}
     for dir in settings.SECURITY_FOOTAGE_DIRS:
         recordings[os.path.basename(dir)] = sorted(os.listdir(dir),
-                                                   key=lambda x: os.path.getmtime(os.path.join(dir, x)))[-page - 1:-page + 5]
-    emit('push video', {'feeds': feeds, 'recordings': recordings})
+                                                   key=lambda x: os.path.getmtime(os.path.join(dir, x)))[
+                                            -page - 1:-page + 5]
+    emit('push video', {'recordings': recordings})

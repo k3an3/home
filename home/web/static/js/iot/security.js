@@ -7,15 +7,19 @@ var recordings_visible = false;
 var page = 6;
 
 ws.on('push video', function(data) {
-    $("#monitor").html('');
-    data.feeds.forEach(function(e) {
-        $('#monitor').append('<img class="feed img-responsive" style="float:left;width:50%;" data-src="/security/stream/' + e + '/" title="' + e + '">')
-    });
-    $("#recordings").html('');
-    for (var key in data.recordings) {
-        data.recordings[key].forEach(function(e) {
-            $('#recordings').append('<a target="_blank" href="/security/recordings/' + key + '/' + e + '"><video type="video/mp4" style="float:left;width:30%;margin 0 auto;" src="/security/recordings/' + key + '/' + e + '" title="' + e + '"autoplay loop></video></a>');
+    if (data.feeds != null) {
+        $("#monitor").html('');
+        data.feeds.forEach(function (e) {
+            $('#monitor').append('<img class="feed img-responsive" style="float:left;width:50%;" data-src="/security/stream/' + e + '/" title="' + e + '">')
         });
+    }
+    if (data.recordings != null) {
+        $("#recordings").html('');
+        for (var key in data.recordings) {
+            data.recordings[key].forEach(function (e) {
+                $('#recordings').append('<a target="_blank" href="/security/recordings/' + key + '/' + e + '"><video type="video/mp4" style="float:left;width:30%;margin 0 auto;" src="/security/recordings/' + key + '/' + e + '" title="' + e + '"autoplay loop></video></a>');
+            });
+        }
     }
     if (streams_visible)
         reveal_stream();
@@ -38,7 +42,7 @@ function toggle_streams() {
         hide_stream();
     }
     else {
-        ws.emit('get video');
+        ws.emit('get feeds');
         reveal_stream();
     }
 }
@@ -48,7 +52,7 @@ function toggle_recordings() {
         hide_recs();
     }
     else {
-        ws.emit('get video');
+        ws.emit('get recordings');
         reveal_recs();
     }
 }

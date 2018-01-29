@@ -6,7 +6,7 @@ Module to interact with Motion's HTTP API.
 """
 import requests
 from flask import abort, make_response
-from flask_login import login_required
+from flask_login import login_required, current_user
 
 from home.core.models import get_device
 from home.web.web import app
@@ -74,9 +74,10 @@ def stream(camera):
         abort(404)
     if not camera.driver.klass == MotionController:
         raise NotImplementedError
-    response = make_response()
-    response.headers['X-Accel-Redirect'] = '/stream/' + camera.name
-    return response
+    if current_user.has_permission(camera):
+        response = make_response()
+        response.headers['X-Accel-Redirect'] = '/stream/' + camera.name
+        return response
 
 
 @app.route("/security/recordings/<path:video>")
@@ -87,6 +88,8 @@ def recordings(video):
     :param camera: 
     :return: 
     """
+    if not current_user.admin:
+        abort(403)
     response = make_response()
     response.headers['X-Accel-Redirect'] = '/videos/' + video
     return response

@@ -6,7 +6,6 @@
 * Allow driver modules to define actions in a class attribute
 * LDAP login logic fixes
 * Multiple, configurable display panels with ACLs
-* Protect against CORS WS attacks
 * Fix bug preventing long-running WebSockets
 * API client enforced ACLs, modifyable on admin panel
 * Several admin functions served asynchronously
@@ -14,6 +13,7 @@
 * Various admin features
 * Improve logging inconsistencies
 * Device config.yml now modifiable and validated from web
+* Security fixes
 
 ## v0.10
 * Chainable actions

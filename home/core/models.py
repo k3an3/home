@@ -74,7 +74,7 @@ class Device(YAMLObject):
             try:
                 self.dev = dev(**config_d)
             except Exception as e:
-                raise DeviceSetupError("Failed to configure device '" + self.name + "': " + e)
+                raise DeviceSetupError("Failed to configure device '" + self.name + "': " + str(e))
             if self.widget and hasattr(self.dev, 'widget'):
                 self.build_widget(self.dev.widget)
                 widgets.update(self.widget['mapping'])

@@ -1,6 +1,6 @@
 import datetime
 import json
-from typing import List, Dict
+from typing import List, Dict, Any
 
 from flask_login import UserMixin
 from passlib.hash import sha256_crypt
@@ -10,7 +10,7 @@ from peewee import CharField, BooleanField, ForeignKeyField, IntegerField, \
 from pywebpush import WebPusher
 
 from home.core.utils import random_string
-from home.settings import GOOGLE_API_KEY, USE_LDAP, db, DEBUG
+from home.settings import GOOGLE_API_KEY, USE_LDAP, db, DEBUG, PUBLIC_GROUPS
 
 grants = []
 
@@ -66,6 +66,12 @@ class User(BaseModel, UserMixin):
     @property
     def groups(self) -> List[str]:
         return self._groups.split(',')
+
+    def has_permission(self, obj: Any = None, group: str = "") -> bool:
+        if obj:
+            return obj.group in PUBLIC_GROUPS or obj.group in self.groups or self.admin
+        elif group:
+            return group in PUBLIC_GROUPS or group in self.groups or self.admin
 
 
 class APIClient(BaseModel):

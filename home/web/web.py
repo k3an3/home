@@ -17,7 +17,7 @@ import home.core.utils as utils
 from home.core.async import run
 from home.core.models import devices, interfaces, get_action, actions, get_interface, get_driver, widgets, get_device, \
     MultiDevice, get_display, displays
-from home.settings import SECRET_KEY, LOG_FILE, PUBLIC_GROUPS
+from home.settings import SECRET_KEY, LOG_FILE
 from home.web.models import *
 from home.web.models import User, APIClient
 from home.web.utils import ws_login_required, generate_csrf_token, VERSION, api_auth_required, send_to_subscribers, \
@@ -337,7 +337,7 @@ def test_push(client):
 @login_required
 def display(disp):
     disp = get_display(disp)
-    if disp.group in current_user.groups or disp.group in PUBLIC_GROUPS:
+    if current_user.has_permission(disp):
         dashboard = disp.render()
         widget_html = get_widgets(current_user) + get_action_widgets(current_user)
         return render_template(disp.template or 'display.html',
@@ -364,7 +364,7 @@ def widget(data):
         # Widget is out of date. Force client reload
         emit('reload')
         return
-    if target[3].group in current_user.groups or target[3].group in PUBLIC_GROUPS or current_user.admin:
+    if current_user.has_permission(target[3]):
         if target[0] == 'method':
             app.logger.info(
                 "({}) Execute {} on {} with config {}".format(current_user.username, target[1].__name__, target[3].name,
@@ -386,7 +386,7 @@ def widget(data):
 @ws_login_required
 def device_state(data):
     target = get_device(data['device'])
-    if target.group in current_user.groups or target.group in PUBLIC_GROUPS or current_user.admin:
+    if current_user.has_permission(target):
         try:
             emit('device state', {'device': target.name, 'state': target.dev.get_state()})
         except AttributeError:

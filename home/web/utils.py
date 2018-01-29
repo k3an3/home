@@ -13,7 +13,7 @@ from flask_login import current_user
 from flask_socketio import disconnect
 from ldap3 import Server, Connection, ALL_ATTRIBUTES
 from peewee import DoesNotExist
-from typing import List
+from typing import List, Any
 
 from home.core.async import run
 from home.core.models import get_device, devices, actions, MultiDevice
@@ -156,7 +156,7 @@ def get_qr() -> (str, str):
 def get_widgets(user: User) -> List[str]:
     widget_html = []
     for d in devices:
-        if d.group in PUBLIC_GROUPS or d.group in user.groups or user.admin:
+        if user.has_permission(d):
             try:
                 widget_html.append(d.widget['html'])
             except (AttributeError, TypeError):
@@ -168,7 +168,7 @@ def get_action_widgets(user: User) -> List[str]:
     widget_html = []
     groups = get_groups(actions)
     for group in groups:
-        if group in user.groups or group in PUBLIC_GROUPS or user.admin:
+        if user.has_permission(group=group):
             html = ''
             html += '<div class="widget-panel panel panel-info"><div class="panel-heading"><h3 ' \
                     'class="panel-title">{}</h3></div><div class="panel-body">'.format(group)
