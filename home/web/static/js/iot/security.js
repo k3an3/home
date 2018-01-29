@@ -27,13 +27,13 @@ ws.on('push video', function(data) {
 
 function next_page() {
     page += 6;
-    ws.emit('get video', page);
+    ws.emit('get recordings', page);
 }
 
 function prev_page() {
     if (page >= 12) {
         page -= 6;
-        ws.emit('get video', page);
+        ws.emit('get recordings', page);
     }
 }
 
