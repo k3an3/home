@@ -361,7 +361,9 @@ def widget(data):
     try:
         target = widgets[data['id']]
     except KeyError:
+        # Widget is out of date. Force client reload
         emit('reload')
+        return
     if target[3].group in current_user.groups or target[3].group in PUBLIC_GROUPS or current_user.admin:
         if target[0] == 'method':
             app.logger.info(

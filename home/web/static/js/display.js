@@ -3,9 +3,9 @@ var ws = io.connect('//' + document.domain + ':' + location.port);
 $('#widgets').hide();
 $('#update').hide();
 nextbus();
-presence();
+//presence();
 setInterval(nextbus, 30000);
-setInterval(presence, 10000);
+//setInterval(presence, 10000);
 $('.btn').addClass('btn-block');
 $('.btn-group').removeClass('btn-group');
 
