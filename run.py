@@ -1,18 +1,4 @@
 #!/usr/bin/env python3
-import logging
-import os
-import sys
-from logging.handlers import RotatingFileHandler
-
-from home import settings
-from home.core.parser import parse
-from home.web.models import db_init
-from home.web.utils import gen_guest_login
-from home.web.web import socketio, app
-
-sys.path.append(os.path.dirname(os.path.realpath(__file__)))
-
-db_init()
 try:
     import eventlet
 
@@ -35,6 +21,21 @@ except ImportError:
         print('Using threading')
         create_thread_func = lambda f: threading.Thread(target=f)
         start_thread_func = lambda t: t.start()
+
+import logging
+import os
+import sys
+from logging.handlers import RotatingFileHandler
+
+from home import settings
+from home.core.parser import parse
+from home.web.models import db_init
+from home.web.utils import gen_guest_login
+from home.web.web import socketio, app
+
+sys.path.append(os.path.dirname(os.path.realpath(__file__)))
+
+db_init()
 
 try:
     parse(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'config.yml'))
