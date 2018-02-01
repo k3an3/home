@@ -98,45 +98,20 @@ def send_to_subscribers(message: str) -> None:
 
 def handle_task(post: dict, client: APIClient) -> bool:
     device = get_device(post.pop('device').strip())
-    try:
-        c_method, c_kwargs = device.last.pop()
-    except IndexError:
-        c_method, c_kwargs = None, None
-    try:
-        l_method, l_kwargs = device.last.pop()
-    except IndexError:
-        l_method, l_kwargs = None, None
-    else:
-        device.last.append((l_method, l_kwargs))
-        device.last.append((c_method, c_kwargs))
-    if post.get('method') == 'last':
-        # The most recent action
-        # The previous action
-        method = l_method
-        kwargs = l_kwargs
-    else:
-        method = method_from_name(device.dev, post.pop('method'))
-        if post.get('increment'):
-            kwargs = c_kwargs
-            kwargs[post['increment']] += post.get('count', 1)
-        elif post.get('decrement'):
-            kwargs = c_kwargs
-            kwargs[post['decrement']] += post.get('count', 1)
-        else:
-            kwargs = post
+    method = method_from_name(device.dev, post.pop('method'))
     from home.web.web import app
     if not client.has_permission(device.group):
         app.logger.warning(
             "({}) Insufficient API permissions to execute '{}' on '{}' with config {}".format(
-                client.name, method.__name__, device.name, kwargs))
+                client.name, method.__name__, device.name, post))
         return False
-    device.last.append((method, kwargs))
+    device.last.append((method, post))
     app.logger.info(
-        "({}) Execute '{}' on '{}' with config {}".format(client.name, method.__name__, device.name, kwargs))
+        "({}) Execute '{}' on '{}' with config {}".format(client.name, method.__name__, device.name, post))
     if device.driver.noserialize or type(device) is MultiDevice:
-        method(**kwargs)
+        method(**post)
     else:
-        device.last_task = run(method, **kwargs)
+        device.last_task = run(method, **post)
     return True
 
 

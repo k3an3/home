@@ -5,19 +5,17 @@ models.py
 Contains classes to represent objects created by the parser.
 """
 import os
-from collections import deque
+from copy import deepcopy
 from multiprocessing import Process
 from time import sleep
-
-import yaml
 # Arrays to store object instances
 from typing import Iterator, Dict, List, Callable
 
-from copy import deepcopy
+import yaml
 
 from home.core.async import scheduler, multiprocessing_run, run
 from home.core.utils import class_from_name, method_from_name, random_string
-from home.settings import TEMPLATE_DIR, DEVICE_HISTORY
+from home.settings import TEMPLATE_DIR
 
 drivers = []
 devices = []
@@ -52,7 +50,6 @@ class Device(YAMLObject):
         self.config = config
         self.uuid = random_string()
         self.dev = None
-        self.last = deque(maxlen=DEVICE_HISTORY)
         self.last_task = None
         self.widget = widget
 
@@ -223,14 +220,8 @@ class Action(YAMLObject):
         for callback, args, kwargs in self.subscriptions:
             callback(*args, **kwargs)
         for device, config in self.devices:
-            if config['method'] == 'last':
-                method = method_from_name(device.dev, device.last_method)
-                kwargs = device.last_kwargs
-            else:
-                method = method_from_name(device.dev, config['method'])
-                kwargs = config.get('config', {})
-                device.last_method = method
-                device.last_kwargs = kwargs
+            method = method_from_name(device.dev, config['method'])
+            kwargs = config.get('config', {})
             print("Execute action", config['method'])
             if device.driver.noserialize or type(device) is MultiDevice:
                 multiprocessing_run(target=method, delay=config.get('delay', 0), **kwargs)
