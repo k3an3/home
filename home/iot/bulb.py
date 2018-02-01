@@ -197,7 +197,7 @@ class Bulb:
         city = a[settings.LOCATION]
         sun = city.sun(date=datetime.now(), local=True)
         dt = datetime.now(sun['sunset'].tzinfo)
-        minutes_until_sunset = (dt - sun['sunset']).total_seconds() / 60 * -1
+        minutes_until_sunset = (sun['sunset'] - dt).total_seconds() / 60
         if 0 <= minutes_until_sunset <= self.sunset_minutes:
             self.sunlight()
 
