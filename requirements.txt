@@ -23,7 +23,7 @@ Flask-Login
 #flask_oauthlib
 Flask-SocketIO
 future
-gevent
+#gevent
 greenlet
 http-ece
 idna
