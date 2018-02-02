@@ -105,7 +105,6 @@ def handle_task(post: dict, client: APIClient) -> bool:
             "({}) Insufficient API permissions to execute '{}' on '{}' with config {}".format(
                 client.name, method.__name__, device.name, post))
         return False
-    device.last.append((method, post))
     app.logger.info(
         "({}) Execute '{}' on '{}' with config {}".format(client.name, method.__name__, device.name, post))
     if device.driver.noserialize or type(device) is MultiDevice:
