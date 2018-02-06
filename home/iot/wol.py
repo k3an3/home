@@ -6,7 +6,7 @@ Wrapper for wake-on-lan automation
 """
 import subprocess
 
-from wakeonlan import wol
+from wakeonlan import send_magic_packet
 
 
 class WakeOnLAN:
@@ -30,4 +30,4 @@ class WakeOnLAN:
         if self.interface:
             subprocess.run(['sudo', '/usr/sbin/ether-wake', '-i', self.interface, self.mac])
         else:
-            wol.send_magic_packet(self.mac, ip_address=self.host, port=self.port)
+            send_magic_packet(self.mac, ip_address=self.host, port=self.port)

@@ -1,13 +1,13 @@
-import datetime
 import json
-from typing import List, Dict, Any
 
+import datetime
 from flask_login import UserMixin
 from passlib.hash import sha256_crypt
 from peewee import CharField, BooleanField, ForeignKeyField, IntegerField, \
     DateTimeField, \
-    OperationalError, Model
+    Model, IntegrityError
 from pywebpush import WebPusher
+from typing import List, Dict, Any
 
 from home.core.utils import random_string
 from home.settings import GOOGLE_API_KEY, USE_LDAP, db, DEBUG, PUBLIC_GROUPS
@@ -33,7 +33,7 @@ def db_init() -> None:
             u.admin = True
             u.save()
             SecurityController.create()
-    except OperationalError:
+    except IntegrityError:
         pass
     db.close()
 
