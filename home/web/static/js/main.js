@@ -150,9 +150,11 @@ ws.on('config', function(config) {
     $('#config').html(config);
 });
 
+/*
 $(".device-status").each(function() {
     ws.emit('device state', {'device': this.id.split('-')[1].replace('_', ' ')});
 });
+*/
 
 // https://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
 function rgbToHex(r, g, b) {
