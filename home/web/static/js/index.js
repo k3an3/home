@@ -7,6 +7,12 @@ $('.tab a').click(function (e) {
     $(this).tab('show');
 });
 
+$('#homea').click(function() {
+    $('.navbar-nav li').each(function() {
+        $(this).removeClass('active');
+    });
+});
+
 function updateTarget(newTarget) {
     target = newTarget;
 }
