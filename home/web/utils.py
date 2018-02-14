@@ -97,8 +97,11 @@ def send_to_subscribers(message: str) -> None:
 
 
 def handle_task(post: dict, client: APIClient) -> bool:
-    device = get_device(post.pop('device').strip())
-    method = method_from_name(device.dev, post.pop('method'))
+    try:
+        device = get_device(post.pop('device').strip())
+        method = method_from_name(device.dev, post.pop('method'))
+    except StopIteration:
+        return False
     from home.web.web import app
     if not client.has_permission(device.group):
         app.logger.warning(

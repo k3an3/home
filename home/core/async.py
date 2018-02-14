@@ -7,14 +7,16 @@ exist here and handle the execution of whatever task is passed to it, whether or
 """
 from multiprocessing import Process
 from time import sleep
+from typing import Callable
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from celery import Celery
 from celery.security import setup_security
 from celery.utils.log import get_task_logger
-from typing import Callable
+from raven import Client
+from raven.contrib.celery import register_signal, register_logger_signal
 
-from home.settings import ASYNC_MODE
+from home.settings import ASYNC_MODE, SENTRY_URL
 
 setup_security(allowed_serializers=['pickle', 'json'],
                serializer='pickle')
@@ -64,3 +66,25 @@ def multiprocessing_run(target: Callable, delay: float = 0, **kwargs):
     if delay:
         sleep(delay)
     Process(target=target, kwargs=kwargs).start()
+
+
+if SENTRY_URL:
+    client = Client(SENTRY_URL)
+
+    # register a custom filter to filter out duplicate logs
+    register_logger_signal(client)
+
+    # The register_logger_signal function can also take an optional argument
+    # `loglevel` which is the level used for the handler created.
+    # Defaults to `logging.ERROR`
+    import logging
+
+    register_logger_signal(client, loglevel=logging.INFO)
+
+    # hook into the Celery error handler
+    register_signal(client)
+
+    # The register_signal function can also take an optional argument
+    # `ignore_expected` which causes exception classes specified in Task.throws
+    # to be ignored
+    register_signal(client, ignore_expected=True)

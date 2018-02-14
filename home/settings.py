@@ -19,6 +19,7 @@ LDAP_ADMIN_GID = 10000
 SPOTIFY_API_KEY = 'your_key_here'
 ASYNC_MODE = 'multiprocessing'
 MEDIA_TEST_URI = '/test.mp4'
+SENTRY_URL = ''
 db = SqliteDatabase('app.db')
 # db = MySQLDatabase(host="localhost", database="home", user="home", passwd="home")
 

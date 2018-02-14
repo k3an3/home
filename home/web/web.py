@@ -10,6 +10,7 @@ from flask_login import LoginManager, login_required, current_user
 from flask_login import login_user, logout_user
 from flask_socketio import SocketIO, emit, disconnect
 from peewee import DoesNotExist
+from raven.contrib.flask import Sentry
 from webassets.loaders import PythonLoader as PythonAssetsLoader
 
 import home.core.parser as parser
@@ -17,7 +18,7 @@ import home.core.utils as utils
 from home.core.async import run
 from home.core.models import devices, interfaces, get_action, actions, get_interface, get_driver, widgets, get_device, \
     MultiDevice, get_display, displays
-from home.settings import SECRET_KEY, LOG_FILE
+from home.settings import SECRET_KEY, LOG_FILE, SENTRY_URL
 from home.web.models import *
 from home.web.models import User, APIClient
 from home.web.utils import ws_login_required, generate_csrf_token, VERSION, api_auth_required, send_to_subscribers, \
@@ -48,6 +49,9 @@ try:
     app.config.update(LDAP_CONFIG)
 except ImportError:
     ldap = None
+
+if SENTRY_URL:
+    sentry = Sentry(app, dsn=SENTRY_URL)
 
 
 @app.route('/', methods=['GET', 'POST'])
