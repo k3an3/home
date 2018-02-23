@@ -29,6 +29,7 @@ queue = Celery('home',
 queue.conf.update(
     CELERY_TASK_SERIALIZER='pickle',
     CELERY_ACCEPT_CONTENT=['pickle', 'json'],
+    CELERY_TASK_SOFT_TIME_LIMIT=30,
 )
 
 try:
