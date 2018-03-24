@@ -127,6 +127,7 @@ def command_api(client):
 def ws_admin(data):
     if not current_user.admin:
         disconnect()
+        return
     command = data.get('command')
     if command == 'action':
         app.logger.info("({}) Execute action '{}'".format(current_user.username, data.get('action')))
