@@ -64,7 +64,8 @@ def index():
     interface_list = []
     for i in interfaces:
         interface_list.append((i, [d for d in devices if d.driver and d.driver.interface == i
-                                   and current_user.has_permission(d)]))
+                                   and current_user.has_permission(d) if current_user.is_authenticated
+                                   else True]))
     if current_user.is_active:
         widget_html = get_widgets(current_user) + get_action_widgets(current_user)
         return render_template('index.html',
