@@ -46,7 +46,8 @@ import sys
 
 from astral import Astral
 from datetime import datetime
-from flask_socketio import emit
+from flask_login import current_user
+from flask_socketio import emit, disconnect
 from typing import Dict
 
 from home import settings
@@ -248,9 +249,12 @@ def request_change_color(message):
     """
     Change the bulb's color.
     """
+    device = get_device(message['device'].replace('-', ' '))
+    if not current_user.has_permission(device):
+        disconnect()
+        return
     emit('push color', {"device": message['device'], "color": message['color']},
          broadcast=True)
-    device = get_device(message['device'].replace('-', ' '))
     device.dev.change_color(*utils.RGBfromhex(message['color']),
                             utils.num(message.get('white', 0)), message.get('bright', 100), '41'
                             )
