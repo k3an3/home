@@ -126,7 +126,6 @@ def command_api(client):
 @ws_login_required
 def ws_admin(data):
     if not current_user.admin:
-        disconnect()
         return
     command = data.get('command')
     if command == 'action':
