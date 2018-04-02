@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+from raven.handlers.logbook import SentryHandler
+
+from home.settings import SENTRY_URL
+
 try:
     import eventlet
 
@@ -45,6 +49,10 @@ except FileNotFoundError:
 handler = RotatingFileHandler('home.log', maxBytes=10000, backupCount=1)
 handler.setLevel(logging.INFO)
 handler.setFormatter(logging.Formatter("%(asctime)s: %(message)s"))
+if SENTRY_URL:
+    sentryhandler = SentryHandler(SENTRY_URL)
+    sentryhandler.setLevel(logging.ERROR)
+    app.logger.addHandler(sentryhandler)
 app.logger.addHandler(handler)
 app.logger.setLevel(logging.INFO)
 gen_guest_login()
