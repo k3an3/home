@@ -32,7 +32,9 @@ class Ping:
         for target in hosts:
             result = self.ping(target['host'], target['port'])
             if not result and last_results.get(target['host'], True):
-                send_to_subscribers("Failed to ping " + target['host'])
+                send_to_subscribers("Lost connectivity to " + target['host'])
+            elif result and not last_results.get(target['host'], True):
+                send_to_subscribers("Restored connectivity to " + target['host'])
             results[target['host']] = result
         with open('.ping.last', 'w') as f:
             f.write(str(results))
