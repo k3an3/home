@@ -16,3 +16,4 @@ config.yml
 *.pid
 *.sock
 .webassets-cache/
+.ping.last
