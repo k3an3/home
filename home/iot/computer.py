@@ -26,7 +26,12 @@ class Computer:
                 'text': 'Shut Down',
                 'method': 'power',
                 'config': {'state': 'off'},
-                'class': 'btn-warning'
+                'class': 'btn-danger'
+            },
+            {
+                'text': 'Reboot',
+                'method': 'restart',
+                'class': 'btn-danger'
             },
         )
     }
