@@ -2,7 +2,7 @@ import re
 import subprocess
 
 import paramiko
-from wakeonlan.wol import send_magic_packet
+from wakeonlan import send_magic_packet
 
 
 def escape(command):
