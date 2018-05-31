@@ -6,7 +6,7 @@ The application is in the early stages and is under rapid development. APIs may 
 ## Install
 For dev:
 ```
-$ pyvenv-3.x env
+$ python3.x -m venv env
 $ . env/bin/activate
 $ pip install -r requirements.txt --no-deps
 $ vim home/settings_local.py # Do local configuration
@@ -15,7 +15,7 @@ $ ./run.py
 ```
 For production:
 ```
-# python3 setup.py install
+# pip3 install .
 ### Configure nginx/apache to reverse proxy
 $ sudo cp scripts/systemd/* /etc/systemd/system # Edit path to install dir in both files
 $ sudo systemctl start home
