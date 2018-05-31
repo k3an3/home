@@ -42,6 +42,21 @@ class Computer:
         self.interface = manual_interface
         self.os = os
 
+    def on(self):
+        self.wake()
+
+    def off(self):
+        self.power('off')
+
+    def restart(self):
+        self.power('restart')
+
+    def reboot_to(self, boot_option: int):
+        if boot_option >= 0:
+            self.run_command('sudo grub-reboot ' + boot_option)
+            self.run_command('sudo grub2-reboot ' + boot_option)
+            self.restart()
+
     def wake(self):
         if self.interface:
             subprocess.run(['sudo', '/usr/sbin/ether-wake', '-i', self.interface, self.mac])
@@ -63,6 +78,10 @@ class Computer:
             self.run_command('sudo poweroff')
         elif state in ['sleep', 'suspend']:
             self.sleep()
+        elif state in ['restart', 'reboot']:
+            self.run_command('sudo reboot')
+        else:
+            raise NotImplementedError
 
     def run_command(self, command: str) -> str:
         ssh = paramiko.SSHClient()
