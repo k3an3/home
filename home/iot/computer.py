@@ -37,7 +37,7 @@ class Computer:
     }
 
     def __init__(self, mac, host=None, port=None, manual_interface=None, keyfile="~/.ssh/id_rsa", username="root",
-                 password=None, os: str = "linux"):
+                 password=None, os: str = "linux", wakeonlan: str = "native"):
         self.password = password
         self.username = username
         self.keyfile = keyfile
@@ -46,6 +46,7 @@ class Computer:
         self.port = port
         self.interface = manual_interface
         self.os = os
+        self.wakeonlan = wakeonlan
 
     def on(self):
         self.wake()
@@ -63,10 +64,12 @@ class Computer:
             self.restart()
 
     def wake(self):
-        if self.interface:
+        if self.wakeonlan == 'etherwake' and self.interface:
             subprocess.run(['sudo', '/usr/sbin/ether-wake', '-i', self.interface, self.mac])
-        else:
-            send_magic_packet(self.mac, ip_address=self.host, port=self.port)
+        elif self.wakeonlan == 'wakeonlan':
+            subprocess.run(['sudo', '/usr/bin/wakeonlan', self.mac])
+        elif self.wakeonlan == 'native':
+            send_magic_packet(self.mac, ip_address=self.host)
 
     def sleep(self):
         if self.os == "linux":
