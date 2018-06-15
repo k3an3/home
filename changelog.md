@@ -1,5 +1,6 @@
 # Changelog
 ## v0.11
+* Merge several modules into single "computer" module for controlling computers over remote access protocols
 * Multi-devices: a single device object acts as abstraction to multiple devices
 * DDwrt Wi-Fi based presence detection
 * Fix broken Chromecast controls (partially)
@@ -13,7 +14,13 @@
 * Various admin features
 * Improve logging inconsistencies
 * Device config.yml now modifiable and validated from web
-* Security fixes
+* WebSocket security fixes
+* Sentry.io integration
+* Celery tasks bound by soft time limit
+* Prevent ping notifications from cascading
+* Rough hooks for OAuth 2.0
+* Weather module takes location through API instead of hardcoded location
+* Numerous other features and bug/compatibility fixes
 
 ## v0.10
 * Chainable actions
