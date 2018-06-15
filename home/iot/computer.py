@@ -1,12 +1,7 @@
-import re
 import subprocess
 
 import paramiko
 from wakeonlan import send_magic_packet
-
-
-def escape(command):
-    return re.sub(r'[&|]', '', command)
 
 
 class Computer:
@@ -99,6 +94,6 @@ class Computer:
                     self.username,
                     self.password,
                     key_filename=self.keyfile)
-        r = ssh.exec_command(escape(command))[2].readlines()
+        r = ssh.exec_command(command)[2].readlines()
         ssh.close()
         return r
