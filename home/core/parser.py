@@ -49,11 +49,14 @@ def parse(file: str = None, data: str = None):
     print("Configured actions:")
     if y.get('actions'):
         for group in y['actions']:
-            for action in y['actions'][group]:
-                action.group = group
-                actions.append(action)
-                action.setup()
-                print(action.devices)
+            try:
+                for action in y['actions'][group]:
+                    action.group = group
+                    actions.append(action)
+                    action.setup()
+                    print(action.devices)
+            except TypeError:
+                print(group, "group defined with no actions. Skipping...")
     if y.get('displays'):
         for group in y['displays']:
             for display in y['displays'][group]:
