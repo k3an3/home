@@ -30,6 +30,7 @@ gevent-websocket
 greenlet
 http-ece
 idna
+ifaddr
 itsdangerous
 Jinja2
 jsmin
