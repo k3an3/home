@@ -91,14 +91,17 @@ class Computer:
         else:
             raise NotImplementedError
 
-    def run_command(self, command: str) -> str:
+    def run_command(self, command: str, user: str = "", password: str = "", keyfile: str = "") -> str:
+        username = user or self.username
+        password = password or self.password
+        keyfile = keyfile or self.keyfile
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         ssh.connect(self.host,
                     self.port,
-                    self.username,
-                    self.password,
-                    key_filename=self.keyfile)
+                    username,
+                    password,
+                    key_filename=keyfile)
         r = ssh.exec_command(command)[2].readlines()
         ssh.close()
         return r
