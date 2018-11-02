@@ -176,7 +176,8 @@ ws.on("device state", function(data) {
 
 
 $(".saveperms").click(function() {
-    var client = $(this).attr('id').split('-')[1];
+    var client = $(this).attr('id');
+    client = client.slice(client.indexOf('-'));
     ws.emit('admin',
         {
             command: 'update permissions',
