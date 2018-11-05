@@ -8,7 +8,7 @@ Requires=redis.service
 User=home
 Group=home
 WorkingDirectory=/srv/www/home
-ExecStart=/srv/www/home/env/bin/celery multi start 2 -c 2 -A home.core.async.queue --loglevel=info
+ExecStart=/srv/www/home/env/bin/celery multi start 2 -c 2 -A home.core.tasks.queue --loglevel=info
 
 [Install]
 WantedBy=multi-user.target
