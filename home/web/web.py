@@ -15,7 +15,7 @@ from webassets.loaders import PythonLoader as PythonAssetsLoader
 
 import home.core.parser as parser
 import home.core.utils as utils
-from home.core.async import run
+from home.core.tasks import run
 from home.core.models import devices, interfaces, get_action, actions, get_interface, get_driver, widgets, get_device, \
     MultiDevice, get_display, displays
 from home.settings import SECRET_KEY, LOG_FILE, SENTRY_URL

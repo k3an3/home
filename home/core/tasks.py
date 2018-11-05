@@ -1,5 +1,5 @@
 """
-async.py
+tasks.py
 ~~~~~~~~
 
 Handles running of tasks in an asynchronous fashion. Not explicitly tied to Celery. The `run` method simply must

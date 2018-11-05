@@ -15,7 +15,7 @@ from ldap3 import Server, Connection, ALL_ATTRIBUTES
 from peewee import DoesNotExist
 from typing import List, Any
 
-from home.core.async import run
+from home.core.tasks import run
 from home.core.models import get_device, devices, actions, MultiDevice
 from home.core.utils import random_string, method_from_name, get_groups
 from home.settings import PUBLIC_GROUPS, BASE_URL, LDAP_BASE_DN, LDAP_FILTER, LDAP_HOST, LDAP_PORT, LDAP_SSL, \

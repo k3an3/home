@@ -13,7 +13,7 @@ from typing import Iterator, Dict, List, Callable
 
 import yaml
 
-from home.core.async import scheduler, multiprocessing_run, run
+from home.core.tasks import scheduler, multiprocessing_run, run
 from home.core.utils import class_from_name, method_from_name, random_string
 from home.settings import TEMPLATE_DIR
 
