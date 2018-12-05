@@ -27,6 +27,8 @@ SMTP_PORT = 25
 SMTP_USERNAME = ''
 SMTP_PASSWORD = ''
 db = SqliteDatabase('app.db')
+BACKEND_PATH = 'redis://'
+BROKER_PATH = 'redis://'
 # db = MySQLDatabase(host="localhost", database="home", user="home", passwd="home")
 
 try:

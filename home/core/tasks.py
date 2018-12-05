@@ -16,14 +16,14 @@ from celery.utils.log import get_task_logger
 from raven import Client
 from raven.contrib.celery import register_signal, register_logger_signal
 
-from home.settings import ASYNC_MODE, SENTRY_URL
+from home.settings import ASYNC_MODE, SENTRY_URL, BROKER_PATH, BACKEND_PATH
 
 setup_security(allowed_serializers=['pickle', 'json'],
                serializer='pickle')
 
 queue = Celery('home',
-               broker='redis://',
-               backend='redis://',
+               broker=BROKER_PATH,
+               backend=BACKEND_PATH,
                serializer='pickle')
 
 queue.conf.update(
