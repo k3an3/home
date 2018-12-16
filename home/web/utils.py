@@ -19,7 +19,7 @@ from home.core.tasks import run
 from home.core.models import get_device, devices, actions, MultiDevice
 from home.core.utils import random_string, method_from_name, get_groups
 from home.settings import PUBLIC_GROUPS, BASE_URL, LDAP_BASE_DN, LDAP_FILTER, LDAP_HOST, LDAP_PORT, LDAP_SSL, \
-    LDAP_ADMIN_GID, DEBUG
+    LDAP_ADMIN_GROUP, DEBUG
 from home.web.models import APIClient, Subscriber, User
 
 try:
@@ -176,12 +176,12 @@ def ldap_auth(username: str, password: str) -> User:
             u, created = User.get_or_create(username=username,
                                             defaults={'ldap': True,
                                                       'password': '',
-                                                      'admin': r['gidnumber'] == LDAP_ADMIN_GID
+                                                      'admin': LDAP_ADMIN_GROUP in r['memberOf']
                                                       })
             if created:
                 app.logger.info("Created new user from LDAP: " + username)
             else:
-                u.admin = r['gidnumber'] == LDAP_ADMIN_GID
+                u.admin = LDAP_ADMIN_GROUP in r['memberOf']
                 u.save()
         else:
             app.logger.info("Failed to bind with user " + LDAP_FILTER.format(username) + "," + LDAP_BASE_DN)

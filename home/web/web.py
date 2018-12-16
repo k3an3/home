@@ -64,7 +64,8 @@ def index():
     interface_list = []
     for i in interfaces:
         interface_list.append((i, [d for d in devices if d.driver and d.driver.interface == i and (i.public
-                                   or current_user.is_authenticated and current_user.has_permission(d))]))
+                                                                                                   or current_user.is_authenticated and current_user.has_permission(
+                    d))]))
     if current_user.is_active:
         widget_html = get_widgets(current_user) + get_action_widgets(current_user)
         return render_template('index.html',
@@ -266,6 +267,16 @@ def add_header(response):
 @login_manager.user_loader
 def user_loader(user_id):
     return User.get(username=user_id)
+
+
+@login_manager.request_loader
+def load_user_from_request(request):
+    u = request.headers.get('user')
+    if u and request.headers.get('verified') == 'SUCCESS':
+        user = User.get(username=u.split('=')[1].split(',')[0])
+        if user:
+            return user
+    return None
 
 
 @app.route('/login', methods=['POST'])

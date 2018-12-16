@@ -16,8 +16,8 @@ LDAP_HOST = ''
 LDAP_PORT = 389
 LDAP_SSL = False
 LDAP_FILTER = "uid={}"
-LDAP_ADMIN_GID = 10000
-LDAP_BASE_DN = ''
+LDAP_ADMIN_GROUP = 'cn=admins,dc=example,dc=com'
+LDAP_BASE_DN = 'cn=users,dc=example,dc=com'
 SPOTIFY_API_KEY = 'your_key_here'
 ASYNC_MODE = 'multiprocessing'
 MEDIA_TEST_URI = '/test.mp4'
