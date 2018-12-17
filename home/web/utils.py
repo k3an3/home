@@ -187,6 +187,3 @@ def ldap_auth(username: str, password: str) -> User:
         app.logger.info("Failed to bind with user " + LDAP_FILTER.format(username) + "," + LDAP_BASE_DN)
     c.unbind()
     return u
-
-
-print(ldap_auth('tester', 'cdccdccdc872087'))
