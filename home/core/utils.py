@@ -96,7 +96,7 @@ def update():
     subprocess.call(['git', 'stash'])
     subprocess.call(['git', 'pull', 'origin', 'master'])
     subprocess.call(['git', 'stash', 'apply'])
-    subprocess.call(['/srv/www/home/env/bin/pip', 'install', '-r', 'requirements.txt', '--upgrade', '--no-deps'])
+    subprocess.call(['/srv/www/home/env/bin/pip', 'install', '.', '--upgrade'])
     reload()
 
 
