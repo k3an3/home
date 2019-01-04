@@ -105,3 +105,5 @@ class Computer:
         r = ssh.exec_command(command)[2].readlines()
         ssh.close()
         return r
+
+    def enum_virsh(self):
