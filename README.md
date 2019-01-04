@@ -17,6 +17,5 @@ For production:
 ```
 # pip3 install .
 ### Configure nginx/apache to reverse proxy
-$ sudo cp scripts/systemd/* /etc/systemd/system # Edit path to install dir in both files
 $ sudo systemctl start home
 ```
