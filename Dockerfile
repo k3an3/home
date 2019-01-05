@@ -7,4 +7,5 @@ RUN apt -o Acquire::ForceIPv4=true update && apt install -o Acquire::ForceIPv4=t
 RUN pip3 install -U redis==2.10.6
 
 USER home
+EXPOSE 5000
 CMD ["/app/scripts/run.sh"]
