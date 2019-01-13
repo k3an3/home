@@ -1,4 +1,5 @@
 import subprocess
+from time import sleep
 
 import paramiko
 from wakeonlan import send_magic_packet
@@ -63,14 +64,17 @@ class Computer:
             iface = []
             if self.interface:
                 iface = ['-i ' + self.interface]
-            for i in range(3):
+            for i in range(5):
                 subprocess.run(['sudo', '/usr/sbin/ether-wake', *iface, self.mac])
+                sleep(0.5)
         elif self.wakeonlan == 'wakeonlan':
-            for i in range(3):
+            for i in range(5):
                 subprocess.run(['sudo', '/usr/bin/wakeonlan', self.mac])
+                sleep(0.5)
         elif self.wakeonlan == 'native':
-            for i in range(3):
+            for i in range(5):
                 send_magic_packet(self.mac, ip_address=self.host)
+                sleep(0.5)
         else:
             raise NotImplementedError("No valid wake-on-LAN method chosen")
 
