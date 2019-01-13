@@ -63,11 +63,14 @@ class Computer:
             iface = []
             if self.interface:
                 iface = ['-i ' + self.interface]
-            subprocess.run(['sudo', '/usr/sbin/ether-wake', *iface, self.mac])
+            for i in range(3):
+                subprocess.run(['sudo', '/usr/sbin/ether-wake', *iface, self.mac])
         elif self.wakeonlan == 'wakeonlan':
-            subprocess.run(['sudo', '/usr/bin/wakeonlan', self.mac])
+            for i in range(3):
+                subprocess.run(['sudo', '/usr/bin/wakeonlan', self.mac])
         elif self.wakeonlan == 'native':
-            send_magic_packet(self.mac, ip_address=self.host)
+            for i in range(3):
+                send_magic_packet(self.mac, ip_address=self.host)
         else:
             raise NotImplementedError("No valid wake-on-LAN method chosen")
 
