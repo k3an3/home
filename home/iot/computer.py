@@ -132,6 +132,10 @@ class Computer:
             vms.append((line[1], status))
         self.vms = vms
 
+    def vm_power(self, vm: str, action: str = 'start'):
+        if action in ('start', 'stop', 'reboot', 'suspend', 'resume'):
+            self.run_command('sudo virsh {} {}'.format(action, vm))
+
 
 @socketio.on('enum virsh')
 @ws_login_required
@@ -144,3 +148,13 @@ def get_vms(message):
     if device.dev.vms:
         emit('vms', {"device": message['device'], "vms": device.dev.vms})
 
+
+@socketio.on('vm ctrl')
+@ws_login_required
+def get_vms(message):
+    device = get_device(message['device'].replace('-', ' '))
+    if not current_user.has_permission(device):
+        disconnect()
+        return
+    device.dev.vm_power(message['vm'], message['action'])
+    emit('message', {'class': 'alert-success', 'content': "Success"})
