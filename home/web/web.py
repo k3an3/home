@@ -271,6 +271,9 @@ def user_loader(user_id):
 
 @login_manager.request_loader
 def load_user_from_request(request):
+    return None
+    for handler in CUSTOM_AUTH_HANDLERS:
+        pass
     u = request.headers.get('user')
     if u and request.headers.get('verified') == 'SUCCESS':
         user = User.get(username=u.split('=')[1].split(',')[0])
