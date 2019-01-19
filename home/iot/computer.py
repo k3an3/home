@@ -1,7 +1,14 @@
 import subprocess
+from typing import List
 
 import paramiko
+from flask_login import current_user
+from flask_socketio import disconnect, emit
 from wakeonlan import send_magic_packet
+
+from home.core.models import get_device
+from home.web.utils import ws_login_required
+from home.web.web import socketio
 
 
 class Computer:
@@ -31,8 +38,9 @@ class Computer:
         )
     }
 
-    def __init__(self, mac, host=None, port=None, manual_interface=None, keyfile="~/.ssh/id_rsa", username="root",
-                 password=None, os: str = "linux", wakeonlan: str = "native"):
+    def __init__(self, mac: str = None, host: str = None, port: int = 22, manual_interface: str = None,
+                 keyfile: str = "~/.ssh/id_rsa", username: str = "root",
+                 password: str = None, os: str = "linux", wakeonlan: str = "native"):
         self.password = password
         self.username = username
         self.keyfile = keyfile
@@ -42,6 +50,7 @@ class Computer:
         self.interface = manual_interface
         self.os = os
         self.wakeonlan = wakeonlan
+        self.vms = []
 
     def on(self):
         self.wake()
@@ -91,7 +100,8 @@ class Computer:
         else:
             raise NotImplementedError
 
-    def run_command(self, command: str, user: str = "", password: str = "", keyfile: str = "") -> str:
+    def run_command(self, command: str, user: str = "", password: str = "", keyfile: str = "",
+                    capture_output: bool = False) -> List[str]:
         username = user or self.username
         password = password or self.password
         keyfile = keyfile or self.keyfile
@@ -102,8 +112,35 @@ class Computer:
                     username,
                     password,
                     key_filename=keyfile)
-        r = ssh.exec_command(command)[2].readlines()
+        stdin, stdout, stderr = ssh.exec_command(command)
+        output = []
+        if capture_output:
+            for s in (stdin, stdout, stderr):
+                try:
+                    output.append(s.readlines())
+                except OSError:
+                    output.append("")
         ssh.close()
-        return r
+        return output
 
     def enum_virsh(self):
+        o = self.run_command('sudo virsh list --all', capture_output=True)[1]
+        vms = []
+        for line in o[2:-1]:
+            line = line.split()
+            status = ' '.join(line[2:])
+            vms.append((line[1], status))
+        self.vms = vms
+
+
+@socketio.on('enum virsh')
+@ws_login_required
+def get_vms(message):
+    device = get_device(message['device'].replace('-', ' '))
+    if not current_user.has_permission(device):
+        disconnect()
+        return
+    device.dev.enum_virsh()
+    if device.dev.vms:
+        emit('vms', {"device": message['device'], "vms": device.dev.vms})
+

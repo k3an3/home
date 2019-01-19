@@ -15,4 +15,5 @@ $('#homea').click(function() {
 
 function updateTarget(newTarget) {
     target = newTarget;
+    $('#'+ target).trigger("click");
 }
