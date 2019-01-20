@@ -41,7 +41,8 @@ class Computer:
 
     def __init__(self, mac: str = None, host: str = None, port: int = 22, manual_interface: str = None,
                  keyfile: str = "~/.ssh/id_rsa", username: str = "root",
-                 password: str = None, os: str = "linux", wakeonlan: str = "native"):
+                 password: str = None, os: str = "linux", wakeonlan: str = "native",
+                 virt: bool = False):
         self.password = password
         self.username = username
         self.keyfile = keyfile
@@ -52,6 +53,7 @@ class Computer:
         self.os = os
         self.wakeonlan = wakeonlan
         self.vms = []
+        self.virt = virt
 
     def on(self):
         self.wake()
@@ -151,9 +153,10 @@ def get_vms(message):
     if not current_user.has_permission(device):
         disconnect()
         return
-    device.dev.enum_virsh()
-    if device.dev.vms:
-        emit('vms', {"device": message['device'], "vms": device.dev.vms})
+    if device.dev.virt:
+        device.dev.enum_virsh()
+        if device.dev.vms:
+            emit('vms', {"device": message['device'], "vms": device.dev.vms})
 
 
 @socketio.on('vm ctrl')
@@ -164,4 +167,8 @@ def get_vms(message):
         disconnect()
         return
     device.dev.vm_power(message['vm'], message['action'])
-    emit('message', {'class': 'alert-success', 'content': "Success"})
+    emit('message',
+         {'class': 'alert-success',
+          'content': "Successfully ran '{}' on '{}'".format(message['action'],
+                                                            message['vm'])
+          })

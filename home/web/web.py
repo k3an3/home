@@ -29,7 +29,7 @@ try:
 except ImportError:
     GOOGLE_API_KEY = ""
 
-app = Flask(__name__, template_folder='templates')
+app = Flask(__name__)
 app.secret_key = SECRET_KEY
 socketio = SocketIO(app, cors_allowed_origins=[])
 login_manager = LoginManager()
@@ -63,9 +63,8 @@ def index():
     events = sec.events
     interface_list = []
     for i in interfaces:
-        interface_list.append((i, [d for d in devices if d.driver and d.driver.interface == i and (i.public
-                                                                                                   or current_user.is_authenticated and current_user.has_permission(
-                    d))]))
+        interface_list.append((i, [d for d in devices if d.driver and d.driver.interface == i and
+                                   (i.public or current_user.is_authenticated and current_user.has_permission(d))]))
     if current_user.is_active:
         widget_html = get_widgets(current_user) + get_action_widgets(current_user)
         return render_template('index.html',

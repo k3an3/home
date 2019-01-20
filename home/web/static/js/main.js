@@ -66,7 +66,7 @@ $('#logout').click(function () {
     document.location = "/logout";
 });
 
-ws.on('message', function (data) {
+function message(data) {
     $('#messages').attr('class', 'alert floating-message');
     $('#messages').html(data.content);
     $("#messages").css('visibility', 'visible');
@@ -75,6 +75,10 @@ ws.on('message', function (data) {
     setTimeout(function () {
         $('#messages').fadeOut();
     }, 5000);
+}
+
+ws.on('message', function (data) {
+    message(data);
 });
 
 ws.on('event', function (data) {

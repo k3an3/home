@@ -1,4 +1,11 @@
 # Changelog
+## v0.12
+* Control virt-manager through computer driver
+* Added/fixed Docker compatibility
+* Improved setuptools packaging
+* Python 3.7 compatibility 
+* LDAP fixes and 3rd-party auth integrations
+* Other bugfixes and minor improvements
 ## v0.11
 * Merge several modules into single "computer" module for controlling computers over remote access protocols
 * Multi-devices: a single device object acts as abstraction to multiple devices

@@ -26,6 +26,8 @@ interfaces:
         # Whether or not this interface should be visible to
         # unauthenticated users.
         public: true
+    - !interface
+        name: computer
 
 # Drivers
 #
@@ -107,6 +109,10 @@ installed_drivers:
         module: payments
         klass: Payments
         interface: payments
+    - !driver
+        module: computer
+        klass: Computer
+        interface: computer
 
 # Devices
 #
@@ -178,10 +184,16 @@ devices:
              host: 172.24.0.25
         - !device
             name: Desktop
-            driver: wol
+            driver: computer
             config:
-             mac: 44:8a:5b:2c:38:d9
+             host: 192.168.12.41
+             mac: de:ad:be:ef:12:12
+             # If there is more than one interface on this host, pick which to use for
+             # wake on lan
              manual_interface: eno1
+             user: root
+             keyfile: /var/www/.ssh/id_rsa
+             virt: yes
         - !device
             name: Audio
             driver: audio

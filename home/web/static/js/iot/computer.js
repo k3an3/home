@@ -36,6 +36,7 @@ ws.on('vms', function(data) {
 
 $('.refresh-vms').click(function() {
     enum_virsh();
+    message({content: 'Refreshing...', class: 'alert-info'});
 });
 
 enum_virsh();
