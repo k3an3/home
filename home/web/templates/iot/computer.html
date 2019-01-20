@@ -2,12 +2,9 @@
 <br><br>
 <br><br>
 <div class="computer" id="{{ device.name }}"></div>
-{% if device.virt %}
+{% if device.dev.virt %}
     <div class="col-md-6">
         <h2>Virt-Manager</h2>
-        <button type="button" class="btn btn-default btn-sm refresh-vms">
-            <span class="glyphicon glyphicon-refresh"></span> Refresh
-        </button>
         <table class="table table-bordered table-striped" id="{{ device.name }}-table">
             <thead>
             <tr>
@@ -18,5 +15,6 @@
             </thead>
             <tbody></tbody>
         </table>
+        <button type="button" class="btn btn-default btn-sm refresh-vms">Refresh</button>
     </div>
 {% endif %}
