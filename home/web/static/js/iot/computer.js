@@ -8,7 +8,7 @@ function enum_virsh() {
 function buttons(device) {
     var btn = '<div class="btn-group" role="group">';
     btn += '<button id="{}-start" type="button" class="btn btn-sm btn-success vm-control">Start</button>';
-    btn += '<button id="{}-stop" type="button" class="btn btn-sm btn-danger vm-control">Stop</button>';
+    btn += '<button id="{}-shutdown" type="button" class="btn btn-sm btn-danger vm-control">Stop</button>';
     btn += '<button id="{}-restart" type="button" class="btn btn-sm btn-warning vm-control">Restart</button>';
     btn += '</div>';
     return btn.replace(/{}/g, device);
