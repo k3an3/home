@@ -8,6 +8,7 @@ from flask_socketio import disconnect, emit
 from wakeonlan import send_magic_packet
 
 from home.core.models import get_device
+from home.core.tasks import run
 from home.web.utils import ws_login_required
 from home.web.web import socketio
 
@@ -166,7 +167,7 @@ def get_vms(message):
     if not current_user.has_permission(device):
         disconnect()
         return
-    device.dev.vm_power(message['vm'], message['action'])
+    run(device.dev.vm_power, vm=message['vm'], action=message['action'])
     emit('message',
          {'class': 'alert-success',
           'content': "Successfully ran '{}' on '{}'".format(message['action'],
