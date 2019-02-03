@@ -41,6 +41,7 @@ tail:
     0f
     checksum (sum of data fields)
 """
+import colorsys
 import socket
 import sys
 
@@ -49,6 +50,8 @@ from datetime import datetime
 from flask_login import current_user
 from flask_socketio import emit, disconnect
 from typing import Dict
+
+from pyHS100 import SmartBulb
 
 from home import settings
 from home.core import utils as utils
@@ -232,6 +235,23 @@ class Bulb:
         sock.close()
         if len(r) == 14:
             return {'red': r[6], 'green': r[7], 'blue': r[8], 'white': r[9]}
+
+
+class KasaBulb:
+    def __init__(self, host: str = None):
+        self.host = host
+
+    def change_color(self, red: int = 0, green: int = 0, blue: int = 0):
+        bulb = SmartBulb(host=self.host)
+        bulb.hsv = colorsys.rgb_to_hsv(red, green, blue)
+
+    def on(self):
+        bulb = SmartBulb(host=self.host)
+        bulb.turn_on()
+
+    def off(self):
+        bulb = SmartBulb(host=self.host)
+        bulb.turn_off()
 
 
 if __name__ == '__main__':

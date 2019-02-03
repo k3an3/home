@@ -54,6 +54,7 @@ pycparser
 pycryptodome
 git+git://github.com/keaneokelley/pyelliptic.git#egg=pyelliptic
 pyflakes
+pyHS100
 pynacl
 python-engineio
 python-jose
