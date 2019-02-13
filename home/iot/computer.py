@@ -143,7 +143,7 @@ class Computer:
         self.vms = vms
 
     def vm_power(self, vm: str, action: str = 'start'):
-        if action in ('start', 'stop', 'reboot', 'suspend', 'resume'):
+        if action in ('start', 'shutdown', 'reboot', 'suspend', 'resume'):
             self.run_command('sudo virsh {} {}'.format(action, vm))
 
 
