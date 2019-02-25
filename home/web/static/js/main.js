@@ -43,6 +43,10 @@ function revoke(name) {
     ws.emit('admin', {command: 'revoke', name: name});
 }
 
+function del_user(name) {
+    ws.emit('admin', {command: 'delete', name: name});
+}
+
 var update = false;
 
 ws.on('disconnect', function () {
@@ -187,6 +191,17 @@ $(".saveperms").click(function() {
             command: 'update permissions',
             name: client,
             perms: $('#perms-' + client).val()
+        });
+});
+
+$(".u_saveperms").click(function () {
+    var user = $(this).attr('id');
+    user = user.slice(user.indexOf('-') + 1);
+    ws.emit('admin',
+        {
+            command: 'user update permissions',
+            name: user,
+            perms: $('#u_perms-' + user).val()
         });
 });
 

@@ -15,9 +15,9 @@ from webassets.loaders import PythonLoader as PythonAssetsLoader
 
 import home.core.parser as parser
 import home.core.utils as utils
-from home.core.tasks import run
 from home.core.models import devices, interfaces, get_action, actions, get_interface, get_driver, widgets, get_device, \
     MultiDevice, get_display, displays
+from home.core.tasks import run
 from home.settings import SECRET_KEY, LOG_FILE, SENTRY_URL
 from home.web.models import *
 from home.web.models import User, APIClient
@@ -79,6 +79,7 @@ def index():
                                qr=get_qr(),
                                widgets=widget_html,
                                displays=displays,
+                               users=User.select()
                                )
     return render_template('index.html', interfaces=interface_list, devices=devices)
 
@@ -156,6 +157,17 @@ def ws_admin(data):
         client.save()
         emit('message', {'class': 'alert-success',
                          'content': 'Successfully updated API permissions.'})
+    elif command == 'delete':
+        user = User.get(username=data.get('name'))
+        user.delete_instance()
+        emit('message', {'class': 'alert-success',
+                         'content': 'Successfully deleted user.'})
+    elif command == 'user update permissions':
+        user = User.get(username=data.get('name'))
+        user._groups = data.get('perms').replace(' ', '')
+        user.save()
+        emit('message', {'class': 'alert-success',
+                         'content': 'Successfully updated User permissions.'})
     elif command == 'refresh_display':
         emit('display refresh', broadcast=True)
     elif command == 'update config':

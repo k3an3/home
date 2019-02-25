@@ -1,0 +1,24 @@
+<div id="home" class="tab-pane fade in active" style="text-align: center;">
+    {% if current_user.is_authenticated %}
+        {% if widgets %}
+            <div class="row">
+                {% for widget in widgets %}
+                    <div class="col-md-3">
+                        {{ widget | safe }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <h2>Welcome Home!</h2>
+        {% endif %}
+    {% endif %}
+</div>
+{% for device in devices %}
+    {% if current_user.is_authenticated or device.driver.interface.public %}
+        <div id="{{ device.name | slugify }}" class="tab-pane fade in" style="text-align: center;">
+            {% if device.driver and device.driver.interface.template %}
+                {% include device.driver.interface.template %}
+            {% endif %}
+        </div>
+    {% endif %}
+{% endfor %}
