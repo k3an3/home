@@ -1,6 +1,7 @@
 # Changelog
 ## v0.12
 * Control virt-manager through computer driver
+* Added ability to manage users through web UI
 * Added/fixed Docker compatibility
 * Improved setuptools packaging
 * Python 3.7 compatibility 
