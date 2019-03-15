@@ -1,4 +1,4 @@
-raven
+ravenravenravenravenravenravenravenravenravenravenravenravenravenravenravenraven
 amqp
 appdirs
 APScheduler
@@ -62,8 +62,8 @@ python-socketio
 pytz
 py_vapid
 pywebpush
-PyYAML
-qrcode
+PyYAML==3.13
+qrcodeqrcodeqrcodeqrcode
 redis
 requests
 six
