@@ -88,12 +88,21 @@ def generate_csrf_token() -> str:
     return session['_csrf_token']
 
 
-def send_to_subscribers(message: str) -> None:
+def send_to_subscribers(message: str, groups: List[str]) -> None:
     for subscriber in Subscriber.select():
-        try:
-            subscriber.push(message)
-        except Exception as e:
-            print("Webpusher:", str(e))
+        send = False
+        if groups:
+            for group in groups:
+                if subscriber.user.has_permission(group=group):
+                    send = True
+                    break
+        else:
+            send = True
+        if send:
+            try:
+                subscriber.push(message)
+            except Exception as e:
+                print("Webpusher:", str(e))
 
 
 def handle_task(post: dict, client: APIClient) -> bool:

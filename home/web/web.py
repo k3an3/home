@@ -354,12 +354,13 @@ def logout():
     return redirect(url_for('index'))
 
 
-@app.route("/push", methods=['GET', 'POST'])
+@app.route("/api/notify", methods=['POST'])
 @api_auth_required
-def test_push(client):
-    if not client.has_permission('test'):
+def push_notify(client):
+    if not client.has_permission('notify'):
         abort(403)
-    send_to_subscribers("This is only a test.")
+    data = request.get_json()
+    send_to_subscribers(data['msg'], groups=data.get('groups', []))
     return '', 204
 
 
