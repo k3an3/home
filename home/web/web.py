@@ -356,10 +356,9 @@ def logout():
 
 @app.route("/api/notify", methods=['POST'])
 @api_auth_required
-def push_notify(client):
+def push_notify(client, data):
     if not client.has_permission('notify'):
         abort(403)
-    data = request.get_json()
     send_to_subscribers(data['msg'], groups=data.get('groups', []))
     return '', 204
 
