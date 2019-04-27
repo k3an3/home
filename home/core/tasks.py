@@ -18,19 +18,12 @@ from raven.contrib.celery import register_signal, register_logger_signal
 
 from home.settings import ASYNC_MODE, SENTRY_URL, BROKER_PATH, BACKEND_PATH
 
-setup_security(allowed_serializers=['pickle', 'json'],
-               serializer='pickle',
-               task_serializer='auth',
-               accept_content=['auth'])
-
 queue = Celery('home',
                broker=BROKER_PATH,
                backend=BACKEND_PATH,
-               serializer='pickle')
+               )
 
 queue.conf.update(
-    CELERY_TASK_SERIALIZER='pickle',
-    CELERY_ACCEPT_CONTENT=['pickle', 'json'],
     CELERY_TASK_SOFT_TIME_LIMIT=30,
 )
 
