@@ -11,7 +11,7 @@ app = Flask(__name__)
 
 @app.route("/list")
 def list_vms():
-    return subprocess.run(['sudo', 'virsh', 'list', '--all'], capture_output=True)
+    return subprocess.run(['sudo', 'virsh', 'list', '--all'], capture_output=True).stdout.decode()
 
 
 @app.route("/vm/<vm>/power/<action>")
