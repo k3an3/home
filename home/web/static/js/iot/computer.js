@@ -21,8 +21,8 @@ $('body').on('click', 'button.vm-control', function(a) {
         vm: s[1],
         action: s[2]
     });
+    setInterval(enum_virsh, 3000);
     setInterval(enum_virsh, 5000);
-    setInterval(enum_virsh, 10000);
 });
 
 ws.on('vms', function(data) {
@@ -40,4 +40,4 @@ $('.refresh-vms').click(function() {
 });
 
 enum_virsh();
-setInterval(enum_virsh, 60000);
+setInterval(enum_virsh, 15000);

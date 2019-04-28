@@ -139,14 +139,15 @@ class Computer:
 
     def enum_virsh(self):
         if self.virt == 'http':
-            o = requests.get("http://{}:{}/list".format(self.host, self.vm_port)).text
+            o = requests.get("http://{}:{}/list".format(self.host, self.vm_port)).text.split('\n')
         else:
             o = self.run_command('sudo virsh list --all', capture_output=True)[1]
         vms = []
         for line in o[2:-1]:
-            line = line.split()
-            status = ' '.join(line[2:])
-            vms.append((line[1], status))
+            if line:
+                line = line.split()
+                status = ' '.join(line[2:])
+                vms.append((line[1], status))
         self.vms = vms
 
     def vm_power(self, vm: str, action: str = 'start'):
