@@ -3,6 +3,7 @@ from time import sleep
 from typing import List
 
 import paramiko
+import requests
 from flask_login import current_user
 from flask_socketio import disconnect, emit
 from wakeonlan import send_magic_packet
@@ -43,7 +44,7 @@ class Computer:
     def __init__(self, mac: str = None, host: str = None, port: int = 22, manual_interface: str = None,
                  keyfile: str = "~/.ssh/id_rsa", username: str = "root",
                  password: str = None, os: str = "linux", wakeonlan: str = "native",
-                 virt: bool = False):
+                 virt: str = None, vm_port: int = 8888):
         self.password = password
         self.username = username
         self.keyfile = keyfile
@@ -55,6 +56,7 @@ class Computer:
         self.wakeonlan = wakeonlan
         self.vms = []
         self.virt = virt
+        self.vm_port = vm_port
 
     def on(self):
         self.wake()
@@ -66,6 +68,8 @@ class Computer:
         self.power('restart')
 
     def reboot_to(self, boot_option: int):
+        if 'linux' not in self.os:
+            raise NotImplementedError
         if boot_option >= 0:
             self.run_command('sudo grub-reboot ' + boot_option)
             self.run_command('sudo grub2-reboot ' + boot_option)
@@ -134,7 +138,10 @@ class Computer:
         return output
 
     def enum_virsh(self):
-        o = self.run_command('sudo virsh list --all', capture_output=True)[1]
+        if self.virt == 'http':
+            o = requests.get("http://{}:{}/list".format(self.host, self.vm_port)).text
+        else:
+            o = self.run_command('sudo virsh list --all', capture_output=True)[1]
         vms = []
         for line in o[2:-1]:
             line = line.split()
@@ -144,7 +151,10 @@ class Computer:
 
     def vm_power(self, vm: str, action: str = 'start'):
         if action in ('start', 'shutdown', 'reboot', 'suspend', 'resume'):
-            self.run_command('sudo virsh {} {}'.format(action, vm))
+            if self.virt == 'http':
+                r = requests.post("http://{}:{}/vm/{}/power/{}".format(self.host, self.vm_port, vm, action))
+            else:
+                self.run_command('sudo virsh {} {}'.format(action, vm))
 
 
 @socketio.on('enum virsh')
