@@ -14,7 +14,7 @@ def list_vms():
     return subprocess.run(['sudo', 'virsh', 'list', '--all'], capture_output=True).stdout.decode()
 
 
-@app.route("/vm/<vm>/power/<action>")
+@app.route("/vm/<vm>/power/<action>", methods=['POST'])
 def vm_power(vm, action):
     if action in ('start', 'shutdown', 'reboot', 'suspend', 'resume'):
         subprocess.run(['sudo', 'virsh', action, vm], check=True)
