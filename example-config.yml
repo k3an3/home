@@ -99,6 +99,11 @@ installed_drivers:
         klass: Http
         static: True
     - !driver
+        name: socket
+        module: simplesocket
+        klass: SimpleSocket
+        static: True
+    - !driver
         module: test
         klass: Test
     - !driver

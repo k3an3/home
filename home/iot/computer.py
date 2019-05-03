@@ -173,7 +173,7 @@ def get_vms(message):
 
 @socketio.on('vm ctrl')
 @ws_login_required
-def get_vms(message):
+def vm_ctrl(message):
     device = get_device(message['device'].replace('-', ' '))
     if not current_user.has_permission(device):
         disconnect()
