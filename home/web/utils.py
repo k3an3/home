@@ -4,6 +4,7 @@ import hmac
 import subprocess
 from base64 import b64encode
 from io import BytesIO
+from typing import List
 
 import qrcode
 from flask import abort
@@ -13,12 +14,11 @@ from flask_login import current_user
 from flask_socketio import disconnect
 from ldap3 import Server, Connection, ALL_ATTRIBUTES
 from peewee import DoesNotExist
-from typing import List, Any
 
-from home.core.tasks import run
 from home.core.models import get_device, devices, actions, MultiDevice
+from home.core.tasks import run
 from home.core.utils import random_string, method_from_name, get_groups
-from home.settings import PUBLIC_GROUPS, BASE_URL, LDAP_BASE_DN, LDAP_FILTER, LDAP_HOST, LDAP_PORT, LDAP_SSL, \
+from home.settings import BASE_URL, LDAP_BASE_DN, LDAP_FILTER, LDAP_HOST, LDAP_PORT, LDAP_SSL, \
     LDAP_ADMIN_GROUP, DEBUG
 from home.web.models import APIClient, Subscriber, User
 
@@ -32,21 +32,34 @@ guest_path = ""
 guest_path_qr = None
 
 
-def ws_login_required(f):
+def ws_login_required(_f=None, has_permission: str = None, check_device: bool = False):
     """
     Authenticate Websocket requests
-    :param f: Decorated function
+    :param check_device: Whether to extract device object and check user's permissions against it
+    :param has_permission: String representing a permission group
+    :param _f: Decorated function
     :return: Function
     """
 
-    @functools.wraps(f)
-    def wrapped(*args, **kwargs):
-        if not current_user.is_authenticated:
+    def decorator_ws_login(f):
+        @functools.wraps(f)
+        def wrapped(*args, **kwargs):
+            if current_user.is_authenticated:
+                if has_permission and current_user.has_permission(
+                        group=has_permission):
+                    return f(*args, **kwargs)
+                elif check_device:
+                    device = get_device(args[0]['device'].replace('-', ' '))
+                    if current_user.has_permission(device):
+                        args.append(device)
+                        return f(*args, **kwargs)
             disconnect()
-        else:
-            return f(*args, **kwargs)
+        return wrapped
 
-    return wrapped
+    if _f is None:
+        return decorator_ws_login
+    else:
+        return decorator_ws_login(_f)
 
 
 def ws_optional_auth(f):
@@ -59,31 +72,48 @@ def ws_optional_auth(f):
     return wrapped
 
 
-def api_auth_required(f):
-    @functools.wraps(f)
-    def wrapped(*args, **kwargs):
-        try:
-            if request.headers.get('X-Gogs-Signature'):
-                client = APIClient.get(name='gogs-update')
-                secret = bytes(client.token.encode())
-                mac = hmac.new(secret, msg=request.get_data(), digestmod=hashlib.sha256)
-                if not hmac.compare_digest(mac.hexdigest(), request.headers['X-Gogs-Signature']):
-                    abort(403)
-            elif request.is_json:
-                data = request.get_json()
-                kwargs['data'] = data
-                client = APIClient.get(token=data['key'])
-            else:
-                client = APIClient.get(token=request.values.get('key'))
-            kwargs['client'] = client
-        except DoesNotExist:
-            if DEBUG:
-                kwargs['client'] = APIClient.get()
-            else:
-                abort(403)
-        return f(*args, **kwargs)
+def api_auth_required(_f=None, has_permission: str = None, check_device: bool = False):
+    def decorator_api_auth(f):
+        @functools.wraps(f)
+        def wrapped(*args, **kwargs):
+            try:
+                if request.headers.get('X-Gogs-Signature'):
+                    client = APIClient.get(name='gogs-update')
+                    secret = bytes(client.token.encode())
+                    mac = hmac.new(secret, msg=request.get_data(), digestmod=hashlib.sha256)
+                    if not hmac.compare_digest(mac.hexdigest(), request.headers['X-Gogs-Signature']):
+                        abort(403)
+                elif request.is_json:
+                    data = request.get_json()
+                    kwargs['data'] = data
+                    client = APIClient.get(token=data['key'])
+                else:
+                    client = APIClient.get(token=request.values.get('key'))
 
-    return wrapped
+                if client:
+                    kwargs['client'] = client
+                    if has_permission and not client.has_permission(has_permission):
+                        abort(403)
+                    elif check_device:
+                        device = get_device(args[0]['device'].replace('-', ' '))
+                        if client.has_permission(device.group):
+                            args.append(device)
+                            return f(*args, **kwargs)
+            except DoesNotExist:
+                if DEBUG:
+                    kwargs['client'] = APIClient.get()
+                else:
+                    from home.web.web import app
+                    app.logger.warning("Gogs update invoked, but no API client exists for Gogs.")
+                    abort(403)
+            return f(*args, **kwargs)
+
+        return wrapped
+
+    if _f is None:
+        return decorator_api_auth
+    else:
+        return decorator_api_auth(_f)
 
 
 def generate_csrf_token() -> str:

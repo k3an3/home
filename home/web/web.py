@@ -190,6 +190,13 @@ def ws_admin(data):
             emit('config', f.read())
 
 
+def send_message(msg: str, style: str = 'info'):
+    emit('message',
+         {'class': 'alert-' + style,
+          'content': msg
+          })
+
+
 @socketio.on('subscribe')
 @ws_login_required
 def subscribe(subscriber):
