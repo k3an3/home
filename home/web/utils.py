@@ -4,7 +4,7 @@ import hmac
 import subprocess
 from base64 import b64encode
 from io import BytesIO
-from typing import List
+from typing import List, Any
 
 import qrcode
 from flask import abort
@@ -232,3 +232,9 @@ def ldap_auth(username: str, password: str) -> User:
         app.logger.info("Failed to bind with user " + LDAP_FILTER.format(username) + "," + LDAP_BASE_DN)
     c.unbind()
     return u
+
+
+def filter_by_permission(user: User, objects: List[Any]):
+    if user.admin:
+        return objects
+    return [o for o in objects if user.has_permission(o)]

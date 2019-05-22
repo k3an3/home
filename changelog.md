@@ -5,7 +5,11 @@
 * Added/fixed Docker compatibility
 * Improved setuptools packaging
 * Python 3.7 compatibility 
+* Acknowledge when a clicked button has fired on the server
 * LDAP fixes and 3rd-party auth integrations
+* Some UI fixes
+* Remove admin function visibility from unprivileged user sessions
+* Prevent unprivileged users seeing all devices and actions
 * Other bugfixes and minor improvements
 ## v0.11
 * Merge several modules into single "computer" module for controlling computers over remote access protocols

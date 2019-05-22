@@ -1,14 +1,12 @@
 import subprocess
-from time import sleep
 from typing import List
 
 import paramiko
 import requests
-from flask_login import current_user
-from flask_socketio import disconnect, emit
+from flask_socketio import emit
+from time import sleep
 from wakeonlan import send_magic_packet
 
-from home.core.models import get_device
 from home.core.tasks import run
 from home.web.utils import ws_login_required
 from home.web.web import socketio
@@ -159,12 +157,8 @@ class Computer:
 
 
 @socketio.on('enum virsh')
-@ws_login_required
-def get_vms(message):
-    device = get_device(message['device'].replace('-', ' '))
-    if not current_user.has_permission(device):
-        disconnect()
-        return
+@ws_login_required(check_device=True)
+def get_vms(message, device):
     if device.dev.virt:
         device.dev.enum_virsh()
         if device.dev.vms:
@@ -172,12 +166,8 @@ def get_vms(message):
 
 
 @socketio.on('vm ctrl')
-@ws_login_required
-def vm_ctrl(message):
-    device = get_device(message['device'].replace('-', ' '))
-    if not current_user.has_permission(device):
-        disconnect()
-        return
+@ws_login_required(check_device=True)
+def vm_ctrl(message, device):
     run(device.dev.vm_power, vm=message['vm'], action=message['action'])
     emit('message',
          {'class': 'alert-success',

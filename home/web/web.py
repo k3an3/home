@@ -8,21 +8,19 @@ import flask_assets
 from flask import Flask, render_template, request, redirect, abort, url_for, session, flash
 from flask_login import LoginManager, login_required, current_user
 from flask_login import login_user, logout_user
-from flask_socketio import SocketIO, emit, disconnect
+from flask_socketio import SocketIO, emit
 from peewee import DoesNotExist
 from raven.contrib.flask import Sentry
 from webassets.loaders import PythonLoader as PythonAssetsLoader
 
 import home.core.parser as parser
 import home.core.utils as utils
-from home.core.models import devices, interfaces, get_action, actions, get_interface, get_driver, widgets, get_device, \
-    MultiDevice, get_display, displays
-from home.core.tasks import run
-from home.settings import SECRET_KEY, LOG_FILE, SENTRY_URL
+from home.core.models import devices, interfaces, get_action, actions, get_driver, get_display, displays
+from home.settings import SECRET_KEY, SENTRY_URL, CUSTOM_AUTH_HANDLERS
 from home.web.models import *
 from home.web.models import User, APIClient
-from home.web.utils import ws_login_required, generate_csrf_token, VERSION, api_auth_required, send_to_subscribers, \
-    handle_task, get_qr, get_widgets, get_action_widgets, ldap_auth
+from home.web.utils import generate_csrf_token, VERSION, api_auth_required, send_to_subscribers, \
+    handle_task, get_qr, get_widgets, get_action_widgets, ldap_auth, filter_by_permission
 
 try:
     from home.settings import GOOGLE_API_KEY
@@ -69,11 +67,11 @@ def index():
         widget_html = get_widgets(current_user) + get_action_widgets(current_user)
         return render_template('index.html',
                                interfaces=interface_list,
-                               devices=devices,
+                               devices=filter_by_permission(current_user, devices),
                                sec=sec,
                                events=events,
                                clients=APIClient.select(),
-                               actions=actions,
+                               actions=filter_by_permission(current_user, actions),
                                version=VERSION,
                                debug=DEBUG,
                                qr=get_qr(),
@@ -124,94 +122,6 @@ def command_api(client):
     return '', 204
 
 
-@socketio.on('admin')
-@ws_login_required
-def ws_admin(data):
-    if not current_user.admin:
-        return
-    command = data.get('command')
-    if command == 'action':
-        app.logger.info("({}) Execute action '{}'".format(current_user.username, data.get('action')))
-        get_action(data.get('action')).run()
-        emit('message', {'class': 'alert-success',
-                         'content': "Executing action '{}'.".format(data.get('action'))
-                         })
-    elif command == 'visible':
-        interface = get_interface(data.get('iface'))
-        interface.public = not interface.public
-        emit('message', {'class': 'alert-success',
-                         'content': 'Successfully changed interface visibility (until server is restarted).'})
-    elif command == 'update':
-        utils.update()
-        emit('update', {}, broadcast=True)
-        emit('message', {'class': 'alert-success',
-                         'content': 'Updating...'})
-    elif command == 'revoke':
-        client = APIClient.get(name=data.get('name'))
-        client.delete_instance()
-        emit('message', {'class': 'alert-success',
-                         'content': 'Successfully revoked API permissions.'})
-    elif command == 'update permissions':
-        client = APIClient.get(name=data.get('name'))
-        client.permissions = data.get('perms').replace(' ', '')
-        client.save()
-        emit('message', {'class': 'alert-success',
-                         'content': 'Successfully updated API permissions.'})
-    elif command == 'delete':
-        user = User.get(username=data.get('name'))
-        user.delete_instance()
-        emit('message', {'class': 'alert-success',
-                         'content': 'Successfully deleted user.'})
-    elif command == 'user update permissions':
-        user = User.get(username=data.get('name'))
-        user._groups = data.get('perms').replace(' ', '')
-        user.save()
-        emit('message', {'class': 'alert-success',
-                         'content': 'Successfully updated User permissions.'})
-    elif command == 'refresh_display':
-        emit('display refresh', broadcast=True)
-    elif command == 'update config':
-        try:
-            parser.parse(data=data['config'])
-        except Exception as e:
-            parser.parse(file='config.yml')
-            emit('message', {'class': 'alert-danger',
-                             'content': 'Error parsing device configuration. ' + str(e)})
-        else:
-            with open('config.yml', 'w') as f:
-                f.write(data['config'])
-            emit('message', {'class': 'alert-success',
-                             'content': 'Successfully updated device configuration.'})
-    elif command == 'refresh logs':
-        with open(LOG_FILE) as f:
-            emit('logs', f.read())
-    elif command == 'get config':
-        with open('config.yml') as f:
-            emit('config', f.read())
-
-
-def send_message(msg: str, style: str = 'info'):
-    emit('message',
-         {'class': 'alert-' + style,
-          'content': msg
-          })
-
-
-@socketio.on('subscribe')
-@ws_login_required
-def subscribe(subscriber):
-    """
-    Subscribe the browser to push notifications.
-    """
-    s, created = Subscriber.get_or_create(
-        endpoint=subscriber.get('endpoint'),
-        auth=subscriber.get('keys')['auth'],
-        p256dh=subscriber.get('keys')['p256dh'],
-        user=current_user.id)
-    if created:
-        s.push("Subscribed to push notifications!")
-
-
 @app.route('/api/update', methods=['POST'])
 @api_auth_required
 def api_update_app(client):
@@ -219,14 +129,6 @@ def api_update_app(client):
         abort(403)
     socketio.emit('update', {}, broadcast=True)
     utils.update()
-
-
-@socketio.on('update')
-@ws_login_required
-def ws_update():
-    if current_user.admin:
-        utils.update()
-        emit('update', {}, broadcast=True)
 
 
 @app.route("/update")
@@ -289,15 +191,10 @@ def user_loader(user_id):
 
 @login_manager.request_loader
 def load_user_from_request(request):
-    return None
     for handler in CUSTOM_AUTH_HANDLERS:
-        pass
-    u = request.headers.get('user')
-    if u and request.headers.get('verified') == 'SUCCESS':
-        user = User.get(username=u.split('=')[1].split(',')[0])
+        user = handler()
         if user:
             return user
-    return None
 
 
 @app.route('/login', methods=['POST'])
@@ -392,44 +289,13 @@ def guest_auth(path):
     abort(403)
 
 
-@socketio.on("widget")
-@ws_login_required
-def widget(data):
-    try:
-        target = widgets[data['id']]
-    except KeyError:
-        # Widget is out of date. Force client reload
-        emit('reload')
-        return
-    if current_user.has_permission(target[3]):
-        if target[0] == 'method':
-            app.logger.info(
-                "({}) Execute {} on {} with config {}".format(current_user.username, target[1].__name__, target[3].name,
-                                                              target[2]))
-            func = target[1]
-            args = target[2]
-            if target[3].driver.noserialize or type(target[3]) is MultiDevice:
-                func(**args)
-            else:
-                run(func, **args)
-        elif target[0] == 'action':
-            app.logger.info("({}) Execute action {}".format(current_user.username, target[1]))
-            target[1].run()
-    else:
-        disconnect()
-
-
-@socketio.on("device state")
-@ws_login_required
-def device_state(data):
-    target = get_device(data['device'])
-    if current_user.has_permission(target):
-        try:
-            emit('device state', {'device': target.name, 'state': target.dev.get_state()})
-        except AttributeError:
-            emit('device state', {'device': target.name, 'state': None})
-
-
 @app.template_filter('slugify')
 def slugify(text: str):
     return text.replace(' ', '-')
+
+
+def send_message(msg: str, style: str = 'info'):
+    emit('message',
+         {'class': 'alert-' + style,
+          'content': msg
+          })

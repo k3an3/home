@@ -58,3 +58,9 @@ auth_js = Bundle(
         output='public/js/common.js'
     ),
 )
+
+admin_js = Bundle(
+    'js/admin.js',
+    filters='jsmin',
+    output='public/js/admin.js'
+)

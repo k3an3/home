@@ -8,45 +8,6 @@ var bright = 100;
 var target = "0";
 $('#messages').hide();
 
-ws.emit('admin', {
-    command: 'refresh logs',
-});
-
-ws.emit('admin', {
-    command: 'get config',
-});
-
-function editDevice() {
-    ws.emit('admin', {
-        action: 'add',
-        id: $('#id').val(),
-        name: $('#name').val(),
-        category: $('#category').val(),
-        data: $('#data').val()
-    });
-}
-
-$('.visibility ').click(function(e) {
-    ws.emit('admin', {
-        command: 'visible',
-        iface: $(this).attr('id'),
-    });
-});
-
-$('#refresh_display').click(function() {
-    ws.emit('admin', {
-        command: 'refresh_display'
-    });
-});
-
-function revoke(name) {
-    ws.emit('admin', {command: 'revoke', name: name});
-}
-
-function del_user(name) {
-    ws.emit('admin', {command: 'delete', name: name});
-}
-
 var update = false;
 
 ws.on('disconnect', function () {
@@ -85,10 +46,6 @@ ws.on('message', function (data) {
     message(data);
 });
 
-ws.on('event', function (data) {
-    var table = $('#events');
-});
-
 $("#loadingScreen").dialog({
     autoOpen: false,    // set this to false so we can manually open it
     dialogClass: "loadingScreenWindow",
@@ -124,45 +81,14 @@ function waitingDialog(waiting) {
     $("#loadingScreen").dialog('open');
 }
 
-$('#saveconfig').hide();
-$('#editconfig').click(function() {
-    $('#config').removeAttr('readonly');
-    $(this).hide();
-    $('#saveconfig').show();
-});
-
-$('#saveconfig').click(function() {
-    ws.emit('admin',
-        {
-            command: 'update config',
-            config: $('#config').val()
-        }
-    );
-});
-
 $(".widget").click(function () {
     ws.emit('widget', {id: this.id});
 });
 
-$('#refresh_logs').click(function() {
-    ws.emit('admin', {
-        command: 'refresh logs',
-    });
-});
-
-ws.on('logs', function(logs) {
-    $('#logs').html(logs);
-});
 
 ws.on('config', function(config) {
     $('#config').html(config);
 });
-
-/*
-$(".device-status").each(function() {
-    ws.emit('device state', {'device': this.id.split('-')[1].replace('_', ' ')});
-});
-*/
 
 // https://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
 function rgbToHex(r, g, b) {
@@ -181,30 +107,6 @@ ws.on("device state", function(data) {
     else
         t.html(data.state);
 });
-
-
-$(".saveperms").click(function() {
-    var client = $(this).attr('id');
-    client = client.slice(client.indexOf('-') + 1);
-    ws.emit('admin',
-        {
-            command: 'update permissions',
-            name: client,
-            perms: $('#perms-' + client).val()
-        });
-});
-
-$(".u_saveperms").click(function () {
-    var user = $(this).attr('id');
-    user = user.slice(user.indexOf('-') + 1);
-    ws.emit('admin',
-        {
-            command: 'user update permissions',
-            name: user,
-            perms: $('#u_perms-' + user).val()
-        });
-});
-
 
 setTimeout(function () {
     $('#messages2').fadeOut();
