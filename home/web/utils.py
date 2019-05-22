@@ -51,8 +51,10 @@ def ws_login_required(_f=None, has_permission: str = None, check_device: bool = 
                 elif check_device:
                     device = get_device(args[0]['device'].replace('-', ' '))
                     if current_user.has_permission(device):
-                        args.append(device)
+                        kwargs['device'] = device
                         return f(*args, **kwargs)
+                elif not has_permission and not check_device:
+                    return f(*args, **kwargs)
             disconnect()
         return wrapped
 
