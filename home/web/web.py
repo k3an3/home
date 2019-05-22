@@ -192,7 +192,7 @@ def user_loader(user_id):
 @login_manager.request_loader
 def load_user_from_request(request):
     for handler in CUSTOM_AUTH_HANDLERS:
-        user = handler()
+        user = handler(request)
         if user:
             return user
 

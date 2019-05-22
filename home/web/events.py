@@ -1,3 +1,5 @@
+from time import sleep
+
 from flask_login import current_user
 from flask_socketio import emit, disconnect
 
@@ -7,7 +9,7 @@ from home.core.tasks import run
 from home.settings import LOG_FILE
 from home.web.models import APIClient, User, Subscriber
 from home.web.utils import ws_login_required
-from home.web.web import socketio, app
+from home.web.web import socketio, app, send_message
 
 
 @socketio.on('admin')
@@ -26,7 +28,7 @@ def ws_admin(data):
         interface = get_interface(data.get('iface'))
         interface.public = not interface.public
         emit('message', {'class': 'alert-success',
-                         'content': 'Successfully changed interface visibility (until server is restarted).'})
+                         'content': 'Temporarily changed interface visibility (until server is restarted).'})
     elif command == 'update':
         utils.update()
         emit('update', {}, broadcast=True)
@@ -91,21 +93,31 @@ def widget(data):
         target = widgets[data['id']]
     except KeyError:
         # Widget is out of date. Force client reload
+        send_message("Interface out of date; reloading", "warning")
+        sleep(1)
         emit('reload')
         return
     if current_user.has_permission(target[3]):
         if target[0] == 'method':
+            name = target[1].__name__
             app.logger.info(
-                "({}) Execute {} on {} with config {}".format(current_user.username, target[1].__name__, target[3].name,
+                "({}) Execute {} on {} with config {}".format(current_user.username, name, target[3].name,
                                                               target[2]))
             func = target[1]
             args = target[2]
-            if target[3].driver.noserialize or type(target[3]) is MultiDevice:
-                func(**args)
+            try:
+                if target[3].driver.noserialize or type(target[3]) is MultiDevice:
+                    func(**args)
+                else:
+                    run(func, **args)
+            except Exception as e:
+                app.logger.error("Error running {}: {}".format(name, str(e)))
+                send_message("Error running \"{}\"!".format(name), 'danger')
             else:
-                run(func, **args)
+                send_message("Successfully ran \"{}\".".format(name), 'success')
         elif target[0] == 'action':
             app.logger.info("({}) Execute action {}".format(current_user.username, target[1]))
+            send_message("Executing action \"{}\"".format(target[1]))
             target[1].run()
     else:
         disconnect()
