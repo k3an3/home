@@ -17,6 +17,8 @@ RAINY_SAYINGS = (
     "I hope you saved something for a rainy day.",
     "you might just get wet.",
     "unless you want to get wet.",
+    "Drop your socks and put on your crocs! It's going to be a wet one.",
+    "You know what they say about April showers. That would be awkward if it wasn't April..."
 )
 
 WINDY_SAYINGS = (
@@ -27,11 +29,13 @@ WINDY_SAYINGS = (
 )
 
 HOT_SAYINGS = (
-    "Drop your socks and grab your crocs! It's going to be a hot one.",
     "Might want to stay inside, or go to the pool. It will be a bit hot.",
     "Soak up that air conditioning! It's hot out.",
     "Make sure to stay hydrated in this hot weather!",
     "Spend some quality time inside today, it'll be hot out there.",
+    "Spend some time in the freshest possible air! Good old A C.",
+    "Head for the beach. Or don't. Up to you.",
+    "Put away your cloudblock and make sure to use plenty of sunblock!"
 )
 
 COLD_SAYINGS = (
@@ -41,14 +45,16 @@ COLD_SAYINGS = (
     "Break out the handwarmers! It may be hard to type.",
     "Crank up the heater and get toasty!",
     "Better put another log on the fire, it is cold out!",
+    "Summer called, and wanted to make you jealous of the weather."
 )
 
 SNOWY_SAYINGS = (
     "Put on your snowshoes, you'll need them today.",
     "Gone away is the bluebird, here to stay is the new bird. a k a, it might be a winter wonderland out there.",
     "Don't go to Dairy Queen today, eat some snow instead!",
-    "Might just be a good day for a snowball fight! Rally your troops.",
+    "Might just be a good day for a snowball fight! What about the possibility of an aerial attack?",
     "Just because it's snowing doesn't mean you get the day off.",
+    "Hope the roads are clean; driving could get interesting."
 )
 
 STORMY_SAYINGS = (
@@ -56,6 +62,9 @@ STORMY_SAYINGS = (
     "You may want to seek shelter indoors today.",
     "Don't get struck by lightning!",
     "Thunder and lightning from above!",
+    "Hope the dog isn't scared of thunder.",
+    "Unplug all of your applicances and do not shower unless you dare.",
+    "Do you think we'll set a record for hail size today?",
 )
 
 
