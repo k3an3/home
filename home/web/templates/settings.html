@@ -46,6 +46,7 @@
                         <input class="form-control" id="u_perms-{{ user.username }}" type="text"
                                value="{{ user._groups }}">
                         <button class="btn btn-warning u_saveperms" id="bp-{{ user.username }}">Update</button>
+                        <button class="btn btn-default u_regentok" id="tk-{{ user.username }}">Logout</button>
                         <button onclick="del_user('{{ user.username }}');this.parentNode.style.display = 'none';"
                                 class="btn btn-danger">Delete
                         </button>

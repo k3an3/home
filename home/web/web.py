@@ -5,7 +5,7 @@ web.py
 Flask web application for Home.
 """
 import flask_assets
-from flask import Flask, render_template, request, redirect, abort, url_for, session, flash
+from flask import Flask, render_template, request, redirect, abort, url_for, session, flash, make_response
 from flask_login import LoginManager, login_required, current_user
 from flask_login import login_user, logout_user
 from flask_socketio import SocketIO, emit
@@ -29,6 +29,12 @@ except ImportError:
 
 app = Flask(__name__)
 app.secret_key = SECRET_KEY
+if not DEBUG:
+    app.config.update(
+        SESSION_COOKIE_SECURE=True,
+        SESSION_COOKIE_HTTPONLY=True,
+        SESSION_COOKIE_SAMESITE='Lax',
+    )
 socketio = SocketIO(app, cors_allowed_origins=[])
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -185,8 +191,11 @@ def add_header(response):
 
 
 @login_manager.user_loader
-def user_loader(user_id):
-    return User.get(username=user_id)
+def user_loader(token):
+    try:
+        return User.get(token=token)
+    except DoesNotExist:
+        return None
 
 
 @login_manager.request_loader

@@ -87,3 +87,13 @@ $(".u_saveperms").click(function () {
             perms: $('#u_perms-' + user).val()
         });
 });
+
+$(".u_regentok").click(function () {
+    let user = $(this).attr('id');
+    user = user.slice(user.indexOf('-') + 1);
+    ws.emit('admin',
+        {
+            command: 'user regen token',
+            name: user,
+        });
+});

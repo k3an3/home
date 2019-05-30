@@ -1,13 +1,14 @@
-import json
-
 import datetime
+import json
+from secrets import token_hex
+from typing import List, Dict, Any
+
 from flask_login import UserMixin
 from passlib.hash import sha256_crypt
 from peewee import CharField, BooleanField, ForeignKeyField, IntegerField, \
     DateTimeField, \
     Model, IntegrityError
 from pywebpush import WebPusher
-from typing import List, Dict, Any
 
 from home.core.utils import random_string
 from home.settings import GOOGLE_API_KEY, USE_LDAP, db, DEBUG, PUBLIC_GROUPS
@@ -43,6 +44,10 @@ class BaseModel(Model):
         database = db
 
 
+def gen_token() -> str:
+    return token_hex(16)
+
+
 class User(BaseModel, UserMixin):
     username = CharField(unique=True)
     authenticated = BooleanField(default=False)
@@ -50,9 +55,10 @@ class User(BaseModel, UserMixin):
     admin = BooleanField(default=False)
     _groups = CharField(default='')
     ldap = BooleanField(default=False)
+    token = CharField(default=gen_token)
 
     def get_id(self) -> str:
-        return self.username
+        return self.token
 
     def check_password(self, password: str) -> bool:
         if self.ldap and USE_LDAP:

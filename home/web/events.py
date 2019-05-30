@@ -1,3 +1,4 @@
+from secrets import token_hex
 from time import sleep
 
 from flask_login import current_user
@@ -7,7 +8,7 @@ from home.core import utils as utils, parser as parser
 from home.core.models import get_action, get_interface, widgets, MultiDevice
 from home.core.tasks import run
 from home.settings import LOG_FILE
-from home.web.models import APIClient, User, Subscriber
+from home.web.models import APIClient, User, Subscriber, gen_token
 from home.web.utils import ws_login_required
 from home.web.web import socketio, app, send_message
 
@@ -56,6 +57,12 @@ def ws_admin(data):
         user.save()
         emit('message', {'class': 'alert-success',
                          'content': 'Successfully updated User permissions.'})
+    elif command == 'user regen token':
+        user = User.get(username=data.get('name'))
+        user.token = gen_token()
+        user.save()
+        emit('message', {'class': 'alert-success',
+                         'content': 'Successfully invalidated sessions.'})
     elif command == 'refresh_display':
         emit('display refresh', broadcast=True)
     elif command == 'update config':
