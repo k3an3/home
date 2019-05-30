@@ -3,7 +3,7 @@
 from playhouse.migrate import *
 
 from home.settings import db
-from home.web import gen_token
+from home.web import gen_token, User
 
 if type(db) == SqliteDatabase:
     migrator = SqliteMigrator(db)
@@ -12,5 +12,9 @@ elif type(db) == MySQLDatabase:
 
 with db.transaction():
     migrate(
-        migrator.add_column('user', 'token', CharField(default=gen_token)),
+        migrator.add_column('user', 'token', CharField(unique=True)),
     )
+
+for user in User.select():
+    user.token = gen_token()
+    user.save()
