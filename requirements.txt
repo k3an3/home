@@ -62,7 +62,7 @@ python-socketio
 pytz
 py_vapid
 pywebpush
-PyYAML==3.13
+PyYAML
 qrcode
 redis
 requests

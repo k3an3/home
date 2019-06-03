@@ -31,7 +31,7 @@ def parse(file: str = None, data: str = None):
     interfaces.clear()
     widgets.clear()
     clear_scheduled_jobs()
-    y = yaml.load(d)
+    y = yaml.load(d, Loader=yaml.Loader)
     for interface in y['interfaces']:
         interfaces.append(interface)
     print("Installed drivers:")
