@@ -1,7 +1,7 @@
 import calendar
+import datetime
 import random
 
-import datetime
 import requests
 from flask import request, abort
 
@@ -72,13 +72,13 @@ class Weather:
     def __init__(self, api_key):
         self.api_key = api_key
 
-    def get(self, city_id=None, zip=None, latlon=None, name=None, mode='weather'):
+    def get(self, city_id=None, zipcode=None, latlon=None, name=None, mode='weather'):
         if city_id:
             loc = "id=" + str(city_id)
-        elif zip:
-            loc = "zip=" + str(zip)
+        elif zipcode:
+            loc = "zip=" + str(zipcode)
         elif latlon:
-            loc = "lat={0[0]}&lon={0[1]}".format(latlon)
+            loc = "lat={0[0]}&lon={0[1]}".format(latlon.split(','))
         elif name:
             loc = "q=" + name
         uri = '?{}&APPID={}&units=imperial'.format(loc, self.api_key)
@@ -87,7 +87,8 @@ class Weather:
             raise Exception("Invalid response from OpenWeatherMap")
         return Forecast(r.json())
 
-    def render_widget(self, lat, lon):
+    @staticmethod
+    def render_widget(lat, lon):
         return '<iframe src="https://weatherfor.us/widget?" scrolling="no" frameborder="0" allowtransparency="true" ' \
                'style="background: transparent; width: 720px; height: 250px; overflow: hidden;"></iframe> <img ' \
                'src="https://radblast.wunderground.com/cgi-bin/radar/WUNIDS_map?station=DMX&brand=wui&num=6&delay=15' \
@@ -152,7 +153,7 @@ def format_weather(weather: Forecast, forecast: Forecast, speech: Speech) -> str
 @api_auth_required
 def motd(client):
     try:
-        speech = get_device(request.values.get('device'))
+        speech = get_device(request.values.pop('device'))
     except StopIteration:
         abort(404)
     if not speech.driver.klass == Speech:
@@ -160,6 +161,7 @@ def motd(client):
     if not client.has_permission(speech.group):
         abort(403)
     speech = speech.dev
-    weather = speech.weather.get(latlon=request.values.get('loc').split(','))
-    forecast = speech.weather.get(latlon=request.values.get('loc').split(','), mode='forecast')
+    params = dict(request.values)
+    weather = speech.weather.get(**params)
+    forecast = speech.weather.get(**params, mode='forecast')
     return format_weather(weather, forecast, speech)
