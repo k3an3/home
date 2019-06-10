@@ -85,6 +85,8 @@ def api_auth_required(_f=None, has_permission: str = None, check_device: bool = 
                     mac = hmac.new(secret, msg=request.get_data(), digestmod=hashlib.sha256)
                     if not hmac.compare_digest(mac.hexdigest(), request.headers['X-Gogs-Signature']):
                         abort(403)
+                elif request.headers.get('X-Auth-Token'):
+                    client = APIClient.get(token=request.headers['X-Auth-Token'])
                 elif request.is_json:
                     data = request.get_json()
                     kwargs['data'] = data
