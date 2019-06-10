@@ -79,6 +79,13 @@ def api_auth_required(_f=None, has_permission: str = None, check_device: bool = 
         @functools.wraps(f)
         def wrapped(*args, **kwargs):
             try:
+                if request.is_json:
+                    data = request.get_json()
+                    kwargs['data'] = data
+                    device = data['device']
+                else:
+                    device = args[0]['device']
+
                 if request.headers.get('X-Gogs-Signature'):
                     client = APIClient.get(name='gogs-update')
                     secret = bytes(client.token.encode())
@@ -88,8 +95,6 @@ def api_auth_required(_f=None, has_permission: str = None, check_device: bool = 
                 elif request.headers.get('X-Auth-Token'):
                     client = APIClient.get(token=request.headers['X-Auth-Token'])
                 elif request.is_json:
-                    data = request.get_json()
-                    kwargs['data'] = data
                     client = APIClient.get(token=data['key'])
                 else:
                     client = APIClient.get(token=request.values.get('key'))
@@ -99,7 +104,7 @@ def api_auth_required(_f=None, has_permission: str = None, check_device: bool = 
                     if has_permission and not client.has_permission(has_permission):
                         abort(403)
                     elif check_device:
-                        device = get_device(args[0]['device'].replace('-', ' '))
+                        device = get_device(device.replace('-', ' '))
                         if client.has_permission(device.group):
                             args.append(device)
                             return f(*args, **kwargs)
