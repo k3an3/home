@@ -152,8 +152,9 @@ def format_weather(weather: Forecast, forecast: Forecast, speech: Speech) -> str
 @app.route('/api/motd', methods=['GET', 'POST'])
 @api_auth_required
 def motd(client):
+    data = dict(request.values)
     try:
-        speech = get_device(request.values.pop('device'))
+        speech = get_device(data.pop('device'))
     except StopIteration:
         abort(404)
     if not speech.driver.klass == Speech:
@@ -161,7 +162,6 @@ def motd(client):
     if not client.has_permission(speech.group):
         abort(403)
     speech = speech.dev
-    params = dict(request.values)
-    weather = speech.weather.get(**params)
-    forecast = speech.weather.get(**params, mode='forecast')
+    weather = speech.weather.get(**data)
+    forecast = speech.weather.get(**data, mode='forecast')
     return format_weather(weather, forecast, speech)
