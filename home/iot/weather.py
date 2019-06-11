@@ -162,6 +162,7 @@ def motd(client):
     if not client.has_permission(speech.group):
         abort(403)
     speech = speech.dev
+    data.pop('key')
     weather = speech.weather.get(**data)
     forecast = speech.weather.get(**data, mode='forecast')
     return format_weather(weather, forecast, speech)
