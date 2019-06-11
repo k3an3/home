@@ -130,7 +130,7 @@ def command_api(client):
 
 @app.route('/api/update', methods=['POST'])
 @api_auth_required(has_permission='update')
-def api_update_app(client):
+def api_update_app(client, *args, **kwargs):
     socketio.emit('update', {}, broadcast=True)
     utils.update()
 
