@@ -5,7 +5,7 @@ web.py
 Flask web application for Home.
 """
 import flask_assets
-from flask import Flask, render_template, request, redirect, abort, url_for, session, flash, make_response
+from flask import Flask, render_template, request, redirect, abort, url_for, session, flash
 from flask_login import LoginManager, login_required, current_user
 from flask_login import login_user, logout_user
 from flask_socketio import SocketIO, emit
@@ -129,10 +129,8 @@ def command_api(client):
 
 
 @app.route('/api/update', methods=['POST'])
-@api_auth_required
+@api_auth_required(has_permission='update')
 def api_update_app(client):
-    if not client.has_permission('update'):
-        abort(403)
     socketio.emit('update', {}, broadcast=True)
     utils.update()
 
@@ -268,10 +266,8 @@ def logout():
 
 
 @app.route("/api/notify", methods=['POST'])
-@api_auth_required
+@api_auth_required(has_permission='notify')
 def push_notify(client, data):
-    if not client.has_permission('notify'):
-        abort(403)
     send_to_subscribers(data['msg'], groups=data.get('groups', []))
     return '', 204
 

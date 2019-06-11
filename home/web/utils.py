@@ -82,9 +82,9 @@ def api_auth_required(_f=None, has_permission: str = None, check_device: bool = 
                 if request.is_json:
                     data = request.get_json()
                     kwargs['data'] = data
-                    device = data['device']
+                    device = data.get('device')
                 else:
-                    device = args[0]['device']
+                    device = request.values.get('device')
 
                 if request.headers.get('X-Gogs-Signature'):
                     client = APIClient.get(name='gogs-update')
