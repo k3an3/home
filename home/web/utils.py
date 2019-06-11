@@ -106,8 +106,7 @@ def api_auth_required(_f=None, has_permission: str = None, check_device: bool = 
                     elif check_device:
                         device = get_device(device.replace('-', ' '))
                         if client.has_permission(device.group):
-                            args.append(device)
-                            return f(*args, **kwargs)
+                            return f(*args, device, **kwargs)
             except DoesNotExist:
                 if DEBUG:
                     kwargs['client'] = APIClient.get()
