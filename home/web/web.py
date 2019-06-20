@@ -268,6 +268,7 @@ def logout():
 @app.route("/api/notify", methods=['POST'])
 @api_auth_required(has_permission='notify')
 def push_notify(client, data):
+    # Expects JSON payload, hence the data argument
     send_to_subscribers(data['msg'], groups=data.get('groups', []))
     return '', 204
 

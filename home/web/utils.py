@@ -112,7 +112,7 @@ def api_auth_required(_f=None, has_permission: str = None, check_device: bool = 
                     kwargs['client'] = APIClient.get()
                 else:
                     from home.web.web import app
-                    app.logger.warning("Gogs update invoked, but no API client exists for Gogs.")
+                    app.logger.warning("No API client exists for the request.")
                     abort(403)
             return f(*args, **kwargs)
 
