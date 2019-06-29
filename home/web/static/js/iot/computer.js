@@ -27,11 +27,11 @@ $('body').on('click', 'button.vm-control', function(a) {
 });
 
 ws.on('vms', function(data) {
-    var device = $('#' + data.device + '-table');
+    let device = $('#' + data.device + '-table');
     device.html('');
     $.each(data.vms, function(a, b) {
-        var status = '<span class="label label-' + status_label[b[1]] + '">' + b[1] + '</span>';
-        device.append('<tr><td>' + b[0] + '</td><td>' + status + '</td><td>' + buttons(data.device + '-' + b[0]) + '</td></tr>');
+        let status = '<span class="label label-' + status_label[b[1]] + '">' + b[1] + '</span>';
+        device.append('<tr><td>' + b[0] + '</td><td>' + status + '</td><td>' + buttons(data.device + ':' + b[0]) + '</td></tr>');
     });
 });
 
