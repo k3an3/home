@@ -24,3 +24,33 @@ $ sudo systemctl start home
 
 Why do I have a separate command to install the requirements when this all could be done in `setup.py`? As far as I know, 
 there is no way to achieve the same behavior with setuptools.
+
+## API
+IOT modules can register an HTTP endpoint at `/api/*` or a custom path, and may integrate with the app's authentication (see below). 
+```python
+from home.web.utils import api_auth_required
+from home.web.web import app
+
+
+@app.route('/api/myiotdevice', methods=['GET', 'POST'])
+@api_auth_required(check_device=True)
+def my_endpoint(device, client):
+    # do whatever
+```
+
+The same can be performed with websockets powered by SocketIO.
+```python
+from home.web.utils import ws_login_required
+from home.web.web import socketio
+
+
+@socketio.on('do something cool')
+@ws_auth_required(check_device=True)
+def my_ws_endpoint(message, device):
+    # do whatever
+```
+
+Valid authentication methods for passing API tokens include:
+* HTTP header X-Auth-Token
+* JSON parameter `{"key": "apikeyblah"}
+* In the parameters of a GET or POST request
