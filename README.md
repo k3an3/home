@@ -51,6 +51,6 @@ def my_ws_endpoint(message, device):
 ```
 
 Valid authentication methods for passing API tokens include:
-* HTTP header X-Auth-Token
-* JSON parameter `{"key": "apikeyblah"}
+* HTTP header `X-Auth-Token`
+* JSON parameter `{"key": "apikeyblah"}`
 * In the parameters of a GET or POST request
