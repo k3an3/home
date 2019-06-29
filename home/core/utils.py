@@ -62,7 +62,7 @@ def class_from_name(module_name: str, class_name: str):
             class_name
         )
     except ImportError:
-        raise NotImplementedError()
+        raise NotImplementedError(f"No such module exists: {module_name}.{class_name}")
 
 
 def method_from_name(klass, method_name: str):

@@ -1,4 +1,5 @@
-var status_label = {running: 'success', 'shut off': 'danger'};
+let status_label = {running: 'success', 'shut off': 'danger', 'paused': 'info'};
+
 function enum_virsh() {
     $('.computer').each(function(i, a) {
         ws.emit('enum virsh', {device: a.id});
@@ -6,16 +7,16 @@ function enum_virsh() {
 }
 
 function buttons(device) {
-    var btn = '<div class="btn-group" role="group">';
-    btn += '<button id="{}-start" type="button" class="btn btn-sm btn-success vm-control">Start</button>';
-    btn += '<button id="{}-shutdown" type="button" class="btn btn-sm btn-danger vm-control">Stop</button>';
-    btn += '<button id="{}-restart" type="button" class="btn btn-sm btn-warning vm-control">Restart</button>';
+    let btn = '<div class="btn-group" role="group">';
+    btn += '<button id="{}:start" type="button" class="btn btn-sm btn-success vm-control">Start</button>';
+    btn += '<button id="{}:shutdown" type="button" class="btn btn-sm btn-danger vm-control">Stop</button>';
+    btn += '<button id="{}:restart" type="button" class="btn btn-sm btn-warning vm-control">Restart</button>';
     btn += '</div>';
     return btn.replace(/{}/g, device);
 }
 
 $('body').on('click', 'button.vm-control', function(a) {
-    var s = a.target.id.split('-');
+    let s = a.target.id.split(':');
     ws.emit('vm ctrl', {
         device: s[0],
         vm: s[1],
