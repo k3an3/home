@@ -277,7 +277,7 @@ class KasaBulb(Bulb):
     def on(self):
         bulb = self._get_bulb()
         bulb.turn_on()
-        bulb.brightness = 100
+        bulb.hsv = (0, 0, 100)
 
     def off(self):
         bulb = self._get_bulb()
@@ -306,6 +306,7 @@ class KasaBulb(Bulb):
 
     def sunlight(self) -> None:
         bulb = self._get_bulb()
+        bulb.hsv = (0, 0, 0)
         bulb.brightness = calc_sunlight()['white'] / 255 * 100
 
 
