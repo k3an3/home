@@ -289,6 +289,7 @@ class KasaBulb(Bulb):
         bulb = self._get_bulb()
         speed = abs(speed)
         bulb.turn_on()
+        bulb.brightness = start
         if start > stop:
             bright = start
             while bright >= 0:
@@ -296,7 +297,7 @@ class KasaBulb(Bulb):
                 bright -= speed
                 sleep(pause)
         else:
-            bright = stop
+            bright = start
             while bright <= 100:
                 bulb.brightness = bright
                 bright += speed
