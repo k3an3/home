@@ -46,6 +46,7 @@ import socket
 import sys
 from abc import ABC, abstractmethod
 from datetime import datetime
+from time import sleep
 from typing import Dict
 
 from astral import Astral
@@ -56,7 +57,7 @@ from pyHS100 import SmartBulb
 from home import settings
 from home.core import utils as utils
 from home.core.models import get_device
-from home.core.utils import num
+from home.core.utils import num, RGBfromhex
 from home.web.utils import ws_login_required
 from home.web.web import socketio
 
@@ -265,10 +266,12 @@ class KasaBulb(Bulb):
     def _get_bulb(self):
         return SmartBulb(host=self.host)
 
-    def change_color(self, red: int = 0, green: int = 0, blue: int = 0):
+    def change_color(self, red: int = 0, green: int = 0, blue: int = 0, hex_code: str = None, *args, **kwargs):
+        if hex_code:
+            red, green, blue = RGBfromhex(hex_code)
         bulb = self._get_bulb()
-        print(red, green, blue)
-        bulb.hsv = colorsys.rgb_to_hsv(red, green, blue)
+        h1, h2, br = colorsys.rgb_to_hsv(red, green, blue)
+        bulb.hsv = (int(h1 * 360), int(h2 * 100), br // 255 * 100)
 
     def on(self):
         bulb = self._get_bulb()
@@ -282,19 +285,22 @@ class KasaBulb(Bulb):
     def get_state(self):
         return self._get_bulb().state
 
-    def fade(self, start: int = 0, stop: int = 100, bright: int = None, speed: int = 1, pause: int = 0) -> None:
+    def fade(self, start: int = 0, stop: int = 100, speed: int = 1, pause: float = 0) -> None:
         bulb = self._get_bulb()
         speed = abs(speed)
+        bulb.turn_on()
         if start > stop:
             bright = start
             while bright >= 0:
                 bulb.brightness = bright
                 bright -= speed
+                sleep(pause)
         else:
             bright = stop
             while bright <= 100:
                 bulb.brightness = bright
                 bright += speed
+                sleep(pause)
 
     def sunlight(self) -> None:
         bulb = self._get_bulb()
