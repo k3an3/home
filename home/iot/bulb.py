@@ -44,13 +44,13 @@ tail:
 import colorsys
 import socket
 import sys
-
-from astral import Astral
+from abc import ABC, abstractmethod
 from datetime import datetime
-from flask_login import current_user
-from flask_socketio import emit, disconnect
 from typing import Dict
 
+from astral import Astral
+from flask_login import current_user
+from flask_socketio import emit, disconnect
 from pyHS100 import SmartBulb
 
 from home import settings
@@ -115,10 +115,7 @@ def calc_sunlight() -> int:
         return {'white': 255}
 
 
-class Bulb:
-    """
-    A class representing a single MagicHome LED Bulb.
-    """
+class Bulb(ABC):
     widget = {
         'buttons': (
             {
@@ -143,9 +140,62 @@ class Bulb:
         }
     }
 
+    def __init__(self, sunset_minutes: int = 0):
+        self.sunset_minutes = sunset_minutes
+
+    @abstractmethod
+    def on(self):
+        pass
+
+    @abstractmethod
+    def off(self):
+        pass
+
+    @abstractmethod
+    def change_color(self):
+        pass
+
+    def sunlight(self) -> None:
+        self.change_color(**calc_sunlight())
+
+    def auto_on(self):
+        a = Astral()
+        a.solar_depression = 'civil'
+        city = a[settings.LOCATION]
+        sun = city.sun(date=datetime.now(), local=True)
+        dt = datetime.now(sun['sunset'].tzinfo)
+        minutes_until_sunset = (sun['sunset'] - dt).total_seconds() / 60
+        if 0 <= minutes_until_sunset <= self.sunset_minutes:
+            self.sunlight()
+
+    def fade(self, start: Dict = None, stop: Dict = None, bright: int = None, speed: int = 1) -> None:
+        speed = abs(speed)
+        if start:
+            bright = bright or 255
+            while bright > 0:
+                self.change_color(**start, brightness=bright, mode='41')
+                bright -= speed
+        if stop:
+            bright = bright or 0
+            while bright < 255:
+                self.change_color(**stop, brightness=bright, mode='41')
+                bright += speed
+
+    def fade_sunlight(self, speed: int = 1) -> None:
+        self.fade(stop={'white': 255}, speed=speed)
+
+    @abstractmethod
+    def get_state(self):
+        pass
+
+
+class MagicHomeBulb(Bulb):
+    """
+    A class representing a single MagicHome LED Bulb.
+    """
+
     def __init__(self, host: str, sunset_minutes: int = 0):
         self.host = host
-        self.sunset_minutes = sunset_minutes
         self.state = {}
 
     def auth(self) -> None:
@@ -192,35 +242,6 @@ class Bulb:
         except Exception as e:
             print(e)
 
-    def sunlight(self) -> None:
-        self.change_color(**calc_sunlight())
-
-    def auto_on(self):
-        a = Astral()
-        a.solar_depression = 'civil'
-        city = a[settings.LOCATION]
-        sun = city.sun(date=datetime.now(), local=True)
-        dt = datetime.now(sun['sunset'].tzinfo)
-        minutes_until_sunset = (sun['sunset'] - dt).total_seconds() / 60
-        if 0 <= minutes_until_sunset <= self.sunset_minutes:
-            self.sunlight()
-
-    def fade(self, start: Dict = None, stop: Dict = None, bright: int = None, speed: int = 1) -> None:
-        speed = abs(speed)
-        if start:
-            bright = bright or 255
-            while bright > 0:
-                self.change_color(**start, brightness=bright, mode='41')
-                bright -= speed
-        if stop:
-            bright = bright or 0
-            while bright < 255:
-                self.change_color(**stop, brightness=bright, mode='41')
-                bright += speed
-
-    def fade_sunlight(self, speed: int = 1) -> None:
-        self.fade(stop={'white': 255}, speed=speed)
-
     def off(self):
         self.change_color(white=0)
 
@@ -237,30 +258,47 @@ class Bulb:
             return {'red': r[6], 'green': r[7], 'blue': r[8], 'white': r[9]}
 
 
-class KasaBulb:
+class KasaBulb(Bulb):
     def __init__(self, host: str = None):
         self.host = host
 
+    def _get_bulb(self):
+        return SmartBulb(host=self.host)
+
     def change_color(self, red: int = 0, green: int = 0, blue: int = 0):
-        bulb = SmartBulb(host=self.host)
+        bulb = self._get_bulb()
+        print(red, green, blue)
         bulb.hsv = colorsys.rgb_to_hsv(red, green, blue)
 
     def on(self):
-        bulb = SmartBulb(host=self.host)
+        bulb = self._get_bulb()
         bulb.turn_on()
+        bulb.brightness = 100
 
     def off(self):
-        bulb = SmartBulb(host=self.host)
+        bulb = self._get_bulb()
         bulb.turn_off()
 
+    def get_state(self):
+        return self._get_bulb().state
 
-if __name__ == '__main__':
-    if len(sys.argv) < 4:
-        sys.exit('Nope')
-    colors = list(map(lambda x: int(x), sys.argv[2:]))
-    print(colors)
-    b = Bulb(sys.argv[1])
-    b.change_color(*colors)
+    def fade(self, start: int = 0, stop: int = 100, bright: int = None, speed: int = 1, pause: int = 0) -> None:
+        bulb = self._get_bulb()
+        speed = abs(speed)
+        if start > stop:
+            bright = start
+            while bright >= 0:
+                bulb.brightness = bright
+                bright -= speed
+        else:
+            bright = stop
+            while bright <= 100:
+                bulb.brightness = bright
+                bright += speed
+
+    def sunlight(self) -> None:
+        bulb = self._get_bulb()
+        bulb.brightness = calc_sunlight()['white'] / 255 * 100
 
 
 @socketio.on('change color')
@@ -287,3 +325,12 @@ def reset_color_preview(message):
     Reset the color preview
     """
     emit('preview reset', message['color'], broadcast=True)
+
+
+if __name__ == '__main__':
+    if len(sys.argv) < 4:
+        sys.exit('Nope')
+    colors = list(map(lambda x: int(x), sys.argv[2:]))
+    print(colors)
+    b = KasaBulb(sys.argv[1])
+    b.change_color(*colors)

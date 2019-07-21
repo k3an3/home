@@ -39,7 +39,7 @@ installed_drivers:
         # The Python module for this driver, located in home.iot.
         module: bulb
         # The Python class for this driver inside the given module.
-        klass: Bulb
+        klass: MagicHomeBulb
         # Optionally, whether this driver has an HTML interface
         # defined above.
         interface: colormap
