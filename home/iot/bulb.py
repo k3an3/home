@@ -270,6 +270,7 @@ class KasaBulb(Bulb):
         if hex_code:
             red, green, blue = RGBfromhex(hex_code)
         bulb = self._get_bulb()
+        bulb.turn_on()
         h1, h2, br = colorsys.rgb_to_hsv(red, green, blue)
         bulb.hsv = (int(h1 * 360), int(h2 * 100), br // 255 * 100)
 
