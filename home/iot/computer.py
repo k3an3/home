@@ -163,6 +163,8 @@ def get_vms(message, device):
         device.dev.enum_virsh()
         if device.dev.vms:
             emit('vms', {"device": message['device'], "vms": device.dev.vms})
+        else:
+            emit('vms', {"device": message['device'], "vms": []})
 
 
 @socketio.on('vm ctrl')
