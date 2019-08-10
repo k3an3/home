@@ -160,14 +160,12 @@ class Computer:
 @ws_login_required(check_device=True)
 def get_vms(message, device):
     if device.dev.virt:
+        device.dev.vms = []
         try:
             device.dev.enum_virsh()
         except:
-            device.dev.vms = []
-            emit('vms', {"device": message['device'], "vms": []})
-        else:
-            if device.dev.vms:
-                emit('vms', {"device": message['device'], "vms": device.dev.vms})
+            pass
+        emit('vms', {"device": message['device'], "vms": device.dev.vms})
 
 
 @socketio.on('vm ctrl')
