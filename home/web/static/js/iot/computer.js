@@ -6,15 +6,19 @@ function enum_virsh() {
     });
 }
 
-function buttons(device) {
+function buttons(device, state) {
     let btn = '<div class="btn-group" role="group">';
-    btn += '<button id="{}:start" type="button" class="btn btn-sm btn-success vm-control">Start</button>';
+    if (state == "running") {
+        btn += '<button id="{}:save" type="button" class="btn btn-sm btn-primary vm-control">Save</button>';
+        btn += '<button id="{}:suspend" type="button" class="btn btn-sm btn-default vm-control">Pause</button>';
+    } else if (state == "paused") {
+        btn += '<button id="{}:resume" type="button" class="btn btn-sm btn-primary vm-control">Resume</button>';
+    } else {
+        btn += '<button id="{}:start" type="button" class="btn btn-sm btn-success vm-control">Start</button>';
+        btn += '<button id="{}:restore" type="button" class="btn btn-sm btn-info vm-control">Restore</button>';
+    }
     btn += '<button id="{}:shutdown" type="button" class="btn btn-sm btn-danger vm-control">Stop</button>';
     btn += '<button id="{}:restart" type="button" class="btn btn-sm btn-warning vm-control">Restart</button>';
-    btn += '<button id="{}:save" type="button" class="btn btn-sm btn-primary vm-control">Save</button>';
-    btn += '<button id="{}:restore" type="button" class="btn btn-sm btn-info vm-control">Restore</button>';
-    btn += '<button id="{}:suspend" type="button" class="btn btn-sm btn-default vm-control">Pause</button>';
-    btn += '<button id="{}:resume" type="button" class="btn btn-sm btn-primary vm-control">Resume</button>';
     btn += '</div>';
     return btn.replace(/{}/g, device);
 }
@@ -35,7 +39,7 @@ ws.on('vms', function(data) {
     device.html('');
     $.each(data.vms, function(a, b) {
         let status = '<span class="label label-' + status_label[b[1]] + '">' + b[1] + '</span>';
-        device.append('<tr><td>' + b[0] + '</td><td>' + status + '</td><td>' + buttons(data.device + ':' + b[0]) + '</td></tr>');
+        device.append('<tr><td>' + b[0] + '</td><td>' + status + '</td><td>' + buttons(data.device + ':' + b[0], b[1]) + '</td></tr>');
     });
 });
 
