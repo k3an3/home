@@ -15,7 +15,6 @@ function buttons(device, state) {
         btn += '<button id="{}:resume" type="button" class="btn btn-sm btn-primary vm-control">Resume</button>';
     } else {
         btn += '<button id="{}:start" type="button" class="btn btn-sm btn-success vm-control">Start</button>';
-        btn += '<button id="{}:restore" type="button" class="btn btn-sm btn-info vm-control">Restore</button>';
     }
     btn += '<button id="{}:shutdown" type="button" class="btn btn-sm btn-danger vm-control">Stop</button>';
     btn += '<button id="{}:restart" type="button" class="btn btn-sm btn-warning vm-control">Restart</button>';
