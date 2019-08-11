@@ -149,7 +149,7 @@ class Computer:
         self.vms = vms
 
     def vm_power(self, vm: str, action: str = 'start'):
-        if action in ('start', 'shutdown', 'reboot', 'suspend', 'resume'):
+        if action in ('start', 'shutdown', 'reboot', 'suspend', 'resume', 'save', 'restore'):
             if self.virt == 'http':
                 r = requests.post("http://{}:{}/vm/{}/power/{}".format(self.host, self.vm_port, vm, action))
             else:

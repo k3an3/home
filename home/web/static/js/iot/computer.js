@@ -11,6 +11,10 @@ function buttons(device) {
     btn += '<button id="{}:start" type="button" class="btn btn-sm btn-success vm-control">Start</button>';
     btn += '<button id="{}:shutdown" type="button" class="btn btn-sm btn-danger vm-control">Stop</button>';
     btn += '<button id="{}:restart" type="button" class="btn btn-sm btn-warning vm-control">Restart</button>';
+    btn += '<button id="{}:save" type="button" class="btn btn-sm btn-primary vm-control">Save</button>';
+    btn += '<button id="{}:restore" type="button" class="btn btn-sm btn-info vm-control">Restore</button>';
+    btn += '<button id="{}:suspend" type="button" class="btn btn-sm btn-default vm-control">Pause</button>';
+    btn += '<button id="{}:suspend" type="button" class="btn btn-sm btn-primary vm-control">Resume</button>';
     btn += '</div>';
     return btn.replace(/{}/g, device);
 }
