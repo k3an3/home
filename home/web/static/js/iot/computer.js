@@ -29,8 +29,8 @@ $('body').on('click', 'button.vm-control', function(a) {
         vm: s[1],
         action: s[2]
     });
-    setInterval(enum_virsh, 3000);
-    setInterval(enum_virsh, 5000);
+    for (let i = 1; i < 16; i++)
+        setTimeout(enum_virsh, 1000*i);
 });
 
 ws.on('vms', function(data) {

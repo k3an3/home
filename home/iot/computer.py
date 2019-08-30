@@ -1,3 +1,4 @@
+import datetime
 import subprocess
 from typing import List
 
@@ -9,10 +10,14 @@ from time import sleep
 from wakeonlan import send_magic_packet
 
 from home.core.tasks import run
+from home.core.utils import to_float
 from home.web.utils import ws_login_required
 from home.web.web import socketio
 
 storage = redis.StrictRedis(decode_responses=True)
+
+# Virsh will be queried at most once per this value
+SECONDS_BETWEEN_VIRSH_QUERY: float = 1.0
 
 
 class Computer:
@@ -45,7 +50,7 @@ class Computer:
     def __init__(self, mac: str = None, host: str = None, port: int = 22, manual_interface: str = None,
                  keyfile: str = "~/.ssh/id_rsa", username: str = "root",
                  password: str = None, os: str = "linux", wakeonlan: str = "native",
-                 virt: str = None, vm_port: int = 8888):
+                 virt: str = None, vm_port: int = 8888, virsh_seconds: float = SECONDS_BETWEEN_VIRSH_QUERY):
         self.password = password
         self.username = username
         self.keyfile = keyfile
@@ -58,6 +63,7 @@ class Computer:
         self.vms = []
         self.virt = virt
         self.vm_port = vm_port
+        self.virsh_seconds = virsh_seconds
 
     def on(self):
         self.wake()
@@ -142,11 +148,15 @@ class Computer:
         return f"{self.host}:{self.username}:virsh"
 
     def _enum_virsh(self):
-        storage.delete(self._storage_key())
+        last_check = datetime.datetime.fromtimestamp(to_float(storage.get(self._storage_key() + ":last")))
+        if not (datetime.datetime.now() - last_check).seconds >= self.virsh_seconds:
+            return
         if self.virt == 'http':
             o = requests.get("http://{}:{}/list".format(self.host, self.vm_port)).text.split('\n')
         else:
             o = self.run_command('sudo virsh list --all', capture_output=True)[1]
+        storage.delete(self._storage_key())
+        storage.set(self._storage_key() + ":last", datetime.datetime.now().timestamp())
         for line in o[2:-1]:
             if line:
                 storage.rpush(self._storage_key(), line)
@@ -164,7 +174,7 @@ class Computer:
     def vm_power(self, vm: str, action: str = 'start'):
         if action in ('start', 'shutdown', 'reboot', 'suspend', 'resume', 'save', 'restore'):
             if self.virt == 'http':
-                r = requests.post("http://{}:{}/vm/{}/power/{}".format(self.host, self.vm_port, vm, action))
+                requests.post("http://{}:{}/vm/{}/power/{}".format(self.host, self.vm_port, vm, action))
             else:
                 self.run_command('sudo virsh {} {}'.format(action, vm))
 

@@ -57,7 +57,7 @@ from pyHS100 import SmartBulb
 from home import settings
 from home.core import utils as utils
 from home.core.models import get_device
-from home.core.utils import num, RGBfromhex
+from home.core.utils import to_int, RGBfromhex
 from home.web.utils import ws_login_required
 from home.web.web import socketio
 
@@ -214,11 +214,11 @@ class MagicHomeBulb(Bulb):
             raise NotImplementedError
 
         if function:
-            if num(function) not in SUPPORTED_FUNCTIONS:
+            if to_int(function) not in SUPPORTED_FUNCTIONS:
                 raise NotImplementedError
             data = bytearray.fromhex(mode + function + speed + TAIL)
         else:
-            red, green, blue, white, brightness = num(red, green, blue, white, brightness)
+            red, green, blue, white, brightness = to_int(red, green, blue, white, brightness)
             red = red * brightness // 255
             green = green * brightness // 255
             blue = blue * brightness // 255
@@ -323,7 +323,7 @@ def request_change_color(message):
     emit('push color', {"device": message['device'], "color": message['color']},
          broadcast=True)
     device.dev.change_color(*utils.RGBfromhex(message['color']),
-                            utils.num(message.get('white', 0)), message.get('bright', 100), '41'
+                            utils.to_int(message.get('white', 0)), message.get('bright', 100), '41'
                             )
 
 

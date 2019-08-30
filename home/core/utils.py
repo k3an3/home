@@ -14,17 +14,33 @@ from typing import Any, List
 from home.core.tasks import scheduler
 
 
-def num(*args: List[Any]) -> List[int]:
+def to_int(*args: List[Any]) -> List[int]:
     """
-    Given a string, attempt to convert to int. Otherwise, return 0.
-    :param n: A string containing a number.
+    Given a list of strings, attempt to convert each to int. Otherwise, return 0.
+    :param n: A string containing an int.
     :return: An integer representation of the provided value.
     """
     result = []
     for n in args:
         try:
             n = int(n)
-        except ValueError:
+        except (ValueError, TypeError):
+            n = 0
+        result.append(n)
+    return result if len(result) > 1 else result[0]
+
+
+def to_float(*args: List[Any]) -> List[int]:
+    """
+    Given a list of strings, attempt to convert each to float. Otherwise, return 0.
+    :param n: A string containing a float.
+    :return: A float representation of the provided value.
+    """
+    result = []
+    for n in args:
+        try:
+            n = float(n)
+        except (ValueError, TypeError):
             n = 0
         result.append(n)
     return result if len(result) > 1 else result[0]
@@ -114,6 +130,3 @@ def get_groups(it):
         else:
             groups[t.group].append(t)
     return groups
-
-
-
