@@ -2,6 +2,7 @@ import subprocess
 from typing import List
 
 import paramiko
+import redis
 import requests
 from flask_socketio import emit
 from time import sleep
@@ -10,6 +11,8 @@ from wakeonlan import send_magic_packet
 from home.core.tasks import run
 from home.web.utils import ws_login_required
 from home.web.web import socketio
+
+storage = redis.StrictRedis(decode_responses=True)
 
 
 class Computer:
@@ -135,13 +138,23 @@ class Computer:
         ssh.close()
         return output
 
-    def enum_virsh(self):
+    def _storage_key(self):
+        return f"{self.host}:{self.username}:virsh"
+
+    def _enum_virsh(self):
+        storage.delete(self._storage_key())
         if self.virt == 'http':
             o = requests.get("http://{}:{}/list".format(self.host, self.vm_port)).text.split('\n')
         else:
             o = self.run_command('sudo virsh list --all', capture_output=True)[1]
-        vms = []
         for line in o[2:-1]:
+            if line:
+                storage.rpush(self._storage_key(), line)
+
+    def enum_virsh(self):
+        run(self._enum_virsh)
+        vms = []
+        for line in storage.lrange(self._storage_key(), 0, -1):
             if line:
                 line = line.split()
                 status = ' '.join(line[2:])
@@ -160,11 +173,7 @@ class Computer:
 @ws_login_required(check_device=True)
 def get_vms(message, device):
     if device.dev.virt:
-        device.dev.vms = []
-        try:
-            device.dev.enum_virsh()
-        except:
-            pass
+        device.dev.enum_virsh()
         emit('vms', {"device": message['device'], "vms": device.dev.vms})
 
 
