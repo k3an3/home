@@ -151,6 +151,7 @@ class Computer:
         last_check = datetime.datetime.fromtimestamp(to_float(storage.get(self._storage_key() + ":last")))
         if not (datetime.datetime.now() - last_check).seconds >= self.virsh_seconds:
             return
+        storage.set(self._storage_key() + ":last", datetime.datetime.now().timestamp())
         o = None
         try:
             if self.virt == 'http':
@@ -163,7 +164,6 @@ class Computer:
             storage.delete(self._storage_key())
         if not o:
             return
-        storage.set(self._storage_key() + ":last", datetime.datetime.now().timestamp())
         for line in o[2:-1]:
             if line:
                 storage.rpush(self._storage_key(), line)
