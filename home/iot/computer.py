@@ -200,6 +200,6 @@ def vm_ctrl(message, device):
     run(device.dev.vm_power, vm=message['vm'], action=message['action'])
     emit('message',
          {'class': 'alert-success',
-          'content': "Successfully ran '{}' on '{}'".format(message['action'],
+          'content': "Requested '{}' on '{}'".format(message['action'],
                                                             message['vm'])
           })
