@@ -151,11 +151,15 @@ class Computer:
         last_check = datetime.datetime.fromtimestamp(to_float(storage.get(self._storage_key() + ":last")))
         if not (datetime.datetime.now() - last_check).seconds >= self.virsh_seconds:
             return
-        if self.virt == 'http':
-            o = requests.get("http://{}:{}/list".format(self.host, self.vm_port)).text.split('\n')
-        else:
-            o = self.run_command('sudo virsh list --all', capture_output=True)[1]
-        storage.delete(self._storage_key())
+        try:
+            if self.virt == 'http':
+                o = requests.get("http://{}:{}/list".format(self.host, self.vm_port)).text.split('\n')
+            else:
+                o = self.run_command('sudo virsh list --all', capture_output=True)[1]
+        except:
+            pass
+        finally:
+            storage.delete(self._storage_key())
         storage.set(self._storage_key() + ":last", datetime.datetime.now().timestamp())
         for line in o[2:-1]:
             if line:
