@@ -173,13 +173,13 @@ class Computer:
 
     def enum_virsh(self):
         run(self._enum_virsh)
-        vms = []
+        vms = set()
         for line in storage.lrange(self._storage_key(), 0, -1):
             if line:
                 line = line.split()
                 status = ' '.join(line[2:])
-                vms.append((line[1], status))
-        self.vms = vms
+                vms.add((line[1], status))
+        self.vms = list(vms)
 
     def vm_power(self, vm: str, action: str = 'start'):
         if action in ('start', 'shutdown', 'reboot', 'suspend', 'resume', 'save', 'restore'):
