@@ -151,7 +151,6 @@ class Computer:
         last_check = datetime.datetime.fromtimestamp(to_float(storage.get(self._storage_key() + ":last")))
         if not (datetime.datetime.now() - last_check).seconds >= self.virsh_seconds:
             return
-        lock = storage.lock(self._storage_key() + ":lock")
         storage.set(self._storage_key() + ":last", datetime.datetime.now().timestamp())
         o = None
         try:
@@ -164,12 +163,10 @@ class Computer:
         finally:
             storage.delete(self._storage_key())
         if not o:
-            lock.release()
             return
         for line in o[2:-1]:
             if line:
                 storage.rpush(self._storage_key(), line)
-        lock.release()
 
     def enum_virsh(self):
         run(self._enum_virsh)
