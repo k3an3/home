@@ -18,6 +18,8 @@ storage = redis.StrictRedis(decode_responses=True)
 
 # Virsh will be queried at most once per this value
 SECONDS_BETWEEN_VIRSH_QUERY: float = 1.0
+# Max time to wait for all VMs to suspend before suspending the host
+MAX_VIRSH_SUSPEND: int = 600
 
 
 class Computer:
@@ -147,6 +149,23 @@ class Computer:
     def _storage_key(self):
         return f"{self.host}:{self.username}:virsh"
 
+    def get_powered_on_vms(self):
+        self.enum_virsh(blocking=True)
+        for vm, status in self.vms:
+            if not status == "powered off":
+                yield vm
+
+    def save_vms_sleep(self):
+        for vm in self.get_powered_on_vms():
+            run(self.vm_power, vm=vm, action='save')
+        wait_start = datetime.datetime.now()
+        while (datetime.datetime.now() - wait_start).total_seconds() < MAX_VIRSH_SUSPEND:
+            if not len(list(self.get_powered_on_vms())):
+                self.sleep()
+                break
+            sleep(15)
+        # maybe log failure
+
     def _enum_virsh(self):
         last_check = datetime.datetime.fromtimestamp(to_float(storage.get(self._storage_key() + ":last")))
         if not (datetime.datetime.now() - last_check).seconds >= self.virsh_seconds:
@@ -168,8 +187,11 @@ class Computer:
             if line:
                 storage.rpush(self._storage_key(), line)
 
-    def enum_virsh(self):
-        run(self._enum_virsh)
+    def enum_virsh(self, blocking: bool = False):
+        if blocking:
+            self._enum_virsh()
+        else:
+            run(self._enum_virsh)
         vms = set()
         for line in storage.lrange(self._storage_key(), 0, -1):
             if line:
@@ -183,6 +205,7 @@ class Computer:
             if self.virt == 'http':
                 requests.post("http://{}:{}/vm/{}/power/{}".format(self.host, self.vm_port, vm, action))
             else:
+                # Won't work with 'save'
                 self.run_command('sudo virsh {} {}'.format(action, vm))
 
 
