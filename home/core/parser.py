@@ -5,11 +5,15 @@ parser.py
 
 Parses YAML configuration files.
 """
+import re
+
 import yaml
 
 from home.core.models import drivers, devices, actions, interfaces, add_scheduled_job, widgets, get_action, \
     WidgetSetupError, displays
 from home.core.utils import clear_scheduled_jobs
+
+bad_regex = re.compile(r'!!python\/')
 
 
 def parse(file: str = None, data: str = None):
@@ -23,7 +27,9 @@ def parse(file: str = None, data: str = None):
             d = f.read()
     else:
         d = data
-
+    if re.search(bad_regex, d):
+        print("Unsafe expression detected in YAML input! Bailing...")
+        raise Exception("Unsafe expression detected in YAML input.")
     drivers.clear()
     devices.clear()
     actions.clear()
