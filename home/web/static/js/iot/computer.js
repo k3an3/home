@@ -13,6 +13,7 @@ function buttons(device, state) {
         btn += '<button id="{}:suspend" type="button" class="btn btn-sm btn-default vm-control">Pause</button>';
     } else if (state == "paused") {
         btn += '<button id="{}:resume" type="button" class="btn btn-sm btn-primary vm-control">Resume</button>';
+        btn += '<button id="{}:save" type="button" class="btn btn-sm btn-primary vm-control">Save</button>';
     } else {
         btn += '<button id="{}:start" type="button" class="btn btn-sm btn-success vm-control">Start</button>';
     }
