@@ -6,15 +6,14 @@ Handles running of tasks in an asynchronous fashion. Not explicitly tied to Cele
 exist here and handle the execution of whatever task is passed to it, whether or not it is handled asynchronously.
 """
 from multiprocessing import Process
-from time import sleep
 from typing import Callable
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from celery import Celery
-from celery.security import setup_security
 from celery.utils.log import get_task_logger
 from raven import Client
 from raven.contrib.celery import register_signal, register_logger_signal
+from time import sleep
 
 from home.settings import ASYNC_MODE, SENTRY_URL, BROKER_PATH, BACKEND_PATH
 
