@@ -95,7 +95,7 @@ def command_api(client):
     Command API used by devices.
     """
     post = request.form.to_dict()
-    post.pop('key')
+    post.pop('key', None)
     # Send commands directly to device
     if request.form.get('device'):
         if handle_task(post, client):
