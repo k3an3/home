@@ -5,6 +5,7 @@ tasks.py
 Handles running of tasks in an asynchronous fashion. Not explicitly tied to Celery. The `run` method simply must
 exist here and handle the execution of whatever task is passed to it, whether or not it is handled asynchronously.
 """
+from concurrent.futures.thread import ThreadPoolExecutor
 from multiprocessing import Process
 from typing import Callable
 
@@ -32,8 +33,11 @@ try:
     from apscheduler.schedulers.gevent import GeventScheduler
 
     scheduler = GeventScheduler()
+    thread_runner = gevent.spawn
 except ImportError:
     scheduler = BackgroundScheduler()
+    executor = ThreadPoolExecutor(max_workers=100)
+    thread_runner = executor.submit
 scheduler.start()
 logger = get_task_logger(__name__)
 
@@ -50,11 +54,19 @@ def _run(method, **kwargs) -> None:
     method(**kwargs)
 
 
-def run(method: Callable, delay: float = 0, **kwargs):
+def run(method: Callable, delay: float = 0, thread: bool = False, **kwargs):
     if ASYNC_MODE == 'celery':
         return _run.apply_async(args=[method], kwargs=kwargs, countdown=float(delay))
+    elif thread:
+        return thread_run(method, delay, **kwargs)
     else:
         return multiprocessing_run(method, delay, **kwargs)
+
+
+def thread_run(target: Callable, delay: float = 0, **kwargs):
+    if delay:
+        sleep(delay)
+    thread_runner(target, **kwargs)
 
 
 def multiprocessing_run(target: Callable, delay: float = 0, **kwargs):

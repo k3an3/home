@@ -157,7 +157,7 @@ class Computer:
 
     def save_vms_sleep(self):
         for vm in self.get_powered_on_vms():
-            run(self.vm_power, vm=vm, action='save')
+            run(self.vm_power, thread=True, vm=vm, action='save')
         wait_start = datetime.datetime.now()
         while (datetime.datetime.now() - wait_start).total_seconds() < MAX_VIRSH_SUSPEND:
             if not len(list(self.get_powered_on_vms())):
@@ -191,7 +191,7 @@ class Computer:
         if blocking:
             self._enum_virsh()
         else:
-            run(self._enum_virsh)
+            run(self._enum_virsh, thread=True)
         vms = set()
         for line in storage.lrange(self._storage_key(), 0, -1):
             if line:
@@ -220,7 +220,7 @@ def get_vms(message, device):
 @socketio.on('vm ctrl')
 @ws_login_required(check_device=True)
 def vm_ctrl(message, device):
-    run(device.dev.vm_power, vm=message['vm'], action=message['action'])
+    run(device.dev.vm_power, thread=True, vm=message['vm'], action=message['action'])
     emit('message',
          {'class': 'alert-success',
           'content': "Requested '{}' on '{}'".format(message['action'],
