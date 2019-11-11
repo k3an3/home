@@ -30,6 +30,8 @@ db = SqliteDatabase('app.db')
 BACKEND_PATH = 'redis://'
 BROKER_PATH = 'redis://'
 CUSTOM_AUTH_HANDLERS = []
+MAX_THREADS = 100
+MAX_PROCESSES = 32
 # db = MySQLDatabase(host="localhost", database="home", user="home", passwd="home")
 
 try:

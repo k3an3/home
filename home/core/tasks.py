@@ -5,8 +5,9 @@ tasks.py
 Handles running of tasks in an asynchronous fashion. Not explicitly tied to Celery. The `run` method simply must
 exist here and handle the execution of whatever task is passed to it, whether or not it is handled asynchronously.
 """
+from concurrent.futures.process import ProcessPoolExecutor
 from concurrent.futures.thread import ThreadPoolExecutor
-from multiprocessing import Process
+from time import sleep
 from typing import Callable
 
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -14,9 +15,8 @@ from celery import Celery
 from celery.utils.log import get_task_logger
 from raven import Client
 from raven.contrib.celery import register_signal, register_logger_signal
-from time import sleep
 
-from home.settings import ASYNC_MODE, SENTRY_URL, BROKER_PATH, BACKEND_PATH
+from home.settings import ASYNC_MODE, SENTRY_URL, BROKER_PATH, BACKEND_PATH, MAX_THREADS, MAX_PROCESSES
 
 queue = Celery('home',
                broker=BROKER_PATH,
@@ -36,10 +36,13 @@ try:
     thread_runner = gevent.spawn
 except ImportError:
     scheduler = BackgroundScheduler()
-    executor = ThreadPoolExecutor(max_workers=100)
+    executor = ThreadPoolExecutor(max_workers=MAX_THREADS)
     thread_runner = executor.submit
 scheduler.start()
 logger = get_task_logger(__name__)
+
+if ASYNC_MODE == 'multiprocessing':
+    executor = ProcessPoolExecutor(max_workers=MAX_PROCESSES)
 
 
 @queue.task
@@ -66,13 +69,13 @@ def run(method: Callable, delay: float = 0, thread: bool = False, **kwargs):
 def thread_run(target: Callable, delay: float = 0, **kwargs):
     if delay:
         sleep(delay)
-    thread_runner(target, **kwargs)
+    return thread_runner(target, **kwargs)
 
 
 def multiprocessing_run(target: Callable, delay: float = 0, **kwargs):
     if delay:
         sleep(delay)
-    Process(target=target, kwargs=kwargs).start()
+    return executor.submit(target, **kwargs)
 
 
 if SENTRY_URL:
