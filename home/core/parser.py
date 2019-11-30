@@ -10,7 +10,7 @@ import re
 import yaml
 
 from home.core.models import drivers, devices, actions, interfaces, add_scheduled_job, widgets, get_action, \
-    WidgetSetupError, displays
+    WidgetSetupError, displays, devices_by_uuid, DuplicateDeviceNameError
 from home.core.utils import clear_scheduled_jobs
 
 bad_regex = re.compile(r'!!python\/')
@@ -48,8 +48,11 @@ def parse(file: str = None, data: str = None):
     print("Active devices:")
     for group in y['devices']:
         for device in y['devices'][group]:
+            if device.name in devices:
+                raise DuplicateDeviceNameError(device.name)
             device.group = group
-            devices.append(device)
+            devices[device.name] = device
+            devices_by_uuid[device.uuid] = device
             device.setup()
             print(device)
     print("Configured actions:")

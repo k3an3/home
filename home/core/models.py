@@ -8,8 +8,8 @@ import os
 from copy import deepcopy
 from multiprocessing import Process
 from time import sleep
-# Arrays to store object instances
 from typing import Iterator, Dict, List, Callable
+from uuid import uuid4
 
 import yaml
 
@@ -18,7 +18,8 @@ from home.core.utils import class_from_name, method_from_name, random_string
 from home.settings import TEMPLATE_DIR
 
 drivers = []
-devices = []
+devices = {}
+devices_by_uuid = {}
 interfaces = []
 actions = []
 widgets = {}
@@ -48,7 +49,7 @@ class Device(YAMLObject):
         self.driver = driver
         self.group = group
         self.config = config
-        self.uuid = random_string()
+        self.uuid = str(uuid4())
         self.dev = None
         self.last_task = None
         self.widget = widget
@@ -57,8 +58,6 @@ class Device(YAMLObject):
         """
         Set up the driver that this device will use
         """
-        if len([device for device in devices if device.name == self.name]) > 1:
-            raise DuplicateDeviceNameError(self.name)
         # retrieve the class for driver
         if self.driver:
             try:
@@ -175,7 +174,7 @@ class Driver(YAMLObject):
         if self.static:
             dev = Device(self.name, self.name)
             dev.setup()
-            devices.append(dev)
+            devices[self.name] = dev
 
 
 class Action(YAMLObject):
@@ -298,20 +297,16 @@ def get(name: str, search: List):
         raise StopIteration("Couldn't find " + name + " in " + str(search))
 
 
-def get_device_by_key(key: str) -> Device:
-    return next(device for device in devices if device.key == key)
-
-
 def get_device_by_uuid(uuid: str) -> Device:
-    return next(device for device in devices if device.uuid == uuid)
+    return devices_by_uuid[uuid]
 
 
 def get_device(name: str) -> Device:
-    return next(device for device in devices if device.name.lower() == name.lower())
+    return devices[name]
 
 
 def get_devices_by_group(group_name: str) -> Iterator[Device]:
-    return (device for device in devices if device.group == group_name)
+    return (device for device in devices.values() if device.group == group_name)
 
 
 def get_action(action_name: str) -> Action:

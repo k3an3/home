@@ -10,7 +10,6 @@ from flask_login import LoginManager, login_required, current_user
 from flask_login import login_user, logout_user
 from flask_socketio import SocketIO, emit
 from peewee import DoesNotExist
-from raven.contrib.flask import Sentry
 from webassets.loaders import PythonLoader as PythonAssetsLoader
 
 import home.core.parser as parser
@@ -54,26 +53,24 @@ try:
 except ImportError:
     ldap = None
 
-if SENTRY_URL:
-    sentry = Sentry(app, dsn=SENTRY_URL)
-
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
     """
     Route for the HTML interface.
     """
+    print(devices.values())
     sec = SecurityController.get()
     events = sec.events
     interface_list = []
     for i in interfaces:
-        interface_list.append((i, [d for d in devices if d.driver and d.driver.interface == i and
+        interface_list.append((i, [d for d in devices.values() if d.driver and d.driver.interface == i and
                                    (i.public or current_user.is_authenticated and current_user.has_permission(d))]))
     if current_user.is_active:
         widget_html = get_widgets(current_user) + get_action_widgets(current_user)
         return render_template('index.html',
                                interfaces=interface_list,
-                               devices=filter_by_permission(current_user, devices),
+                               devices=filter_by_permission(current_user, devices.values()),
                                sec=sec,
                                events=events,
                                clients=APIClient.select(),
@@ -85,7 +82,7 @@ def index():
                                displays=displays,
                                users=User.select()
                                )
-    return render_template('index.html', interfaces=interface_list, devices=devices)
+    return render_template('index.html', interfaces=interface_list, devices=devices.values())
 
 
 @app.route('/api/command', methods=['POST'])

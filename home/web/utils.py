@@ -15,7 +15,7 @@ from flask_socketio import disconnect
 from ldap3 import Server, Connection, ALL_ATTRIBUTES
 from peewee import DoesNotExist
 
-from home.core.models import get_device, devices, actions, MultiDevice
+from home.core.models import get_device, devices, actions, MultiDevice, get_device_by_uuid, devices_by_uuid
 from home.core.tasks import run
 from home.core.utils import random_string, method_from_name, get_groups
 from home.settings import BASE_URL, LDAP_BASE_DN, LDAP_FILTER, LDAP_HOST, LDAP_PORT, LDAP_SSL, \
@@ -183,7 +183,7 @@ def get_qr() -> (str, str):
 
 def get_widgets(user: User) -> List[str]:
     widget_html = []
-    for d in devices:
+    for d in devices.values():
         if user.has_permission(d):
             try:
                 widget_html.append(d.widget['html'])

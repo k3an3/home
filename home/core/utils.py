@@ -77,8 +77,9 @@ def class_from_name(module_name: str, class_name: str):
             'home.iot.' + module_name),
             class_name
         )
-    except ImportError:
-        raise NotImplementedError(f"No such module exists: {module_name}.{class_name}")
+    except ImportError as e:
+        print(f"No such module exists: {module_name}.{class_name}")
+        raise e
 
 
 def method_from_name(klass, method_name: str):
