@@ -4,7 +4,7 @@ simplesocket.py
 
 Send arbitrary network traffic.
 """
-from socket import SOCK_STREAM, socket, AF_INET, SOCK_DGRAM
+from socket import SOCK_STREAM, socket, AF_INET, SOCK_DGRAM, SHUT_RDWR
 
 TIMEOUT = 10
 
@@ -18,7 +18,7 @@ class SimpleSocket:
         s.settimeout(timeout)
         s.connect((host, port))
         s.send(payload)
-        s.shutdown()
+        s.shutdown(SHUT_RDWR)
         s.close()
 
     @staticmethod
@@ -28,5 +28,5 @@ class SimpleSocket:
         s = socket(AF_INET, SOCK_DGRAM)
         s.settimeout(timeout)
         s.sendto(payload, (host, port))
-        s.shutdown()
+        s.shutdown(SHUT_RDWR)
         s.close()
