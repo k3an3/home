@@ -40,10 +40,6 @@ class Plug(ABC):
         self.power(False)
 
     @abstractmethod
-    def off(self) -> None:
-        pass
-
-    @abstractmethod
     def get_state(self) -> str:
         pass
 
