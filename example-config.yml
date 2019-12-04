@@ -48,7 +48,8 @@ installed_drivers:
         klass: MotionController
     - !driver
         module: plug
-        klass: Plug
+        klass: BroadlinkPlug
+        name: broadlinkplug
     - !driver
         # If a name is not specified, it defaults to klass.lower().
         name: wol
