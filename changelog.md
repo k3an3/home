@@ -1,4 +1,21 @@
 # Changelog
+## v0.13
+* Change how devices are stored to improve performance
+* Deprecated raven in favor of sentry_sdk
+* Devices use UUIDs for unique identifiers instead of random string
+* Add support for Etekcity brand smart plugs
+* Allow both processes and threads to be used interchangeably for running tasks
+* Use process/thread pools with worker limit. Fixes potential OOM bugs caused by 3rd-party modules
+* Sonarcloud integration
+* Additional features for computer-virt
+* Fix logout link
+* Fix closing the socket when using SimpleSocket
+* Security fix for yaml parsing
+* Support TP-Link Kasa bulbs
+* Allow user to log out of all sessions
+* Fix some bugs in weather module
+* Additional API auth options
+* The usual bugfixes and minor changes
 ## v0.12
 * Control virt-manager through computer driver
 * Added ability to manage users through web UI
