@@ -15,7 +15,7 @@ from webassets.loaders import PythonLoader as PythonAssetsLoader
 import home.core.parser as parser
 import home.core.utils as utils
 from home.core.models import devices, interfaces, get_action, actions, get_driver, get_display, displays
-from home.settings import SECRET_KEY, SENTRY_URL, CUSTOM_AUTH_HANDLERS
+from home.settings import SECRET_KEY, CUSTOM_AUTH_HANDLERS
 from home.web.models import *
 from home.web.models import User, APIClient
 from home.web.utils import generate_csrf_token, VERSION, api_auth_required, send_to_subscribers, \
@@ -59,7 +59,6 @@ def index():
     """
     Route for the HTML interface.
     """
-    print(devices.values())
     sec = SecurityController.get()
     events = sec.events
     interface_list = []
