@@ -8,8 +8,9 @@ import flask_assets
 from flask import Flask, render_template, request, redirect, abort, url_for, session, flash
 from flask_login import LoginManager, login_required, current_user
 from flask_login import login_user, logout_user
-from flask_socketio import SocketIO, emit
+from flask_socketio import SocketIO
 from peewee import DoesNotExist
+from uuid import uuid4
 from webassets.loaders import PythonLoader as PythonAssetsLoader
 
 import home.core.parser as parser
@@ -25,6 +26,8 @@ try:
     from home.settings import GOOGLE_API_KEY
 except ImportError:
     GOOGLE_API_KEY = ""
+
+run_session = str(uuid4())
 
 app = Flask(__name__)
 app.secret_key = SECRET_KEY
@@ -79,7 +82,8 @@ def index():
                                qr=get_qr(),
                                widgets=widget_html,
                                displays=displays,
-                               users=User.select()
+                               users=User.select(),
+                               run_session=run_session,
                                )
     return render_template('index.html', interfaces=interface_list, devices=devices.values())
 
@@ -294,10 +298,3 @@ def guest_auth(path):
 @app.template_filter('slugify')
 def slugify(text: str):
     return text.replace(' ', '-')
-
-
-def send_message(msg: str, style: str = 'info'):
-    emit('message',
-         {'class': 'alert-' + style,
-          'content': msg
-          })

@@ -9,6 +9,7 @@ var target = "0";
 $('#messages').hide();
 
 var update = false;
+var run_session = $('#run_session').val();
 
 ws.on('disconnect', function () {
     $('#status').html('Status: <span style="color:red">Disconnected</span>');
@@ -18,6 +19,12 @@ ws.on('connect', function () {
     $('#status').html('Status: <span style="color:green">Connected</span>');
     $("#loadingScreen").dialog('close');
     if (update) {
+        location.reload(true);
+    }
+});
+
+ws.on('run session', function (session) {
+    if (session !== run_session) {
         location.reload(true);
     }
 });

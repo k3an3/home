@@ -1,8 +1,6 @@
-from secrets import token_hex
-from time import sleep
-
 from flask_login import current_user
 from flask_socketio import emit, disconnect
+from time import sleep
 
 from home.core import utils as utils, parser as parser
 from home.core.models import get_action, get_interface, widgets, MultiDevice
@@ -10,7 +8,7 @@ from home.core.tasks import run
 from home.settings import LOG_FILE
 from home.web.models import APIClient, User, Subscriber, gen_token
 from home.web.utils import ws_login_required
-from home.web.web import socketio, app, send_message
+from home.web.web import socketio, app, run_session
 
 
 @socketio.on('admin')
@@ -152,3 +150,15 @@ def subscribe(subscriber):
         user=current_user.id)
     if created:
         s.push("Subscribed to push notifications!")
+
+
+@socketio.on('connect')
+def connect():
+    emit('run session', run_session)
+
+
+def send_message(msg: str, style: str = 'info'):
+    emit('message',
+         {'class': 'alert-' + style,
+          'content': msg
+          })
