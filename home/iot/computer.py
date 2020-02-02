@@ -1,4 +1,5 @@
 import datetime
+import operator
 import subprocess
 from typing import List
 
@@ -198,7 +199,7 @@ class Computer:
                 line = line.split()
                 status = ' '.join(line[2:])
                 vms.add((line[1], status))
-        self.vms = sorted(list(vms), key=lambda x: x[1])
+        self.vms = sorted(list(vms), key=operator.itemgetter(1, 0))
 
     def vm_power(self, vm: str, action: str = 'start'):
         if action in ('start', 'shutdown', 'reboot', 'suspend', 'resume', 'save', 'restore'):
