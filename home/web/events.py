@@ -34,10 +34,10 @@ def ws_admin(data):
                          'content': 'Restarting...'})
         utils.reload()
     elif command == 'update':
-        utils.update()
         emit('update', {}, broadcast=True)
         emit('message', {'class': 'alert-success',
                          'content': 'Updating...'})
+        utils.update()
     elif command == 'revoke':
         client = APIClient.get(name=data.get('name'))
         client.delete_instance()
