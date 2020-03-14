@@ -1,5 +1,6 @@
 # Changelog
 ## v0.13
+* Fix some frontend misbehavior
 * Fix issue where Kasa bulb would jump to last brightness at beginning of fade
 * Subclassed bulb and plug devices under new power class
 * Change how devices are stored to improve performance
