@@ -29,6 +29,18 @@ $('#refresh_display').click(function () {
     });
 });
 
+$('#admin-restart').click(function () {
+    ws.emit('admin', {
+        command: 'restart'
+    });
+});
+
+$('#admin-update').click(function () {
+    ws.emit('admin', {
+        command: 'update'
+    });
+});
+
 function revoke(name) {
     ws.emit('admin', {command: 'revoke', name: name});
 }

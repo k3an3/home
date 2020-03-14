@@ -28,6 +28,11 @@ def ws_admin(data):
         interface.public = not interface.public
         emit('message', {'class': 'alert-success',
                          'content': 'Temporarily changed interface visibility (until server is restarted).'})
+    elif command == 'restart':
+        emit('update', {}, broadcast=True)
+        emit('message', {'class': 'alert-success',
+                         'content': 'Restarting...'})
+        utils.reload()
     elif command == 'update':
         utils.update()
         emit('update', {}, broadcast=True)
