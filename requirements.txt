@@ -53,9 +53,9 @@ pycodestyle
 pycparser
 pycryptodome
 git+git://github.com/keaneokelley/pyelliptic.git#egg=pyelliptic
+git+git://github.com/GadgetReactor/pyHS100@59424d2#egg=pyHS100
 pyflakes
 pyvesync
-pyHS100
 pynacl
 python-engineio
 python-jose

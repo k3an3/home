@@ -1,5 +1,7 @@
 # Changelog
 ## v0.13
+* Fix issue where Kasa bulb would jump to last brightness at beginning of fade
+* Subclassed bulb and plug devices under new power class
 * Change how devices are stored to improve performance
 * Deprecated raven in favor of sentry_sdk
 * Devices use UUIDs for unique identifiers instead of random string

@@ -4,15 +4,17 @@ plug.py
 
 Module for communicating with smart plugs
 """
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 
 import broadlink
 from pyvesync import VeSync
 
+from home.iot.power import Power
+
 PORT = 80
 
 
-class Plug(ABC):
+class Plug(Power):
     widget = {
         'buttons': (
             {
@@ -26,18 +28,6 @@ class Plug(ABC):
             },
         )
     }
-    """
-    A class representing a single Broadlink smart plug
-    """
-    @abstractmethod
-    def power(self, state: bool):
-        pass
-
-    def on(self):
-        self.power(True)
-
-    def off(self):
-        self.power(False)
 
     @abstractmethod
     def get_state(self) -> str:
@@ -45,6 +35,10 @@ class Plug(ABC):
 
 
 class BroadlinkPlug(Plug):
+    """
+    A class representing a single Broadlink smart plug
+    """
+
     def __init__(self, host: str, mac: str):
         self.host = host
         self.mac = mac

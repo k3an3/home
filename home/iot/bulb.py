@@ -2,62 +2,25 @@
 """
 bulb.py
 ~~~~~~~
-
-This module is for communicating with the MagicHome LED bulb over the network.
-
-Wire protocol:
-
--------------------------------------
-|header(1)|data(5-70)|0f|checksum(1)|
--------------------------------------
-
-header:
-    31 color & white
-    41 camera
-    51 custom
-    61 function
-
-color, white, camera (8 bytes):
-    00-ff red
-    00-ff green
-    00-ff blue
-    00-ff white
-    mode:
-        0f white
-        f0 color
-
-functions (5 bytes):
-    25-38 modes
-    1f-01 speed (decreasing)
-    0f who knows
-
-custom (70 bytes):
-    64 bytes of r, g, b, 0 (empty color is 0x01020300)
-    1f-01 speed (decreasing)
-    3a,3b,3c gradual, jumping, strobe
-    ff tail
-
-tail:
-    0f
-    checksum (sum of data fields)
 """
 import colorsys
 import socket
-import sys
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from datetime import datetime
-from time import sleep
 from typing import Dict
 
+import sys
 from astral import Astral
 from flask_login import current_user
 from flask_socketio import emit, disconnect
 from pyHS100 import SmartBulb
+from time import sleep
 
 from home import settings
 from home.core import utils as utils
 from home.core.models import get_device
 from home.core.utils import to_int, RGBfromhex
+from home.iot.power import Power
 from home.web.utils import ws_login_required
 from home.web.web import socketio
 
@@ -116,7 +79,7 @@ def calc_sunlight() -> int:
         return {'white': 255}
 
 
-class Bulb(ABC):
+class Bulb(Power):
     widget = {
         'buttons': (
             {
@@ -141,33 +104,12 @@ class Bulb(ABC):
         }
     }
 
-    def __init__(self, sunset_minutes: int = 0):
-        self.sunset_minutes = sunset_minutes
-
-    @abstractmethod
-    def on(self):
-        pass
-
-    @abstractmethod
-    def off(self):
-        pass
-
     @abstractmethod
     def change_color(self):
         pass
 
     def sunlight(self) -> None:
         self.change_color(**calc_sunlight())
-
-    def auto_on(self):
-        a = Astral()
-        a.solar_depression = 'civil'
-        city = a[settings.LOCATION]
-        sun = city.sun(date=datetime.now(), local=True)
-        dt = datetime.now(sun['sunset'].tzinfo)
-        minutes_until_sunset = (sun['sunset'] - dt).total_seconds() / 60
-        if 0 <= minutes_until_sunset <= self.sunset_minutes:
-            self.sunlight()
 
     def fade(self, start: Dict = None, stop: Dict = None, bright: int = None, speed: int = 1) -> None:
         speed = abs(speed)
@@ -192,10 +134,46 @@ class Bulb(ABC):
 
 class MagicHomeBulb(Bulb):
     """
-    A class representing a single MagicHome LED Bulb.
+    This class is for communicating with the MagicHome LED bulb over the network.
+
+    Wire protocol:
+
+    -------------------------------------
+    |header(1)|data(5-70)|0f|checksum(1)|
+    -------------------------------------
+
+    header:
+        31 color & white
+        41 camera
+        51 custom
+        61 function
+
+    color, white, camera (8 bytes):
+        00-ff red
+        00-ff green
+        00-ff blue
+        00-ff white
+        mode:
+            0f white
+            f0 color
+
+    functions (5 bytes):
+        25-38 modes
+        1f-01 speed (decreasing)
+        0f who knows
+
+    custom (70 bytes):
+        64 bytes of r, g, b, 0 (empty color is 0x01020300)
+        1f-01 speed (decreasing)
+        3a,3b,3c gradual, jumping, strobe
+        ff tail
+
+    tail:
+        0f
+        checksum (sum of data fields)
     """
 
-    def __init__(self, host: str, sunset_minutes: int = 0):
+    def __init__(self, host: str):
         self.host = host
         self.state = {}
 
@@ -243,11 +221,11 @@ class MagicHomeBulb(Bulb):
         except Exception as e:
             print(e)
 
-    def off(self):
-        self.change_color(white=0)
-
-    def on(self):
-        self.change_color(white=255)
+    def power(self, on: bool):
+        if on:
+            self.change_color(white=255)
+        else:
+            self.change_color(white=0)
 
     def get_state(self):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -263,7 +241,7 @@ class KasaBulb(Bulb):
     def __init__(self, host: str = None):
         self.host = host
 
-    def _get_bulb(self):
+    def _get_bulb(self) -> SmartBulb:
         return SmartBulb(host=self.host)
 
     def change_color(self, red: int = 0, green: int = 0, blue: int = 0, hex_code: str = None, *args, **kwargs):
@@ -274,14 +252,13 @@ class KasaBulb(Bulb):
         h1, h2, br = colorsys.rgb_to_hsv(red, green, blue)
         bulb.hsv = (int(h1 * 360), int(h2 * 100), br // 255 * 100)
 
-    def on(self):
+    def power(self, on: bool):
         bulb = self._get_bulb()
-        bulb.turn_on()
-        bulb.hsv = (0, 0, 100)
-
-    def off(self):
-        bulb = self._get_bulb()
-        bulb.turn_off()
+        if on:
+            bulb.turn_on()
+            bulb.hsv = (0, 0, 100)
+        else:
+            bulb.turn_off()
 
     def get_state(self):
         return self._get_bulb().state
@@ -289,18 +266,18 @@ class KasaBulb(Bulb):
     def fade(self, start: int = 0, stop: int = 100, speed: int = 1, pause: float = 0) -> None:
         bulb = self._get_bulb()
         speed = abs(speed)
-        bulb.turn_on()
-        bulb.brightness = start
+        bulb.set_light_state({'on_off': 1, 'mode': 'normal', 'hue': 0, 'saturation': 0,
+                              'color_temp': 0, 'brightness': start})
         if start > stop:
             bright = start
             while bright >= 0:
-                bulb.brightness = bright
+                bulb.set_brightness(bright)
                 bright -= speed
                 sleep(pause)
         else:
             bright = start
             while bright <= 100:
-                bulb.brightness = bright
+                bulb.set_brightness(bright)
                 bright += speed
                 sleep(pause)
 
