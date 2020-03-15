@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from astral import Astral
 
@@ -19,13 +19,10 @@ class Power(ABC):
         city = a[settings.LOCATION]
         sun = city.sun(date=datetime.now(), local=True)
         sun_state_time = datetime.now(sun[sun_state].tzinfo)
-        if datetime.now() >= sun_state_time + offset:
+        if datetime.now() >= sun_state_time + timedelta(seconds=offset):
             {'on': self.on,
              'off': self.off}[action]()
 
     @abstractmethod
     def power(self, on: bool):
-        if on:
-            self.on()
-        else:
-            self.off()
+        pass
