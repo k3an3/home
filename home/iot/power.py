@@ -18,8 +18,7 @@ class Power(ABC):
         a.solar_depression = 'civil'
         city = a[settings.LOCATION]
         sun = city.sun(date=datetime.now(), local=True)
-        sun_state_time = datetime.now(sun[sun_state].tzinfo)
-        if datetime.now() >= sun_state_time + timedelta(seconds=offset):
+        if datetime.now(sun[sun_state].tzinfo) >= sun[sun_state] + timedelta(seconds=offset):
             {'on': self.on,
              'off': self.off}[action]()
 
