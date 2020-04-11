@@ -1,6 +1,9 @@
+import datetime
+import hmac
 import json
 import socket
 from abc import ABC, abstractmethod
+from base64 import b64decode
 from ipaddress import ip_address
 from typing import Dict
 
@@ -47,13 +50,17 @@ class RemoteFirewall(Firewall):
     def __init__(self, host: str, port: int, secret: str = "", users: Dict = {}):
         self.host = host
         self.port = port
-        self.secret = secret
+        self.secret = b64decode(secret.encode())
         self.users = users
 
     def _communicate(self, data: Dict):
+        data['timestamp'] = datetime.datetime.utcnow().timestamp()
+        msg = json.dumps(data).encode()
         s = socket.create_connection((self.host, self.port), timeout=10)
-        data['secret'] = self.secret
-        s.send(json.dumps(data).encode())
+        s.send(msg)
+        if self.secret:
+            signature = hmac.digest(self.secret, msg, 'sha512')
+            s.send(signature)
         s.close()
 
     def reset(self):
