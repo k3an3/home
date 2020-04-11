@@ -26,8 +26,8 @@ def main_loop(sock):
                     continue
             data = json.loads(data)
             print("Got command:", data)
-            if custom := data.get('custom'):
-                cmd = shlex.split("{} {}".format(BIN, custom).format(saddr=data['saddr']))
+            if data.get('custom'):
+                cmd = shlex.split("{} {}".format(BIN, data['custom']).format(saddr=data['saddr']))
             else:
                 cmd = [BIN, 'insert', 'rule', *data['table'].split(),
                        data['chain'], 'ip', 'saddr', data['saddr'],
@@ -50,6 +50,7 @@ if __name__ == '__main__':
     if os.getuid():
         print("Using sudo")
         sudo = True
-    server = socket.create_server(("", 51814))
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.bind(("", 51814))
     server.listen(3)
     main_loop(server)

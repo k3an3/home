@@ -133,7 +133,7 @@ class SSHFirewall(SSH):
 @app.route('/api/firewall/unblock', methods=['POST'])
 @api_auth_required(check_device=True)
 def unblock_this(client, device):
-    if not isinstance(Firewall, device.dev):
+    if not isinstance(device.dev, Firewall):
         raise NotImplementedError
     remote_addr = request.environ['HTTP_X_REAL_IP'] or request.remote_addr
     device.dev.unblock(table=request.form.get('table'), chain=request.form.get('chain'),
