@@ -1,3 +1,4 @@
+import base64
 import datetime
 import hmac
 import json
@@ -56,11 +57,11 @@ class RemoteFirewall(Firewall):
     def _communicate(self, data: Dict):
         data['timestamp'] = datetime.datetime.utcnow().timestamp()
         msg = json.dumps(data).encode()
+        signature = b"."
         s = socket.create_connection((self.host, self.port), timeout=10)
-        s.send(msg)
         if self.secret:
-            signature = hmac.digest(self.secret, msg, 'sha512')
-            s.send(signature)
+            signature += base64.b64encode(hmac.digest(self.secret, msg, 'sha512'))
+        s.send(base64.b64encode(msg) + signature)
         s.close()
 
     def reset(self):
