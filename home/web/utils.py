@@ -2,7 +2,6 @@ import functools
 import hashlib
 import hmac
 import subprocess
-import traceback
 from base64 import b64encode
 from io import BytesIO
 from typing import List, Any
@@ -114,21 +113,22 @@ def api_auth_required(_f=None, has_permission: str = None, check_device: bool = 
                         if client.has_permission(device.group):
                             kwargs['device'] = device
                             return f(*args, **kwargs)
+                    else:
+                        return f(*args, **kwargs)
                 else:
                     # Should not happen
+                    from home.web.web import app
+                    app.logger.warning("API auth hit else block")
                     abort(403)
             except DoesNotExist:
                 if DEBUG:
                     kwargs['client'] = APIClient.get()
+                    return f(*args, **kwargs)
                 else:
                     from home.web.web import app
                     app.logger.warning("No API client exists for the request.")
                     abort(403)
-            except Exception:
-                from home.web.web import app
-                app.logger.error("Critical error in API authentication: {}".format(traceback.format_exc()))
-                abort(403)
-            return f(*args, **kwargs)
+            app.logger.warning("API auth fell through")
 
         return wrapped
 

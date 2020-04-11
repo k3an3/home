@@ -37,6 +37,8 @@ def main_loop(sock):
                 cmd.insert(0, 'sudo')
             print("Exec:", cmd)
             subprocess.run(cmd)
+        except KeyboardInterrupt:
+            sock.close()
         except Exception:
             print("Unhandled exception:", traceback.format_exc())
 
@@ -51,6 +53,7 @@ if __name__ == '__main__':
         print("Using sudo")
         sudo = True
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server.bind(("", 51814))
     server.listen(3)
     main_loop(server)
