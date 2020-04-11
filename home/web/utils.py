@@ -2,6 +2,7 @@ import functools
 import hashlib
 import hmac
 import subprocess
+import traceback
 from base64 import b64encode
 from io import BytesIO
 from typing import List, Any
@@ -15,7 +16,7 @@ from flask_socketio import disconnect
 from ldap3 import Server, Connection, ALL_ATTRIBUTES
 from peewee import DoesNotExist
 
-from home.core.models import get_device, devices, actions, MultiDevice, get_device_by_uuid, devices_by_uuid
+from home.core.models import get_device, devices, actions, MultiDevice
 from home.core.tasks import run
 from home.core.utils import random_string, method_from_name, get_groups
 from home.settings import BASE_URL, LDAP_BASE_DN, LDAP_FILTER, LDAP_HOST, LDAP_PORT, LDAP_SSL, \
@@ -44,6 +45,8 @@ def ws_login_required(_f=None, has_permission: str = None, check_device: bool = 
     def decorator_ws_login(f):
         @functools.wraps(f)
         def wrapped(*args, **kwargs):
+            if has_permission and check_device:
+                raise AuthPluginMisuseError("Cannot provide both `has_permission` and `check_device` to decorator.")
             if current_user.is_authenticated:
                 if has_permission and current_user.has_permission(
                         group=has_permission):
@@ -78,6 +81,9 @@ def api_auth_required(_f=None, has_permission: str = None, check_device: bool = 
     def decorator_api_auth(f):
         @functools.wraps(f)
         def wrapped(*args, **kwargs):
+            if has_permission and check_device:
+                raise AuthPluginMisuseError("Cannot provide both `has_permission` and `check_device` to decorator.")
+            # noinspection PyBroadException
             try:
                 if request.is_json:
                     data = request.get_json()
@@ -106,7 +112,11 @@ def api_auth_required(_f=None, has_permission: str = None, check_device: bool = 
                     elif check_device:
                         device = get_device(device.replace('-', ' '))
                         if client.has_permission(device.group):
-                            return f(*args, device, **kwargs)
+                            kwargs['device'] = device
+                            return f(*args, **kwargs)
+                else:
+                    # Should not happen
+                    abort(403)
             except DoesNotExist:
                 if DEBUG:
                     kwargs['client'] = APIClient.get()
@@ -114,6 +124,10 @@ def api_auth_required(_f=None, has_permission: str = None, check_device: bool = 
                     from home.web.web import app
                     app.logger.warning("No API client exists for the request.")
                     abort(403)
+            except Exception:
+                from home.web.web import app
+                app.logger.error("Critical error in API authentication: {}".format(traceback.format_exc()))
+                abort(403)
             return f(*args, **kwargs)
 
         return wrapped
@@ -244,3 +258,7 @@ def filter_by_permission(user: User, objects: List[Any]):
     if user.admin:
         return objects
     return [o for o in objects if user.has_permission(o)]
+
+
+class AuthPluginMisuseError(Exception):
+    pass
