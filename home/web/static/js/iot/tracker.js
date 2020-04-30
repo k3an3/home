@@ -1,3 +1,4 @@
+/*
 var map;
 //noinspection JSUnusedGlobalSymbols
 function initMap() {
@@ -73,3 +74,4 @@ $("#cmd").keyup(function(e) {
     if (e.which === 13)
         exec();
 });
+*/
