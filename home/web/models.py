@@ -4,10 +4,11 @@ from secrets import token_hex
 from typing import List, Dict, Any
 
 from flask_login import UserMixin
+from passlib.handlers.sha2_crypt import sha512_crypt
 from passlib.hash import sha256_crypt
 from peewee import CharField, BooleanField, ForeignKeyField, IntegerField, \
     DateTimeField, \
-    Model, IntegrityError
+    Model, IntegrityError, BlobField
 from pywebpush import WebPusher
 
 from home.core.utils import random_string
@@ -19,12 +20,13 @@ grants = []
 def db_init() -> None:
     db.connect()
     try:
-        db.create_tables([User,
+        db.create_tables([FIDOToken,
+                          User,
                           Subscriber,
                           SecurityController,
                           SecurityEvent,
                           APIClient,
-                          OAuthClient
+                          OAuthClient,
                           ])
         print('Creating tables...')
         if DEBUG:
@@ -64,10 +66,13 @@ class User(BaseModel, UserMixin):
         if self.ldap and USE_LDAP:
             from home.web.utils import ldap_auth
             return ldap_auth(self.username, password)
-        return sha256_crypt.verify(password, self.password)
+        try:
+            return sha512_crypt.verify(password, self.password)
+        except ValueError:
+            return sha256_crypt.verify(password, self.password)
 
     def set_password(self, password: str) -> None:
-        self.password = sha256_crypt.encrypt(password)
+        self.password = sha512_crypt.encrypt(password)
 
     @property
     def groups(self) -> List[str]:
@@ -78,6 +83,18 @@ class User(BaseModel, UserMixin):
             return obj.group in PUBLIC_GROUPS or obj.group in self.groups or self.admin
         elif group:
             return group in PUBLIC_GROUPS or group in self.groups or self.admin
+
+    def has_fido(self) -> bool:
+        return len(self.fido_tokens) > 0
+
+    def __repr__(self):
+        return self.username
+
+
+class FIDOToken(BaseModel):
+    name = CharField()
+    user = ForeignKeyField(User, related_name='fido_tokens')
+    data = BlobField()
 
 
 class APIClient(BaseModel):

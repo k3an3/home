@@ -1,4 +1,3 @@
-
 amqp
 appdirs
 APScheduler
@@ -58,6 +57,7 @@ pyflakes
 pyvesync
 pynacl
 python-engineio
+git+git://github.com/Yubico/python-fido2@0.8.1#egg=fido2
 python-jose
 python-socketio
 pytz

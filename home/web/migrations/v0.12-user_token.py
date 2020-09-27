@@ -4,11 +4,9 @@ from playhouse.migrate import *
 
 from home.settings import db
 from home.web import gen_token, User
+from home.web.migrations.utils import get_migrator
 
-if type(db) == SqliteDatabase:
-    migrator = SqliteMigrator(db)
-elif type(db) == MySQLDatabase:
-    migrator = MySQLMigrator(db)
+migrator = get_migrator(db)
 
 with db.transaction():
     migrate(

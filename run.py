@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+from flask_debugtoolbar import DebugToolbarExtension
+
 try:
     import eventlet
 
@@ -48,4 +50,4 @@ handler.setFormatter(logging.Formatter("%(asctime)s: %(message)s"))
 app.logger.addHandler(handler)
 app.logger.setLevel(logging.INFO)
 gen_guest_login()
-socketio.run(app, debug=settings.DEBUG)
+socketio.run(app, ssl_context="adhoc", debug=settings.DEBUG)

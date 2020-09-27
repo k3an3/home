@@ -59,6 +59,12 @@ auth_js = Bundle(
     ),
 )
 
+fido_js = Bundle(
+    'dist/js/cbor.js',
+    output='public/js/fido.js',
+    filters='jsmin',
+)
+
 admin_js = Bundle(
     'js/admin.js',
     filters='jsmin',

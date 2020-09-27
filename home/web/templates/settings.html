@@ -91,6 +91,11 @@
                 <br>
                 <input type="submit" class="btn btn-primary" value="Submit">
             </form>
+            <h3>FIDO2</h3>
+            <a href="{{ url_for('register_fido') }}">Register</a>
+            {% for token in current_user.fido_tokens %}
+                <p
+            {% endfor %}
             {% if current_user.admin %}
                 <form id="user_form" method="POST" action="/user/create">
                     <h3>Create User</h3>
