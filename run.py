@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-from flask_debugtoolbar import DebugToolbarExtension
 
 try:
     import eventlet
@@ -26,8 +25,9 @@ except ImportError:
 
 import logging
 import os
-import sys
 from logging.handlers import RotatingFileHandler
+
+import sys
 
 from home import settings
 from home.core.parser import parse
