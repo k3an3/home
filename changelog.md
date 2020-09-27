@@ -2,6 +2,8 @@
 ## v0.14 (dev)
 * Lock down API authentication edge cases
 * Overhaul firewall controls
+* FIDO2 support
+* Overhaul login page
 ## v0.13
 * Fix some frontend misbehavior
 * Fix issue where Kasa bulb would jump to last brightness at beginning of fade
