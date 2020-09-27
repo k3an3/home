@@ -28,24 +28,32 @@ function register() {
     });
 }
 
-$("#token_register").click(register);
 
-function delete_fido(id) {
-    ws.emit('delete_fido_token', {'id': id});
-    $("#row_fido_" + id.toString()).remove();
-}
-
-function get_tokens() {
-    ws.emit('list_fido_tokens');
-    ws.on('tokens_result', function (data) {
-        let div = $("#fido_tokens");
-        if (data.tokens.length > 0) {
-            div.html('');
-            data.tokens.forEach(function (token) {
-                div.append(`<p id="row_fido_${token.id}">"${token.name}",&nbsp;added ${token.added}&nbsp;-&nbsp;<a href="javascript:void(0)" onclick="delete_fido(${token.id});">Delete</a></p>`);
-            });
-        }
+function authenticate() {
+    fetch('/api/user/fido2/auth/start', {
+      method: 'POST',
+    }).then(function(response) {
+      if(response.ok) return response.arrayBuffer();
+      throw new Error('No credential available to authenticate!');
+    }).then(CBOR.decode).then(function(options) {
+      return navigator.credentials.get(options);
+    }).then(function(assertion) {
+      return fetch('/api/user/fido2/auth/finish', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/cbor'},
+        body: CBOR.encode({
+          "credentialId": new Uint8Array(assertion.rawId),
+          "authenticatorData": new Uint8Array(assertion.response.authenticatorData),
+          "clientDataJSON": new Uint8Array(assertion.response.clientDataJSON),
+          "signature": new Uint8Array(assertion.response.signature)
+        })
+      })
+    }).then(function(response) {
+      let stat = response.ok ? 'successful' : 'unsuccessful';
+      alert('Authentication ' + stat);
+    }, function(reason) {
+      alert(reason);
+    }).then(function() {
+      window.location = '/';
     });
 }
-
-setTimeout(get_tokens, 1000);

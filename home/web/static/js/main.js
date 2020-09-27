@@ -6,7 +6,6 @@ var ws = io.connect('//' + document.domain + ':' + location.port);
 var last = "#FFFFFF";
 var bright = 100;
 var target = "0";
-$('#messages').hide();
 
 var update = false;
 var run_session = $('#run_session').val();
@@ -38,16 +37,6 @@ $('#logout').click(function () {
     document.location = "/logout";
 });
 
-function message(data) {
-    $('#messages').attr('class', 'alert floating-message');
-    $('#messages').html(data.content);
-    $("#messages").css('visibility', 'visible');
-    $('#messages').addClass(data.class);
-    $('#messages').fadeIn();
-    setTimeout(function () {
-        $('#messages').fadeOut();
-    }, 5000);
-}
 
 ws.on('message', function (data) {
     message(data);
@@ -118,3 +107,23 @@ ws.on("device state", function(data) {
 setTimeout(function () {
     $('#messages2').fadeOut();
 }, 3000);
+
+$("#token_register").click(register);
+
+function delete_fido(id) {
+    ws.emit('delete_fido_token', {'id': id});
+    $("#row_fido_" + id.toString()).remove();
+}
+
+function get_tokens() {
+    ws.emit('list_fido_tokens');
+    ws.on('tokens_result', function (data) {
+        let div = $("#fido_tokens");
+        if (data.tokens.length > 0) {
+            div.html('');
+            data.tokens.forEach(function (token) {
+                div.append(`<p id="row_fido_${token.id}">"${token.name}",&nbsp;added ${token.added}&nbsp;-&nbsp;<a href="javascript:void(0)" onclick="delete_fido(${token.id});">Delete</a></p>`);
+            });
+        }
+    });
+}

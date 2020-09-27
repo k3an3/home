@@ -63,8 +63,6 @@
                         <li><a id="status">Status:</a></li>
                         <li><a>{{ version }}{% if debug %}<span style="color:red">DEBUG</span>{% endif %}</a></li>
                     <li><a href="/logout" id="logout">Logout {{ current_user.username }}</a></li>
-                    {% else %}
-                        <li><a href="#login">Login</a></li>
                     {% endif %}
                 </ul>
             </div><!--/.nav-collapse -->
@@ -87,9 +85,11 @@
         {% endif %}
     {% endwith %}
 
+    {% if not current_user.is_authenticated %}
+        {% include 'login.html' %}
+    {% endif %}
     <div class="tab-content">
         {% include 'content.html' %}
-        {% include 'login.html' %}
         {% include 'settings.html' %}
         {% assets "common_js" %}
             <script type="text/javascript" src="{{ ASSET_URL }}"></script>

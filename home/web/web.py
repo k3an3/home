@@ -7,7 +7,7 @@ Flask web application for Home.
 from uuid import uuid4
 
 import flask_assets
-from flask import Flask, render_template, request, redirect, abort, url_for, session, flash
+from flask import Flask, render_template, request, redirect, abort, url_for, session, flash, jsonify
 from flask_login import LoginManager, login_required, current_user
 from flask_login import login_user, logout_user
 from flask_socketio import SocketIO
@@ -17,7 +17,7 @@ from webassets.loaders import PythonLoader as PythonAssetsLoader
 import home.core.parser as parser
 import home.core.utils as utils
 from home.core.models import devices, interfaces, get_action, actions, get_driver, get_display, displays
-from home.settings import SECRET_KEY, CUSTOM_AUTH_HANDLERS
+from home.settings import SECRET_KEY, CUSTOM_AUTH_HANDLERS, BASE_URL
 from home.web.models import *
 from home.web.models import User, APIClient
 from home.web.utils import generate_csrf_token, VERSION, api_auth_required, send_to_subscribers, \
@@ -36,7 +36,7 @@ if not DEBUG:
     app.config.update(
         SESSION_COOKIE_SECURE=True,
         SESSION_COOKIE_HTTPONLY=True,
-        SESSION_COOKIE_SAMESITE='Lax',
+        SESSION_COOKIE_SAMESITE='Strict',
     )
 socketio = SocketIO(app, cors_allowed_origins=[])
 login_manager = LoginManager()
@@ -172,8 +172,7 @@ def restart():
 @app.before_request
 def csrf_protect():
     if request.method == "POST" and not request.path.startswith('/api/'):
-        token = session.pop('_csrf_token', None)
-        if not token or token != request.form.get('_csrf_token'):
+        if not request.headers["Origin"] == BASE_URL[:-1]:
             abort(403)
 
 
@@ -205,7 +204,7 @@ def load_user_from_request(request):
             return user
 
 
-@app.route('/login', methods=['POST'])
+@app.route('/user/login', methods=['POST'])
 def login():
     username = request.form.get('username')
     password = request.form.get('password')
@@ -216,16 +215,18 @@ def login():
         if USE_LDAP:
             user = ldap_auth(username, password)
             created = True
+        else:
+            User.get().check_password("")
+            return jsonify({'result': 'err', 'msg': 'Invalid username or password.'})
     if user and not user.username == 'guest':
         if created or user.check_password(password):
             if user.has_fido():
-                pass
+                session['fido_preauth_user'] = user.id
+                return jsonify({'result': 'fido2', 'msg': "Success; FIDO2 auth required."})
             else:
                 login_user(user)
-            flash('Logged in successfully.')
-    if not user:
-        flash('Invalid credentials.')
-    return redirect(url_for('index'))
+            return jsonify({'result': 'success'})
+    return jsonify({'result': 'err', 'msg': 'Invalid username or password.'})
 
 
 @app.route("/user/password", methods=['POST'])
