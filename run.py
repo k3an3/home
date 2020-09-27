@@ -50,4 +50,7 @@ handler.setFormatter(logging.Formatter("%(asctime)s: %(message)s"))
 app.logger.addHandler(handler)
 app.logger.setLevel(logging.INFO)
 gen_guest_login()
-socketio.run(app, ssl_context="adhoc" if settings.DEBUG else None, debug=settings.DEBUG)
+extra = {}
+if settings.DEBUG:
+    extra['ssl_context'] = "adhoc"
+socketio.run(app, **extra, debug=settings.DEBUG)
