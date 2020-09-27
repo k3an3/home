@@ -27,6 +27,13 @@ common_js = Bundle(
     ),
 )
 
+fido_js = Bundle(
+    'dist/js/cbor.js',
+    'js/fido.js',
+    filters='jsmin',
+    output='public/js/fido.js'
+)
+
 display_css = Bundle(
     'dist/css/bootstrap.min.css',
     Bundle(
@@ -57,12 +64,6 @@ auth_js = Bundle(
         filters='jsmin',
         output='public/js/common.js'
     ),
-)
-
-fido_js = Bundle(
-    'dist/js/cbor.js',
-    output='public/js/fido.js',
-    filters='jsmin',
 )
 
 admin_js = Bundle(

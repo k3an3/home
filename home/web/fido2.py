@@ -3,26 +3,21 @@ import re
 from fido2 import cbor
 from fido2.client import ClientData
 from fido2.ctap2 import AttestationObject
-from fido2.server import U2FFido2Server, Fido2Server
+from fido2.server import Fido2Server
 from fido2.webauthn import PublicKeyCredentialRpEntity
-from flask import request, session, render_template
+from flask import request, session
 from flask_login import current_user, login_required
+from flask_socketio import emit
+from peewee import DoesNotExist
 
 from home.settings import BASE_URL
-from home.web import app, send_message
+from home.web import app, send_message, socketio, ws_login_required
 from home.web.models import FIDOToken
-
 
 rp = PublicKeyCredentialRpEntity(
     re.match(r'https?:\/\/([a-zA-Z0-9.-]+)(?::[0-9]{1,5})?\/.*', BASE_URL)[1],
     "Home server")
 server = Fido2Server(rp)
-
-
-@app.route("/user/fido2/register")
-@login_required
-def register_fido():
-    return render_template('fido/register.html')
 
 
 @app.route("/api/user/fido2/register", methods=["POST"])
@@ -40,7 +35,6 @@ def register_begin():
     )
     print(state)
     session["state"] = state
-    session["tok_name"] = request.form.get("token_name", "Unknown")
     print("\n\n\n\n")
     print(registration_data)
     print("\n\n\n\n")
@@ -59,10 +53,28 @@ def register_complete():
     auth_data = server.register_complete(session["state"], client_data, att_obj)
 
     new_token = FIDOToken.create(user=current_user.id,
-                                 name=session["tok_name"],
+                                 name=request.args["name"],
                                  data=auth_data.credential_data)
     print("REGISTERED CREDENTIAL:", auth_data.credential_data)
     return cbor.encode({"status": "OK"})
+
+
+@socketio.on('list_fido_tokens')
+@ws_login_required
+def list_fido():
+    emit('tokens_result', {'tokens': [t.to_dict() for t in current_user.fido_tokens]})
+
+
+@socketio.on('delete_fido_token')
+@ws_login_required
+def delete_fido(data):
+    try:
+        FIDOToken.get(user=current_user.id, id=data['id']).delete_instance();
+    except DoesNotExist:
+        send_message("Invalid FIDO token!", 'error')
+    else:
+        send_message("Deleted FIDO token successfully!", 'success')
+
 
 @app.route("/api/authenticate/begin", methods=["POST"])
 def authenticate_begin():

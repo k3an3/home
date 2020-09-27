@@ -94,6 +94,9 @@
         {% assets "common_js" %}
             <script type="text/javascript" src="{{ ASSET_URL }}"></script>
         {% endassets %}
+        {% assets 'fido_js' %}
+            <script type="text/javascript" src="{{ ASSET_URL }}"></script>
+        {% endassets %}
         {% if current_user.is_authenticated %}
             {% assets "auth_js" %}
                 <script type="text/javascript" src="{{ ASSET_URL }}"></script>

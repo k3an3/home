@@ -92,9 +92,12 @@
                 <input type="submit" class="btn btn-primary" value="Submit">
             </form>
             <h3>FIDO2</h3>
-            <a href="{{ url_for('register_fido') }}">Register</a>
+            <a href="javascript:void(0);" id="token_register">Register New Token</a>
+            <h4>Existing Tokens</h4>
+            <div id="fido_tokens">
+                <p>Nothing here...</p>
+            </div>
             {% for token in current_user.fido_tokens %}
-                <p
             {% endfor %}
             {% if current_user.admin %}
                 <form id="user_form" method="POST" action="/user/create">

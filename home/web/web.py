@@ -4,14 +4,14 @@ web.py
 
 Flask web application for Home.
 """
+from uuid import uuid4
+
 import flask_assets
 from flask import Flask, render_template, request, redirect, abort, url_for, session, flash
-from flask_debugtoolbar import DebugToolbarExtension
 from flask_login import LoginManager, login_required, current_user
 from flask_login import login_user, logout_user
 from flask_socketio import SocketIO
 from peewee import DoesNotExist
-from uuid import uuid4
 from webassets.loaders import PythonLoader as PythonAssetsLoader
 
 import home.core.parser as parser
@@ -218,7 +218,10 @@ def login():
             created = True
     if user and not user.username == 'guest':
         if created or user.check_password(password):
-            login_user(user)
+            if user.has_fido():
+                pass
+            else:
+                login_user(user)
             flash('Logged in successfully.')
     if not user:
         flash('Invalid credentials.')

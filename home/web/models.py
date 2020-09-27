@@ -4,6 +4,7 @@ from secrets import token_hex
 from typing import List, Dict, Any
 
 from flask_login import UserMixin
+from markupsafe import Markup
 from passlib.handlers.sha2_crypt import sha512_crypt
 from passlib.hash import sha256_crypt
 from peewee import CharField, BooleanField, ForeignKeyField, IntegerField, \
@@ -93,8 +94,16 @@ class User(BaseModel, UserMixin):
 
 class FIDOToken(BaseModel):
     name = CharField()
+    added = DateTimeField(default=datetime.datetime.now)
     user = ForeignKeyField(User, related_name='fido_tokens')
     data = BlobField()
+
+    def to_dict(self) -> Dict:
+        return {
+            'id': self.id,
+            'name': Markup.escape(self.name),
+            'added': self.added.isoformat()
+        }
 
 
 class APIClient(BaseModel):
