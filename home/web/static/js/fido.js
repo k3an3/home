@@ -20,10 +20,10 @@ function register() {
         });
     }).then(function (response) {
         let stat = response.ok ? 'successful' : 'unsuccessful';
-        alert('Registration ' + stat);
+        message({content: "Registration successful", class: "alert-success"});
         get_tokens();
     }, function (reason) {
-        alert(reason);
+        message({content: reason, class: "alert-danger"});
     }).then(function () {
     });
 }
@@ -50,9 +50,9 @@ function authenticate() {
       })
     }).then(function(response) {
       let stat = response.ok ? 'successful' : 'unsuccessful';
-      alert('Authentication ' + stat);
+      message({content: "Authentication successful", class: "alert-success"});
     }, function(reason) {
-      alert(reason);
+      message({content: "Authentication unsuccessful", class: "alert-danger"});
     }).then(function() {
       window.location = '/';
     });

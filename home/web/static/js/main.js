@@ -127,3 +127,5 @@ function get_tokens() {
         }
     });
 }
+
+get_tokens();

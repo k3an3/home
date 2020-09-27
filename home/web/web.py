@@ -225,7 +225,8 @@ def login():
                 return jsonify({'result': 'fido2', 'msg': "Success; FIDO2 auth required."})
             else:
                 login_user(user)
-            return jsonify({'result': 'success'})
+                flash("Login successful!")
+                return jsonify({'result': 'success'})
     return jsonify({'result': 'err', 'msg': 'Invalid username or password.'})
 
 
