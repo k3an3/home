@@ -50,6 +50,7 @@ def parse(file: str = None, data: str = None):
         for device in y['devices'][group]:
             if device.name in devices:
                 raise DuplicateDeviceNameError(device.name)
+            group = group.lower()
             device.group = group
             devices[device.name] = device
             devices_by_uuid[device.uuid] = device
@@ -60,6 +61,7 @@ def parse(file: str = None, data: str = None):
         for group in y['actions']:
             try:
                 for action in y['actions'][group]:
+                    group = group.lower()
                     action.group = group
                     actions.append(action)
                     action.setup()
@@ -69,6 +71,7 @@ def parse(file: str = None, data: str = None):
     if y.get('displays'):
         for group in y['displays']:
             for display in y['displays'][group]:
+                group = group.lower()
                 display.group = group
                 displays.append(display)
     # During device setup, couldn't pair widget buttons to actions since they didn't exist yet. Here, we match up
