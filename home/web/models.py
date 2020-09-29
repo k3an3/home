@@ -81,9 +81,9 @@ class User(BaseModel, UserMixin):
 
     def has_permission(self, obj: Any = None, group: str = "") -> bool:
         if obj:
-            return self.admin or obj.group.lower() in PUBLIC_GROUPS or obj.group.lower() in self.groups
+            return obj.group in PUBLIC_GROUPS or obj.group in self.groups or self.admin
         elif group:
-            return self.admin or group.lower() in PUBLIC_GROUPS or group.lower() in self.groups
+            return group in PUBLIC_GROUPS or group in self.groups or self.admin
 
     def has_fido(self) -> bool:
         return len(self.fido_tokens) > 0
