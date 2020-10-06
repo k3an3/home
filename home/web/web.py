@@ -11,6 +11,7 @@ from flask import Flask, render_template, request, redirect, abort, url_for, ses
 from flask_login import LoginManager, login_required, current_user
 from flask_login import login_user, logout_user
 from flask_socketio import SocketIO
+from ldap3.core.exceptions import LDAPException
 from peewee import DoesNotExist
 from webassets.loaders import PythonLoader as PythonAssetsLoader
 
@@ -209,13 +210,17 @@ def login():
     username = request.form.get('username')
     password = request.form.get('password')
     created = False
+    user = None
     try:
         user = User.get(username=username)
     except DoesNotExist:
         if USE_LDAP:
-            user = ldap_auth(username, password)
-            created = True
-        else:
+            try:
+                user = ldap_auth(username, password)
+                created = True
+            except LDAPException:
+                pass
+        if not user:
             User.get().check_password("")
             return jsonify({'result': 'err', 'msg': 'Invalid username or password.'})
     if user and not user.username == 'guest':
