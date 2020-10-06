@@ -36,7 +36,7 @@ if not DEBUG:
     app.config.update(
         SESSION_COOKIE_SECURE=True,
         SESSION_COOKIE_HTTPONLY=True,
-        SESSION_COOKIE_SAMESITE='Strict',
+        SESSION_COOKIE_SAMESITE='Lax',
     )
 socketio = SocketIO(app, cors_allowed_origins=[])
 login_manager = LoginManager()
