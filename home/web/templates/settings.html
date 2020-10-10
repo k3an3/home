@@ -63,7 +63,8 @@
                         <strong>token=</strong><span class="mouse_over">{{ client.token }}</span>
                         <input class="form-control" id="perms-{{ client.name }}" type="text"
                                value="{{ client.permissions }}">
-                        <button class="btn btn-warning saveperms" id="bp-{{ client.name }}">Update</button>
+                        <button class="btn btn-warning saveperms" id="bp-{{ client.name }}">Update Permissions</button>
+                        <button class="btn btn-warning regen" id="regen-{{ client.name }}">Regenerate Token</button>
                         <button onclick="revoke('{{ client.name }}');this.parentNode.style.display = 'none';"
                                 class="btn btn-danger">Revoke
                         </button>

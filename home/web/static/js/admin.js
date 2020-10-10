@@ -78,6 +78,16 @@ ws.on('logs', function (logs) {
     $('#logs').html(logs);
 });
 
+$(".regen").click(function () {
+    var client = $(this).attr('id');
+    client = client.slice(client.indexOf('-') + 1);
+    ws.emit('admin',
+        {
+            command: 'api regen token',
+            name: client,
+        });
+});
+
 $(".saveperms").click(function () {
     var client = $(this).attr('id');
     client = client.slice(client.indexOf('-') + 1);

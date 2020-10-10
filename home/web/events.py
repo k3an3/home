@@ -5,6 +5,7 @@ from time import sleep
 from home.core import utils as utils, parser as parser
 from home.core.models import get_action, get_interface, widgets, MultiDevice
 from home.core.tasks import run
+from home.core.utils import random_string
 from home.settings import LOG_FILE
 from home.web.models import APIClient, User, Subscriber, gen_token
 from home.web.utils import ws_login_required
@@ -15,6 +16,7 @@ from home.web.web import socketio, app, run_session
 @ws_login_required
 def ws_admin(data):
     if not current_user.admin:
+        disconnect()
         return
     command = data.get('command')
     if command == 'action':
@@ -43,6 +45,12 @@ def ws_admin(data):
         client.delete_instance()
         emit('message', {'class': 'alert-success',
                          'content': 'Successfully revoked API permissions.'})
+    elif command == 'api regen token':
+        client = APIClient.get(name=data.get('name'))
+        client.token = random_string(48)
+        client.save()
+        emit('message', {'class': 'alert-success',
+                         'content': 'Successfully updated API token; please refresh.'})
     elif command == 'update permissions':
         client = APIClient.get(name=data.get('name'))
         client.permissions = data.get('perms').replace(' ', '')
