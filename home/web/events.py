@@ -47,7 +47,7 @@ def ws_admin(data):
                          'content': 'Successfully revoked API permissions.'})
     elif command == 'api regen token':
         client = APIClient.get(name=data.get('name'))
-        client.token = random_string(48)
+        client.token = random_string()
         client.save()
         emit('message', {'class': 'alert-success',
                          'content': 'Successfully updated API token; please refresh.'})
